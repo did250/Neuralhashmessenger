@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>605182874473-0lmhoajht8ru2odor529f9pagbrv07de.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.605182874473-0lmhoajht8ru2odor529f9pagbrv07de</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCcFUwM1ZAqEuv7uXQOGd5neWxgmEuOy_Q</string>
+	<key>GCM_SENDER_ID</key>
+	<string>605182874473</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.messengerApp</string>
+	<key>PROJECT_ID</key>
+	<string>messanger-feeac</string>
+	<key>STORAGE_BUCKET</key>
+	<string>messanger-feeac.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:605182874473:ios:796dae1cb2288932f623f8</string>
+	<key>DATABASE_URL</key>
+	<string>https://messanger-feeac-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

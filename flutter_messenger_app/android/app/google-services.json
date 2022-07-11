@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "605182874473",
+    "firebase_url": "https://messanger-feeac-default-rtdb.firebaseio.com",
+    "project_id": "messanger-feeac",
+    "storage_bucket": "messanger-feeac.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:605182874473:android:8d09e74195a2a850f623f8",
+        "android_client_info": {
+          "package_name": "com.example.flutter_messenger_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "605182874473-3uga3ictn6vi96g4cj80ipjnr82u4fjl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuL-KvLAWWLQy6MnY1HZseJ0OPyWGa2ig"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "605182874473-3uga3ictn6vi96g4cj80ipjnr82u4fjl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "605182874473-0lmhoajht8ru2odor529f9pagbrv07de.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.messengerApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:605182874473:android:0ba2acd7c6fe8a80f623f8",
+        "android_client_info": {
+          "package_name": "com.example.messenger_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "605182874473-3uga3ictn6vi96g4cj80ipjnr82u4fjl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBuL-KvLAWWLQy6MnY1HZseJ0OPyWGa2ig"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "605182874473-3uga3ictn6vi96g4cj80ipjnr82u4fjl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "605182874473-0lmhoajht8ru2odor529f9pagbrv07de.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.messengerApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

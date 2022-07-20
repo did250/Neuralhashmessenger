@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_messenger_app/src/pages/ChatRoom.dart';
 
 class ChatTab extends StatefulWidget {
   @override
   _ChatTabState createState() => _ChatTabState();
 }
+
+const List<String> friends = ["희원", "강민", "도윤"];
 
 class _ChatTabState extends State<ChatTab> {
   @override
@@ -42,6 +45,21 @@ class _ChatTabState extends State<ChatTab> {
                     borderSide: BorderSide(color: Colors.grey.shade100)),
               ),
             ),
+          ),
+          ListView.separated(
+              padding: EdgeInsets.only(top: 15),
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: friends.length,
+              itemBuilder: (BuildContext context, int index){
+                return GestureDetector(
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatRoom(friends[index]))),
+                  child: Text(
+                    friends[index]
+                  ),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) => const Divider(),
           ),
         ],
       ),

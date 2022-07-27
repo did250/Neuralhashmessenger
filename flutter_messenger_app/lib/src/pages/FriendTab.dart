@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class FriendTab extends StatefulWidget {
   @override
@@ -7,6 +8,8 @@ class FriendTab extends StatefulWidget {
 
 class _FriendTabState extends State<FriendTab> {
   @override
+  DatabaseReference ref = FirebaseDatabase.instance.ref();
+  //FirebaseDatabase database = FirebaseDatabase.instance;
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(

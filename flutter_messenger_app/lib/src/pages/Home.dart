@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_messenger_app/src/pages/login.dart';
-import 'ChatTab.dart';
-import 'FriendTab.dart';
-import 'SettingsTab.dart';
+import 'package:flutter_messenger_app/src/pages/Login.dart';
+import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
+import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
+import 'package:flutter_messenger_app/src/pages/SettingsTab.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
@@ -16,15 +16,14 @@ class Home extends StatelessWidget {
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
             if (!snapshot.hasData) {
-              return Login();
+              return LoginSignupScreen();
             } else {
               return MainPage();
-              /*Center(
+              /*return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text("${snapshot.data?.displayName}님 반갑습니다."),
-                    q
                   ],
                 ),
               );*/

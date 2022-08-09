@@ -1,5 +1,5 @@
-import 'dart:convert';
-
+import 'dart:math';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 
@@ -8,19 +8,8 @@ class FriendTab extends StatefulWidget {
   _FriendTabState createState() => _FriendTabState();
 }
 
-/*
-class ParsedUserData {
-  String name;
-
-}*/
-class Test {
-  final String name;
-  final int id;
-  Test(this.name, this.id);
-}
-
 Future<void> initFriend(DatabaseReference ref) async {
-  final snapshot = await ref.child('User/hihi').get();
+  final snapshot = await ref.child('UserList/hihi').get();
   if (snapshot.exists) {
     print(snapshot.value);
   } else {
@@ -29,16 +18,17 @@ Future<void> initFriend(DatabaseReference ref) async {
 }
 
 Future<void> readData(DatabaseReference ref) async {
-  final snapshot = await ref.child('User/hihi/Friend').get();
+  final user = FirebaseAuth.instance.currentUser;
+  final myEmail = user?.email;
+  final snapshot = await ref.child('UserList/$myEmail').get();
 
-  var friendlist = snapshot.value;
-  //int item;
-  List<Object> friendList = [];
-  // FriendList friends = new FriendList.fromJson(jsonResponse);
-  /*
-  for (item in List<int>.from(snapshot.value as List<Object?>)) {
+  List<int> friendList = [];
+
+  print(snapshot.value);
+
+  for (int item in List<int>.from(snapshot.value as List<Object?>)) {
     friendList.add(item);
-  }*/
+  }
   //json.decode(snapshot.value.toString());
   if (snapshot.exists) {
     print(snapshot.value);
@@ -47,6 +37,55 @@ Future<void> readData(DatabaseReference ref) async {
   }
 
   //print(friendList[0]);
+}
+
+Future<void> getNameFromUid(List<int> FriendList) async {
+  DatabaseReference ref = FirebaseDatabase.instance.ref();
+  for (int i = 0; i < FriendList.length; i++) {
+    int uid = FriendList[i];
+    ref.child('User/$uid/name');
+  }
+}
+
+Future<void> writeData(DatabaseReference ref) async {
+  print("start!");
+  final user = FirebaseAuth.instance.currentUser;
+  final myEmail = user?.email;
+  print(myEmail);
+  DatabaseReference ref = FirebaseDatabase.instance.ref();
+
+  /************ */
+
+  final snapshot = await ref.child('UserList/$myEmail').get();
+
+  /************* */
+  //추가할 친구 관련 코드 여기에
+
+  /************* */
+  if (!snapshot.exists) {
+    print("snaphost null");
+    ref.update({
+      'Friend': [0]
+    });
+  } else {
+    print("snapshot exist!");
+    List<int> friendList = [];
+    for (int item in List<int>.from(snapshot.value as List<Object?>)) {
+      friendList.add(item);
+    }
+    print(friendList[0]);
+
+    /* 중복체크 필요 */
+    friendList.add(Random().nextInt(10000) /*추가할 친구*/);
+
+    ref.update({'Friend': friendList});
+
+    //final Map<String, int> updates = {};
+    //updates['/User/hihi/Friend/'] = friendList;
+    //updates['/User/hihi/$uid/$newPostKey'] = postData;
+    //FirebaseDatabase.instance.ref().update(updates);*/
+    print("haha");
+  }
 }
 
 class _FriendTabState extends State<FriendTab> {
@@ -62,20 +101,8 @@ class _FriendTabState extends State<FriendTab> {
 
   Future<void> _addFriend() async {
     setState(() {
-      DatabaseReference ref = FirebaseDatabase.instance.ref("User/hihi");
-
-      int friendCount = 1;
-      final friendData = {
-        'uid': 123,
-        'name': 'abc',
-      };
-
-      final newPostKey =
-          FirebaseDatabase.instance.ref().child('posts').push().key;
-      final Map<String, Map> updates = {};
-      updates['/User/hihi/Friend/$newPostKey'] = friendData;
-      //updates['/User/hihi/$uid/$newPostKey'] = postData;
-      FirebaseDatabase.instance.ref().update(updates);
+      final DatabaseReference ref = FirebaseDatabase.instance.ref();
+      writeData(ref);
     });
   }
 

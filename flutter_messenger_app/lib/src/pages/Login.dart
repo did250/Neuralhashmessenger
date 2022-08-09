@@ -17,6 +17,10 @@ class LoginSignupScreen extends StatefulWidget {
 class _LoginSignupScreenState extends State<LoginSignupScreen> {
   final _authentication = FirebaseAuth.instance;
 
+  User? loggedUser;
+
+  bool userNameChecked = false;
+
   bool isSignupScreen = true;
   final _formKey = GlobalKey<FormState>();
   String userName = '';
@@ -27,18 +31,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
     final isValid = _formKey.currentState!.validate();
     if (isValid) {
       _formKey.currentState!.save();
-    }
-  }
-
-  Future<bool> _CheckExisted() async {
-    DatabaseReference ref = FirebaseDatabase.instance.ref(); //Unique Username
-    final snapshot = await ref.child("User").get();
-    if (snapshot.exists) {
-      print(snapshot.value);
-      return true;
-    } else {
-      print('No data available.');
-      return false;
     }
   }
 
@@ -176,13 +168,11 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                   key: ValueKey(1),
                                   validator: (value) {
 
-                                    if (_CheckExisted() == true) {
-                                      return 'Username already exists';
-                                    }
-
                                     if (value!.isEmpty || value.length < 4) {
+                                      userNameChecked = false;
                                       return 'Please enter at least 4 characters';
                                     }
+                                    userNameChecked = true;
                                     return null;
                                   },
                                   onSaved: (value) {
@@ -426,40 +416,54 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                       if (isSignupScreen) { //SIGNUP CASE
                         _tryValidation();
 
-                        try {
-                          final newUser = await _authentication
-                              .createUserWithEmailAndPassword(
-                            email: userEmail,
-                            password: userPassword,
-                          );
+                        if (userNameChecked) {
+                          try {
+                            final newUser = await _authentication
+                                .createUserWithEmailAndPassword(
+                              email: userEmail,
+                              password: userPassword,
+                            );
 
-                          if (newUser.user != null) { //SIGNUP SUCCESS
-                            DatabaseReference ref = FirebaseDatabase.instance.ref("User/"+userName);
+                            if (newUser.user != null) { //SIGNUP SUCCESS
 
-                            await ref.set({
-                              "Email": userEmail,
-                              "Friend": "",
-                              "Num_Chatroom": "",
-                            });
+                              try {
+                                final user = _authentication.currentUser;
+                                if (user != null) {
+                                  loggedUser = user;
+                                  //print(loggedUser!.email.toString());
+                                }
+                              } catch (e) {
+                                print(e);
+                              }
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) {
+                              DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + loggedUser!.uid.toString());
+
+                              await ref.set({
+                                "Email": userEmail,
+                                "Name": userName,
+                                "Friend": "",
+                                "Num_Chatroom": "",
+                              });
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) {
                                   return Home();
                                 },
+                                ),
+                              );
+                            }
+                          } catch (e) { //SIGNUP FAILED
+                            print(e);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content:
+                                Text('Please check your email and password'),
+                                backgroundColor: Colors.blue,
                               ),
                             );
                           }
-                        } catch (e) { //SIGNUP FAILED
-                          print(e);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
-                              Text('Please check your email and password'),
-                              backgroundColor: Colors.blue,
-                            ),
-                          );
-                        }
+                        } //if (userNameChecked) true
                       }
                       if (!isSignupScreen) { //LOGIN CASE
                         _tryValidation();

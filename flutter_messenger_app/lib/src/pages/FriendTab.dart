@@ -9,7 +9,9 @@ class FriendTab extends StatefulWidget {
 }
 
 Future<void> initFriend(DatabaseReference ref) async {
-  final snapshot = await ref.child('UserList/hihi').get();
+  /* 첫 실행시 친구목록 로딩 */
+  final myUid = FirebaseAuth.instance.currentUser?.uid;
+  final snapshot = await ref.child('UserList/$myUid/Friend').get();
   if (snapshot.exists) {
     print(snapshot.value);
   } else {
@@ -18,9 +20,8 @@ Future<void> initFriend(DatabaseReference ref) async {
 }
 
 Future<void> readData(DatabaseReference ref) async {
-  final user = FirebaseAuth.instance.currentUser;
-  final myEmail = user?.email;
-  final snapshot = await ref.child('UserList/$myEmail').get();
+  final myUid = FirebaseAuth.instance.currentUser?.uid;
+  final snapshot = await ref.child('User/$myUid').get();
 
   List<int> friendList = [];
 
@@ -40,23 +41,32 @@ Future<void> readData(DatabaseReference ref) async {
 }
 
 Future<void> getNameFromUid(List<int> FriendList) async {
+  /* todo.. */
   DatabaseReference ref = FirebaseDatabase.instance.ref();
   for (int i = 0; i < FriendList.length; i++) {
     int uid = FriendList[i];
-    ref.child('User/$uid/name');
+    ref.child('User/$uid/Name');
   }
 }
 
-Future<void> writeData(DatabaseReference ref) async {
-  print("start!");
-  final user = FirebaseAuth.instance.currentUser;
-  final myEmail = user?.email;
-  print(myEmail);
+Future<String> searchFriend() async {
+  var name = "Yoon";
   DatabaseReference ref = FirebaseDatabase.instance.ref();
+  Query query = ref.child('UserList').orderByChild('Name').equalTo(name);
+  DataSnapshot event = await query.get();
+  /* 검색실패 구현필요 */
+
+  return event.children.elementAt(0).key ?? "error";
+}
+
+Future<void> writeData(DatabaseReference ref) async {
+  final user = FirebaseAuth.instance.currentUser;
+  final myUid = user?.uid;
+  DatabaseReference ref = FirebaseDatabase.instance.ref('UserList/$myUid');
 
   /************ */
 
-  final snapshot = await ref.child('UserList/$myEmail').get();
+  final snapshot = await ref.child('Friend').get();
 
   /************* */
   //추가할 친구 관련 코드 여기에
@@ -68,23 +78,17 @@ Future<void> writeData(DatabaseReference ref) async {
       'Friend': [0]
     });
   } else {
-    print("snapshot exist!");
-    List<int> friendList = [];
+    List<int> myFriendList = [];
     for (int item in List<int>.from(snapshot.value as List<Object?>)) {
-      friendList.add(item);
+      myFriendList.add(item);
     }
-    print(friendList[0]);
+    //print(myFriendList[0]);
 
     /* 중복체크 필요 */
-    friendList.add(Random().nextInt(10000) /*추가할 친구*/);
+    myFriendList.add(Random().nextInt(10000) /*추가할 친구*/);
 
-    ref.update({'Friend': friendList});
-
-    //final Map<String, int> updates = {};
-    //updates['/User/hihi/Friend/'] = friendList;
-    //updates['/User/hihi/$uid/$newPostKey'] = postData;
-    //FirebaseDatabase.instance.ref().update(updates);*/
-    print("haha");
+    ref.update({'Friend': myFriendList});
+    //ref.update({'Name': 'Kangmin Lee', 'Email': 'seyrinn@g.skku.edu'});
   }
 }
 
@@ -147,7 +151,8 @@ starCountRef.onValue.listen((DatabaseEvent event) {
         TextButton(
           child: Text("read"),
           onPressed: _read,
-        )
+        ),
+        TextButton(child: Text("search"), onPressed: searchFriend),
       ],
     ));
   }

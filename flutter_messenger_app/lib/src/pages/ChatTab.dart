@@ -1,14 +1,39 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_messenger_app/src/pages/ChatRoom.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class ChatTab extends StatefulWidget {
   @override
   _ChatTabState createState() => _ChatTabState();
 }
 
-const List<String> friends = ["윤도윤", "이강민"];
-
 class _ChatTabState extends State<ChatTab> {
+
+  List<String> names = <String>[];
+  List<int> numbers = <int>[];
+  Future<void> readChattingRoom() async {
+    final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').get();
+    if ( snapshot.exists ) {
+      for ( var item in (snapshot.value as List<Object?>)) {
+        Map<String, dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+        numbers.add(map["number"]);
+        names.add(map["with"]);
+      }
+      setState(() {
+
+      });
+
+    }
+  }
+
+  @override
+  void initState(){
+    readChattingRoom();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,12 +75,12 @@ class _ChatTabState extends State<ChatTab> {
                 padding: EdgeInsets.only(top: 15),
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
-                itemCount: friends.length,
+                itemCount: names.length,
                 itemBuilder: (BuildContext context, int index){
                   return GestureDetector(
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatRoom(friends[index]))),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatRoom(names[index],numbers[index]))),
                     child: Text(
-                        friends[index]
+                        names[index]
                     ),
                   );
                 },

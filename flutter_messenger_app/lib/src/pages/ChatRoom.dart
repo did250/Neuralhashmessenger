@@ -6,15 +6,15 @@ import 'package:flutter/material.dart';
 
 const String _name = "양희원";
 String _other = "";
-int chattingroom = 1;
 
 
 class ChatRoom extends StatefulWidget {
   final String name;
+  final int number;
 
-  const ChatRoom(this.name);
+  const ChatRoom(this.name, this.number);
 
-  ChatRoomState createState() => ChatRoomState(this.name);
+  ChatRoomState createState() => ChatRoomState(this.name, this.number);
 
 
 }
@@ -23,8 +23,9 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   List<Messages> _message = <Messages>[];
   List<int> _checked = <int>[];
   String friendname = "";
+  int number = -1;
 
-  ChatRoomState(this.friendname);
+  ChatRoomState(this.friendname, this.number);
   final TextEditingController _textController = TextEditingController();
   bool _exist = false;
 
@@ -41,7 +42,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   /// 메시지들 불러와서 저장하는 함수
   Future<void> readMessages() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    final snapshot = await ref.child('ChattingRoom').child(chattingroom.toString()).child('Messages').get();
+    final snapshot = await ref.child('ChattingRoom').child(this.number.toString()).child('Messages').get();
     if ( snapshot.exists ) {
       for ( var item in (snapshot.value as List<Object?>)){
         bool mine = false;
@@ -61,7 +62,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   /// 메세지 하나 보낼 때, 서버에 갱신하는 함수
   Future<void> updatemessage(String input) async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    await ref.child('ChattingRoom').child(chattingroom.toString()).child('Messages').child((_message.length).toString()).set({
+    await ref.child('ChattingRoom').child(this.number.toString()).child('Messages').child((_message.length).toString()).set({
       "checked": 1,
       "sender": _name,
       "text": input,

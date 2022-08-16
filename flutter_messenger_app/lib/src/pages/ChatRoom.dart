@@ -1,22 +1,18 @@
 import 'dart:convert';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-const String _name = "양희원";
+String _name = "";
 String _other = "";
 
 
 class ChatRoom extends StatefulWidget {
   final String name;
   final int number;
-
   const ChatRoom(this.name, this.number);
-
   ChatRoomState createState() => ChatRoomState(this.name, this.number);
-
-
 }
 
 class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
@@ -24,7 +20,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   List<int> _checked = <int>[];
   String friendname = "";
   int number = -1;
-
   ChatRoomState(this.friendname, this.number);
   final TextEditingController _textController = TextEditingController();
   bool _exist = false;
@@ -39,26 +34,38 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   //   }
   // }
 
-  /// 메시지들 불러와서 저장하는 함수
-  Future<void> readMessages() async {
+  // /// 메시지들 불러와서 저장하는 함수
+  // Future<void> readMessages() async {
+  //   final DatabaseReference ref = FirebaseDatabase.instance.ref();
+  //   final snapshot = await ref.child('ChattingRoom').child(this.number.toString()).child('Messages').get();
+  //   if ( snapshot.exists ) {
+  //     for ( var item in (snapshot.value as List<Object?>)){
+  //       bool mine = false;
+  //       Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+  //       if (map['sender'] == _name) {
+  //         mine = true;
+  //       }
+  //       Messages mas = Messages(text: map['text'], animationController: AnimationController(duration : Duration(milliseconds: 0),vsync: this), ismine: mine,);
+  //       setState(() {
+  //         _message.insert(0, mas);
+  //       });
+  //       mas.animationController.forward();
+  //       _checked.insert(0, map['checked']);
+  //     }
+  //   }
+  // }
+  /// 사용자 이름 loading
+  Future<void> Loaduser() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    final snapshot = await ref.child('ChattingRoom').child(this.number.toString()).child('Messages').get();
+    final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Name').get();
     if ( snapshot.exists ) {
-      for ( var item in (snapshot.value as List<Object?>)){
-        bool mine = false;
-        Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
-        if (map['sender'] == _name) {
-          mine = true;
-        }
-        Messages mas = Messages(text: map['text'], animationController: AnimationController(duration : Duration(milliseconds: 0),vsync: this), ismine: mine,);
-        setState(() {
-          _message.insert(0, mas);
-        });
-        mas.animationController.forward();
-        _checked.insert(0, map['checked']);
-      }
+      setState(() {
+        _name = snapshot.value.toString();
+      });
+
     }
   }
+
   /// 메세지 하나 보낼 때, 서버에 갱신하는 함수
   Future<void> updatemessage(String input) async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
@@ -74,8 +81,9 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   @override
   void initState() {
     // TODO: implement initState
+    final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    Loaduser();
     _other = this.friendname;
-    readMessages();
     super.initState();
   }
 
@@ -89,12 +97,40 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
       body: Container(
         child: Column(
           children: <Widget>[
-            Flexible(child: ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              reverse: true,
-              itemCount: _message.length,
-              itemBuilder: (_, index) => _message[index],
-            ),
+            StreamBuilder(
+              stream: FirebaseDatabase.instance.ref().child("ChattingRoom").child(this.number.toString()).child('Messages').onValue,
+              builder: (BuildContext context, snapshot) {
+                if (snapshot.hasData) {
+                  _message.clear();
+                  _checked.clear();
+                  for (var item in (snapshot.data as DatabaseEvent).snapshot
+                      .value as List<Object?>) {
+                    bool mine = false;
+                    Map<String, dynamic> map = Map<String, dynamic>.from(
+                        item as Map<dynamic?, dynamic?>);
+                    if (map['sender'] == _name) {
+                      mine = true;
+                    }
+                    Messages mas = Messages(text: map['text'],
+                      animationController: AnimationController(
+                          duration: Duration(milliseconds: 0), vsync: this),
+                      ismine: mine,);
+                    _message.insert(0, mas);
+                    mas.animationController.forward();
+                    _checked.insert(0, map['checked']);
+                  }
+                  return Flexible(child: ListView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    reverse: true,
+                    itemCount: _message.length,
+                    itemBuilder: (_, index) => _message[index],
+                  ),
+                  );
+                }
+                else {
+                  return Container();
+                }
+              }
             ),
             Divider(height: 1.0),
             Container(
@@ -226,3 +262,4 @@ class Messages extends StatelessWidget {
     );
   }
 }
+

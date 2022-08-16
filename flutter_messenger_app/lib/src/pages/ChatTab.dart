@@ -12,25 +12,25 @@ class _ChatTabState extends State<ChatTab> {
 
   List<String> names = <String>[];
   List<int> numbers = <int>[];
-  Future<void> readChattingRoom() async {
-    final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').get();
-    if ( snapshot.exists ) {
-      for ( var item in (snapshot.value as List<Object?>)) {
-        Map<String, dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
-        numbers.add(map["number"]);
-        names.add(map["with"]);
-      }
-      setState(() {
 
-      });
-
-    }
-  }
+  // Future<void> readChattingRoom() async {
+  //   final DatabaseReference ref = FirebaseDatabase.instance.ref();
+  //   final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').get();
+  //   if ( snapshot.exists ) {
+  //     for ( var item in (snapshot.value as List<Object?>)) {
+  //       Map<String, dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+  //       numbers.add(map["number"]);
+  //       names.add(map["with"]);
+  //     }
+  //     setState(() {
+  //
+  //     });
+  //
+  //   }
+  // }
 
   @override
   void initState(){
-    readChattingRoom();
     super.initState();
   }
 
@@ -71,21 +71,48 @@ class _ChatTabState extends State<ChatTab> {
                   ),
                 ),
               ),
-              ListView.separated(
-                padding: EdgeInsets.only(top: 15),
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemCount: names.length,
-                itemBuilder: (BuildContext context, int index){
-                  return GestureDetector(
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatRoom(names[index],numbers[index]))),
-                    child: Text(
-                        names[index]
-                    ),
-                  );
-                },
-                separatorBuilder: (BuildContext context, int index) => const Divider(),
+              StreamBuilder(
+                stream: FirebaseDatabase.instance.ref().child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').onValue,
+                builder: (BuildContext context, snapshot) {
+                  if (snapshot.hasData) {
+                    names.clear();
+                    numbers.clear();
+                    for (var item in (snapshot.data as DatabaseEvent).snapshot
+                        .value as List<Object?>) {
+                      Map<String, dynamic> map = Map<String, dynamic>.from(
+                          item as Map<dynamic?, dynamic?>);
+                      numbers.add(map["number"]);
+                      names.add(map["with"]);
+                    }
+                    return ListView.separated(
+                      padding: EdgeInsets.only(top: 15),
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemCount: names.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return GestureDetector(
+                          onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (context) =>
+                                  ChatRoom(names[index], numbers[index]))),
+                          child: Container(
+                            height: 50,
+                            child: Text(
+                                names[index]
+                            ),
+                          ),
+                        );
+                      },
+                      separatorBuilder: (BuildContext context,
+                          int index) => const Divider(),
+                    );
+                  }
+                  else{
+                    return Container();
+                  }
+
+                }
               ),
+
             ],
           ),
         ));

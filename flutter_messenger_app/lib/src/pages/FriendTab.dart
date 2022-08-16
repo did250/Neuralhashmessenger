@@ -2,158 +2,130 @@ import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'SearchFriendTab.dart';
 
 class FriendTab extends StatefulWidget {
   @override
   _FriendTabState createState() => _FriendTabState();
 }
 
-Future<void> initFriend(DatabaseReference ref) async {
-  /* 첫 실행시 친구목록 로딩 */
-  final myUid = FirebaseAuth.instance.currentUser?.uid;
-  final snapshot = await ref.child('UserList/$myUid/Friend').get();
+class Friend {
+  String uid;
+  String name;
+  Friend(this.uid, this.name);
+}
+
+class FriendTile extends StatelessWidget {
+  final Friend _friend;
+  FriendTile(this._friend);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(Icons.person),
+      title: Text(_friend.name),
+    );
+  }
+}
+
+Future<String> getNameFromUid(String uid) async {
+  DatabaseReference ref = FirebaseDatabase.instance.ref('UserList/$uid/Name');
+  final snapshot = await ref.get();
   if (snapshot.exists) {
-    print(snapshot.value);
+    return snapshot.value.toString();
   } else {
-    print('No data available.');
-  }
-}
-
-Future<void> readData(DatabaseReference ref) async {
-  final myUid = FirebaseAuth.instance.currentUser?.uid;
-  final snapshot = await ref.child('User/$myUid').get();
-
-  List<int> friendList = [];
-
-  print(snapshot.value);
-
-  for (int item in List<int>.from(snapshot.value as List<Object?>)) {
-    friendList.add(item);
-  }
-  //json.decode(snapshot.value.toString());
-  if (snapshot.exists) {
-    print(snapshot.value);
-  } else {
-    print('No data available.');
-  }
-
-  //print(friendList[0]);
-}
-
-Future<void> getNameFromUid(List<int> FriendList) async {
-  /* todo.. */
-  DatabaseReference ref = FirebaseDatabase.instance.ref();
-  for (int i = 0; i < FriendList.length; i++) {
-    int uid = FriendList[i];
-    ref.child('User/$uid/Name');
-  }
-}
-
-Future<String> searchFriend() async {
-  var name = "Yoon";
-  DatabaseReference ref = FirebaseDatabase.instance.ref();
-  Query query = ref.child('UserList').orderByChild('Name').equalTo(name);
-  DataSnapshot event = await query.get();
-  /* 검색실패 구현필요 */
-
-  return event.children.elementAt(0).key ?? "error";
-}
-
-Future<void> writeData(DatabaseReference ref) async {
-  final user = FirebaseAuth.instance.currentUser;
-  final myUid = user?.uid;
-  DatabaseReference ref = FirebaseDatabase.instance.ref('UserList/$myUid');
-
-  /************ */
-
-  final snapshot = await ref.child('Friend').get();
-
-  /************* */
-  //추가할 친구 관련 코드 여기에
-
-  /************* */
-  if (!snapshot.exists) {
-    print("snaphost null");
-    ref.update({
-      'Friend': [0]
-    });
-  } else {
-    List<int> myFriendList = [];
-    for (int item in List<int>.from(snapshot.value as List<Object?>)) {
-      myFriendList.add(item);
-    }
-    //print(myFriendList[0]);
-
-    /* 중복체크 필요 */
-    myFriendList.add(Random().nextInt(10000) /*추가할 친구*/);
-
-    ref.update({'Friend': myFriendList});
-    //ref.update({'Name': 'Kangmin Lee', 'Email': 'seyrinn@g.skku.edu'});
+    return "null";
   }
 }
 
 class _FriendTabState extends State<FriendTab> {
   final DatabaseReference ref = FirebaseDatabase.instance.ref();
-  //List<Friend> _friends = [];
+  List<Friend> myFriendList = [];
 
-  /*
   @override
   void initState() {
-    //super.initState();
-    initFriend(ref);
-  }*/
+    _getFriends();
+  }
 
-  Future<void> _addFriend() async {
+  Future<void> _addFriend(String friendUid) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final myUid = user?.uid;
+    DatabaseReference ref = FirebaseDatabase.instance.ref('UserList/$myUid');
+    final snapshot = await ref.child('Friend').get();
+    List<String> tempFriendList = [];
+    if (snapshot.exists) {
+      for (String item in List<String>.from(snapshot.value as List<Object?>)) {
+        tempFriendList.add(item);
+      }
+      tempFriendList.add(friendUid);
+
+      /* 중복체크 필요 */
+      ref.update({'Friend': tempFriendList});
+    } else {
+      print("snaphost null");
+      ref.update({
+        'Friend': [friendUid]
+      });
+    }
     setState(() {
-      final DatabaseReference ref = FirebaseDatabase.instance.ref();
-      writeData(ref);
+      //로컬 친구목록 갱신..
     });
   }
 
-  void _read() {
-    setState(() {
-      final DatabaseReference ref = FirebaseDatabase.instance.ref();
-      readData(ref);
+  Future<void> _getFriends() async {
+    final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    final myUid = FirebaseAuth.instance.currentUser?.uid;
+    final snapshot = await ref.child('UserList/$myUid/Friend').get();
 
-      //test(ref);
-      //snapshot 처리 필요
-      //getfriendnum
-      /*
-      int friendCount = 1;
-      final friendData = {
-        'name': ['a', 'b', 'c'],
-      };
-      final newPostKey =
-          FirebaseDatabase.instance.ref().child('posts').push().key;
-      final Map<String, Map> updates = {};
-      updates['/User/hihi/Friend/$newPostKey'] = friendData;
-      //updates['/User/hihi/$uid/$newPostKey'] = postData;
-      FirebaseDatabase.instance.ref().update(updates);*/
-    });
+    myFriendList = [];
+    if (snapshot.exists) {
+      for (String item in List<String>.from(snapshot.value as List<Object?>)) {
+        myFriendList.add(Friend(item, await getNameFromUid(item)));
+      }
+    } else {
+      print("friendlist null!");
+    }
+    //print(friendList);
+    setState(() {});
   }
 
-  //DatabaseReference ref = FirebaseDatabase.instance.ref('');
-
-  //FirebaseDatabase database = FirebaseDatabase.instance;
-  /* ex)
-  DatabaseReference starCountRef =
-        FirebaseDatabase.instance.ref('posts/$postId/starCount');
-starCountRef.onValue.listen((DatabaseEvent event) {
-    final data = event.snapshot.value;
-    updateStarCount(data);
-});*/
+  _refresh() {
+    setState(() {});
+  }
 
   Widget build(BuildContext context) {
     return Scaffold(
         body: Column(
-      children: [
-        TextButton(child: Text("write"), onPressed: _addFriend),
-        TextButton(
-          child: Text("read"),
-          onPressed: _read,
+          children: [
+            //TextButton(child: Text("addfriend"), onPressed: _addFriend),
+            TextButton(
+              child: Text("getFriends"),
+              onPressed: _getFriends,
+            ),
+            TextButton(onPressed: _refresh, child: Text('refresh')),
+            Container(
+                height: 500, width: 200, child: _buildListView(myFriendList)),
+          ],
         ),
-        TextButton(child: Text("search"), onPressed: searchFriend),
-      ],
-    ));
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            final result = await Navigator.push(context,
+                MaterialPageRoute(builder: (context) => SearchFriendTab()));
+            if (result == 'error') {
+            } else {
+              _addFriend(result);
+              _getFriends();
+            }
+          },
+        ));
   }
+}
+
+Widget _buildListView(List<Friend> friendlist) {
+  return ListView.builder(
+      itemCount: friendlist.length,
+      itemBuilder: (BuildContext context, int index) {
+        //if (index == 0) return Text("builder index == 0");
+        return FriendTile(friendlist[index]);
+      });
 }

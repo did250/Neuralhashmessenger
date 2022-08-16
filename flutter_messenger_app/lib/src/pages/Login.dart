@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutterfire_ui/auth.dart';
+//import 'package:flutterfire_ui/auth.dart';
 import 'package:flutter_messenger_app/src/pages/Home.dart';
 import 'package:flutter_messenger_app/config/palette.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -167,7 +167,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                 TextFormField(
                                   key: ValueKey(1),
                                   validator: (value) {
-
                                     if (value!.isEmpty || value.length < 4) {
                                       userNameChecked = false;
                                       return 'Please enter at least 4 characters';
@@ -413,7 +412,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                       borderRadius: BorderRadius.circular(50)),
                   child: GestureDetector(
                     onTap: () async {
-                      if (isSignupScreen) { //SIGNUP CASE
+                      if (isSignupScreen) {
+                        //SIGNUP CASE
                         _tryValidation();
 
                         if (userNameChecked) {
@@ -424,7 +424,8 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               password: userPassword,
                             );
 
-                            if (newUser.user != null) { //SIGNUP SUCCESS
+                            if (newUser.user != null) {
+                              //SIGNUP SUCCESS
 
                               try {
                                 final user = _authentication.currentUser;
@@ -436,7 +437,9 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                                 print(e);
                               }
 
-                              DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + loggedUser!.uid.toString());
+                              DatabaseReference ref = FirebaseDatabase.instance
+                                  .ref(
+                                      "UserList/" + loggedUser!.uid.toString());
 
                               await ref.set({
                                 "Email": userEmail,
@@ -447,30 +450,33 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) {
-                                  return Home();
-                                },
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return Home();
+                                  },
                                 ),
                               );
                             }
-                          } catch (e) { //SIGNUP FAILED
+                          } catch (e) {
+                            //SIGNUP FAILED
                             print(e);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content:
-                                Text('Please check your email and password'),
+                                content: Text(
+                                    'Please check your email and password'),
                                 backgroundColor: Colors.blue,
                               ),
                             );
                           }
                         } //if (userNameChecked) true
                       }
-                      if (!isSignupScreen) { //LOGIN CASE
+                      if (!isSignupScreen) {
+                        //LOGIN CASE
                         _tryValidation();
 
                         try {
                           final newUser =
-                          await _authentication.signInWithEmailAndPassword(
+                              await _authentication.signInWithEmailAndPassword(
                             email: userEmail,
                             password: userPassword,
                           );
@@ -484,12 +490,13 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                               ),
                             );
                           }
-                        }catch(e){ //LOGIN FAILED
+                        } catch (e) {
+                          //LOGIN FAILED
                           print(e);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content:
-                              Text('Please check your email and password'),
+                                  Text('Please check your email and password'),
                               backgroundColor: Colors.blue,
                             ),
                           );

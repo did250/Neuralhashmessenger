@@ -19,6 +19,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   List<Messages> _message = <Messages>[];
   List<int> _checked = <int>[];
   String friendname = "";
+  String frienduid = "";
   int number = -1;
   ChatRoomState(this.friendname, this.number);
   final TextEditingController _textController = TextEditingController();
@@ -75,16 +76,48 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
       "text": input,
     });
   }
+  /// 친구 uid 찾
+  Future<void> _searchFriend() async {
+    DatabaseReference ref = FirebaseDatabase.instance.ref();
+    Query query = ref.child('UserList').orderByChild('Name').equalTo(this.friendname);
+    DataSnapshot event = await query.get();
+    setState(() {
+      this.frienduid = event.children.elementAt(0).key ?? "error";
+    });
+  }
+
+  /// 메시지 보내면 채팅방 목록에서 맨 위로 올라가는 함수
+  Future<void> refresh(String uid) async {
+    final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    List<Map<String,dynamic>> map2 = [];
+    final snapshot = await ref.child('UserList').child(uid).child('Num_Chatroom').get();
+    if ( snapshot.exists ){
+      for ( var item in (snapshot.value as List<Object?>)) {
+        Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+        if (map["number"] != this.number) {
+          map2.add(map);
+        }
+        else {
+          map2.insert(0, map);
+        }
+      }
+    }
+    await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(
+      map2
+    );
+    print("success");
+  }
 
 
 
   @override
   void initState() {
     // TODO: implement initState
-    final DatabaseReference ref = FirebaseDatabase.instance.ref();
     Loaduser();
     _other = this.friendname;
+    _searchFriend();
     super.initState();
+
   }
 
 
@@ -197,6 +230,8 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     setState(() {
       _exist = false;
       updatemessage(text);
+      refresh(FirebaseAuth.instance.currentUser!.uid.toString());
+      refresh(frienduid);
     });
     Messages message = Messages(
       text: text,

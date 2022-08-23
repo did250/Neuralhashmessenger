@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_messenger_app/src/pages/ChatRoom.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:ntp/ntp.dart';
 
 class ChatTab extends StatefulWidget {
   @override
@@ -12,6 +15,7 @@ class _ChatTabState extends State<ChatTab> {
 
   List<String> names = <String>[];
   List<int> numbers = <int>[];
+  List<int> times = <int>[];
 
   // Future<void> readChattingRoom() async {
   //   final DatabaseReference ref = FirebaseDatabase.instance.ref();
@@ -29,8 +33,13 @@ class _ChatTabState extends State<ChatTab> {
   //   }
   // }
 
+  Future<void> time() async {
+    DateTime current = await NTP.now();
+    print(current);
+  }
+
   @override
-  void initState(){
+  void initState() {
     super.initState();
   }
 
@@ -77,6 +86,7 @@ class _ChatTabState extends State<ChatTab> {
                   if (snapshot.hasData) {
                     names.clear();
                     numbers.clear();
+
                     for (var item in (snapshot.data as DatabaseEvent).snapshot
                         .value as List<Object?>) {
                       Map<String, dynamic> map = Map<String, dynamic>.from(

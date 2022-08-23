@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_messenger_app/src/pages/MyPage.dart';
 
 class SettingsTab extends StatefulWidget {
   const SettingsTab({Key? key}) : super(key: key);
@@ -9,7 +10,7 @@ class SettingsTab extends StatefulWidget {
 }
 
 class _SettingsTabState extends State<SettingsTab> {
-  final _authentication = FirebaseAuth.instance;
+  final authentication = FirebaseAuth.instance;
   User? loggedUser;
 
   @override
@@ -20,10 +21,9 @@ class _SettingsTabState extends State<SettingsTab> {
 
   void getCurrentUser() {
     try {
-      final user = _authentication.currentUser;
+      final user = authentication.currentUser;
       if (user != null) {
         loggedUser = user;
-        print(loggedUser!.email);
       }
     }catch(e){
       print(e);
@@ -42,26 +42,22 @@ class _SettingsTabState extends State<SettingsTab> {
               color: Colors.white,
             ),
             onPressed: () {
-              FirebaseAuth.instance.signOut();
+              authentication.signOut();
             },
           )
         ],
       ),
-    );
-  }
-
-  /*Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Center(
-          child: TextButton(
-            child: Text("로그아웃"),
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-            },
-          ),
-        ),
+      body: ListView(
+          children: <Widget>[
+            ListTile(
+              title: Text('MyPage'),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) { return MyPage(); },),),
+            ),
+            ListTile(
+              title: Text('example'),
+            ),
+        ],
       ),
     );
-  }*/
+  }
 }

@@ -100,7 +100,22 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
         Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
         room.add(map);
       }
+
     }
+
+  }
+
+  Future<void> _checking() async {
+    for (var item in room){
+      if (item['number'] == this.number){
+        int i = room.indexOf(item);
+        if (!room[i]["check"].contains(_name)) {
+          room[i]["check"] = [_name];
+        }
+      }
+    }
+    final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(room);
   }
 
   /// 메시지 보내면 현재 채팅방을 맨 위로
@@ -110,8 +125,11 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
         int i = room.indexOf(item);
         room.removeAt(i);
         room.insert(0, item);
+        room[0]["check"] = [_name];
       }
     }
+    print("refreshmine");
+    print(room);
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(room);
 
@@ -131,6 +149,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
         }
         else {
           map2.insert(0, map);
+          map2[0]["check"] = [_name];
         }
       }
     }
@@ -145,11 +164,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     Loaduser();
     _other = this.friendname;
     _searchFriend();
-    print("start");
-    print(room);
+
     _roomcheck();
+
     super.initState();
   }
+
 
 
   @override
@@ -284,6 +304,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     for (Messages message in _message){
       message.animationController.dispose();
     }
+    _checking();
     super.dispose();
   }
 
@@ -302,26 +323,31 @@ class Messages extends StatelessWidget {
       CurvedAnimation(parent: animationController, curve: Curves.easeOut),
       axisAlignment: 0.0,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 10.0),
+        margin: ismine? const EdgeInsets.only(top: 10, bottom: 10, left: 150.0) : const EdgeInsets.only(top: 10, bottom: 10, left: 0, right: 130.0),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: ismine ? MainAxisAlignment.end : MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Container(
-              margin: ismine ? const EdgeInsets.only(right: 16.0,left: 200.0) : const EdgeInsets.only(right: 16.0),
-              child: ismine ? CircleAvatar(child: Text(_name[0])) : CircleAvatar(child: Text(_other[0])) ,
+            ismine ? Container(
+              margin: const EdgeInsets.only(right: 10.0),
+            ) : Container(
+              margin: const EdgeInsets.only(right: 10.0),
+              child: CircleAvatar(child: Text(_other[0])) ,
             ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(ismine ? _name : _other),
-                  Container(
-                    margin: const EdgeInsets.only(top: 5.0),
-                    child: Text(text),
-                  )
-                ],
-              ),
-            )
+            Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.2
+                ),
+
+                decoration: BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius: BorderRadius.circular(3),
+                  border: Border.all(),
+                ),
+                alignment: ismine ? Alignment.centerRight : Alignment.centerLeft,
+                padding: const EdgeInsets.all(5.0),
+                child: Text(text, style: TextStyle(fontSize: 15.0))
+            ),
           ],
         ),
       ),

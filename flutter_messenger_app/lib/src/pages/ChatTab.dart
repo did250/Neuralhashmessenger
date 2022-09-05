@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +8,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:ntp/ntp.dart';
 
 List<Map<String,dynamic>> room = [];
-
 
 class ChatTab extends StatefulWidget {
   @override
@@ -19,7 +19,8 @@ class ChatTabState extends State<ChatTab> {
   List<String> names = <String>[];
   List<int> numbers = <int>[];
   List<int> times = <int>[];
-
+  List<String> messages = <String>[];
+  List<bool> check = <bool>[];
   // Future<void> readChattingRoom() async {
   //   final DatabaseReference ref = FirebaseDatabase.instance.ref();
   //   final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').get();
@@ -86,18 +87,30 @@ class ChatTabState extends State<ChatTab> {
               StreamBuilder(
                 stream: FirebaseDatabase.instance.ref().child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').onValue,
                 builder: (BuildContext context, snapshot) {
-                  if (snapshot.hasData) {
+                  if (ConnectionState.waiting == snapshot.connectionState) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  else if (snapshot.hasError) {
+                    return Text("error");
+                  }
+                  else if (snapshot.data == null) {
+                    return Text("no data");
+                  }
+                  else if (snapshot.hasData && snapshot.data != null){
                     names.clear();
                     numbers.clear();
+                    check.clear();
                     room.clear();
                     for (var item in (snapshot.data as DatabaseEvent).snapshot.value as List<Object?>) {
-
                       Map<String, dynamic> map = Map<String, dynamic>.from(
                           item as Map<dynamic?, dynamic?>);
                       numbers.add(map["number"]);
                       names.add(map["with"]);
+
+                      check.add(map["check"]?.contains("heewon"));
                       room.add(map);
                     }
+                    print(check);
                     return ListView.separated(
                       padding: EdgeInsets.only(top: 15),
                       scrollDirection: Axis.vertical,
@@ -109,10 +122,30 @@ class ChatTabState extends State<ChatTab> {
                               MaterialPageRoute(builder: (context) =>
                                   ChatRoom(names[index], numbers[index]))),
                           child: Container(
-                            height: 50,
-                            child: Text(
-                                names[index]
+                            child: ListTile(
+                              dense: true,
+                              leading: CircleAvatar(child: Text(names[index][0])),
+                              title: Text(names[index], style: TextStyle(fontSize: 14),),
+                              subtitle: check[index] ? Text("") : Text("새로운 메시지가 있습니다.",style: TextStyle(fontSize: 12),),
+                              trailing: check[index] ? null : Icon(Icons.mark_email_unread, color: Colors.red,),
                             ),
+                            // child: Row(
+                            //   crossAxisAlignment: CrossAxisAlignment.start,
+                            //   children: <Widget>[
+                            //     Container(
+                            //       margin: const EdgeInsets.only(right: 16),
+                            //       child: CircleAvatar(child: Text(names[index][0])),
+                            //     ),
+                            //     Expanded(
+                            //       child: Column(
+                            //         crossAxisAlignment: CrossAxisAlignment.start,
+                            //         children: <Widget>[
+                            //           Text(names[index]),
+                            //         ],
+                            //       ),
+                            //     )
+                            //   ],
+                            // ),
                           ),
                         );
                       },
@@ -120,10 +153,9 @@ class ChatTabState extends State<ChatTab> {
                           int index) => const Divider(),
                     );
                   }
-                  else{
-                    return Container();
+                  else {
+                    return Text("no data");
                   }
-
                 }
               ),
 

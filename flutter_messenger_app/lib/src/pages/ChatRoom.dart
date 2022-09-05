@@ -1,13 +1,10 @@
-import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
 
 String _name = "";
 String _other = "";
-
 
 class ChatRoom extends StatefulWidget {
   final String name;
@@ -28,36 +25,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   final TextEditingController _textController = TextEditingController();
   bool _exist = false;
 
-  // Future<void> getmember() async {
-  //   final DatabaseReference ref = FirebaseDatabase.instance.ref();
-  //   final snapshot = await ref.child('ChattingRoom').child(chattingroom.toString()).child('Members').get();
-  //   if ( snapshot.exists) {
-  //     for ( var item in List<String>.from(snapshot.value as List<Object?>) ) {
-  //
-  //     }
-  //   }
-  // }
-
-  // /// 메시지들 불러와서 저장하는 함수
-  // Future<void> readMessages() async {
-  //   final DatabaseReference ref = FirebaseDatabase.instance.ref();
-  //   final snapshot = await ref.child('ChattingRoom').child(this.number.toString()).child('Messages').get();
-  //   if ( snapshot.exists ) {
-  //     for ( var item in (snapshot.value as List<Object?>)){
-  //       bool mine = false;
-  //       Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
-  //       if (map['sender'] == _name) {
-  //         mine = true;
-  //       }
-  //       Messages mas = Messages(text: map['text'], animationController: AnimationController(duration : Duration(milliseconds: 0),vsync: this), ismine: mine,);
-  //       setState(() {
-  //         _message.insert(0, mas);
-  //       });
-  //       mas.animationController.forward();
-  //       _checked.insert(0, map['checked']);
-  //     }
-  //   }
-  // }
   /// 사용자 이름 loading
   Future<void> Loaduser() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
@@ -66,7 +33,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
       setState(() {
         _name = snapshot.value.toString();
       });
-
     }
   }
 
@@ -100,11 +66,10 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
         Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
         room.add(map);
       }
-
     }
-
   }
 
+  /// 읽음 표시 하는 함
   Future<void> _checking() async {
     for (var item in room){
       if (item['number'] == this.number){
@@ -128,8 +93,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
         room[0]["check"] = [_name];
       }
     }
-    print("refreshmine");
-    print(room);
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(room);
 
@@ -139,7 +102,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   Future<void> refresh(String target) async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     List<Map<String,dynamic>> map2 = [];
-
     final snapshot = await ref.child('UserList').child(target).child('Num_Chatroom').get();
     if ( snapshot.exists ){
       for ( var item in (snapshot.value as List<Object?>)) {
@@ -164,13 +126,9 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     Loaduser();
     _other = this.friendname;
     _searchFriend();
-
     _roomcheck();
-
     super.initState();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -260,21 +218,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     );
   }
 
-  /// 불러온 메시지 값들을 받아서 이미 온 메시지들을 정리한다.
-  void _aaa(){
-    Messages mas = Messages(text: "first message", animationController: AnimationController(duration : Duration(milliseconds: 700),vsync: this), ismine: false,);
-    setState(() {
-      _message.insert(0, mas);
-    });
-    mas.animationController.forward();
-    Messages secondmas = Messages(text: "second message", animationController: AnimationController(duration : Duration(milliseconds: 700),vsync: this), ismine: true,);
-    setState(() {
-      _message.insert(0, secondmas);
-    });
-    secondmas.animationController.forward();
-  }
-
-
   void _handleSubmitted(String text) {
     _textController.clear();
     setState(() {
@@ -291,7 +234,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     );
     setState(() {
       _message.insert(0,message);
-
     });
     _roomcheck();
     refresh(this.frienduid);
@@ -338,7 +280,6 @@ class Messages extends StatelessWidget {
                 constraints: BoxConstraints(
                   maxWidth: MediaQuery.of(context).size.width * 0.2
                 ),
-
                 decoration: BoxDecoration(
                   color: Colors.orange,
                   borderRadius: BorderRadius.circular(3),
@@ -351,8 +292,6 @@ class Messages extends StatelessWidget {
           ],
         ),
       ),
-
     );
   }
 }
-

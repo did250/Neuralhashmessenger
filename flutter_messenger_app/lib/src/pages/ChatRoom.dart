@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
 
 String _name = "";
 String _other = "";
@@ -16,6 +17,8 @@ class ChatRoom extends StatefulWidget {
 }
 
 class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
+
+  final List<Map<String,dynamic>> room = [];
   List<Messages> _message = <Messages>[];
   List<int> _checked = <int>[];
   String friendname = "";
@@ -76,7 +79,8 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
       "text": input,
     });
   }
-  /// 친구 uid 찾
+
+  /// 친구 uid 찾기
   Future<void> _searchFriend() async {
     DatabaseReference ref = FirebaseDatabase.instance.ref();
     Query query = ref.child('UserList').orderByChild('Name').equalTo(this.friendname);
@@ -86,11 +90,39 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     });
   }
 
-  /// 메시지 보내면 채팅방 목록에서 맨 위로 올라가는 함수
-  Future<void> refresh(String uid) async {
+  /// 채팅방 목록 불러오기
+  Future<void> _roomcheck() async {
+    final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').get();
+    if (snapshot.exists){
+      room.clear();
+      for ( var item in (snapshot.value as List<Object?>)) {
+        Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+        room.add(map);
+      }
+    }
+  }
+
+  /// 메시지 보내면 현재 채팅방을 맨 위로
+  Future<void> refreshmine() async {
+    for (var item in room){
+      if (item['number'] == this.number){
+        int i = room.indexOf(item);
+        room.removeAt(i);
+        room.insert(0, item);
+      }
+    }
+    final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(room);
+
+  }
+
+  /// 메시지 보내면 친구의 채팅 목록에서 현재 채팅방을 맨 위로
+  Future<void> refresh(String target) async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     List<Map<String,dynamic>> map2 = [];
-    final snapshot = await ref.child('UserList').child(uid).child('Num_Chatroom').get();
+
+    final snapshot = await ref.child('UserList').child(target).child('Num_Chatroom').get();
     if ( snapshot.exists ){
       for ( var item in (snapshot.value as List<Object?>)) {
         Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
@@ -102,12 +134,9 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
         }
       }
     }
-    await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(
-      map2
-    );
-    print("success");
-  }
+   await ref.child('UserList').child(target).child('Num_Chatroom').set(map2);
 
+  }
 
 
   @override
@@ -116,8 +145,10 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     Loaduser();
     _other = this.friendname;
     _searchFriend();
+    print("start");
+    print(room);
+    _roomcheck();
     super.initState();
-
   }
 
 
@@ -201,7 +232,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
               child: CupertinoButton(
                 child: Text("보내기"),
                 onPressed: _exist ? () => _handleSubmitted(_textController.text) :null,
-
               ),
             ),
           ],
@@ -225,13 +255,11 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   }
 
 
-  void _handleSubmitted(String text){
+  void _handleSubmitted(String text) {
     _textController.clear();
     setState(() {
       _exist = false;
       updatemessage(text);
-      refresh(FirebaseAuth.instance.currentUser!.uid.toString());
-      refresh(frienduid);
     });
     Messages message = Messages(
       text: text,
@@ -243,7 +271,11 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     );
     setState(() {
       _message.insert(0,message);
+
     });
+    _roomcheck();
+    refresh(this.frienduid);
+    refreshmine();
     message.animationController.forward();
   }
 

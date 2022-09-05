@@ -53,7 +53,7 @@ class _MyPageState extends State<MyPage> {
             onPressed: () {
               authentication.signOut();
               Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSignupScreen()),);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
             },
           )
         ],
@@ -159,7 +159,7 @@ class _MyPageState extends State<MyPage> {
                             await authentication.sendPasswordResetEmail(email: loggedUser!.email.toString());
                             authentication.signOut();
                             Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSignupScreen()),);
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
                           },
                           child: Text('Yes')),
                       TextButton(
@@ -202,7 +202,7 @@ class _MyPageState extends State<MyPage> {
                             final DatabaseReference ref = FirebaseDatabase.instance.ref("UserList");
                             ref.child(loggedUser!.uid.toString()).remove();
                             Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSignupScreen()),);
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
                           },
                           child: Text('Yes')),
                       TextButton(

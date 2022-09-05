@@ -42,6 +42,24 @@ class ChatTabState extends State<ChatTab> {
     print(current);
   }
 
+  Future<void> _roomcheck() async {
+    final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').get();
+    if (snapshot.exists){
+      names.clear();
+      numbers.clear();
+      check.clear();
+      room.clear();
+      for ( var item in (snapshot.value as List<Object?>)) {
+        Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+        room.add(map);
+        numbers.add(map["number"]);
+        names.add(map["with"]);
+        check.add(map["check"]?.contains("yang"));
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -85,78 +103,78 @@ class ChatTabState extends State<ChatTab> {
                 ),
               ),
               StreamBuilder(
-                stream: FirebaseDatabase.instance.ref().child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').onValue,
-                builder: (BuildContext context, snapshot) {
-                  if (ConnectionState.waiting == snapshot.connectionState) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  else if (snapshot.hasError) {
-                    return Text("error");
-                  }
-                  else if (snapshot.data == null) {
-                    return Text("no data");
-                  }
-                  else if (snapshot.hasData && snapshot.data != null){
-                    names.clear();
-                    numbers.clear();
-                    check.clear();
-                    room.clear();
-                    for (var item in (snapshot.data as DatabaseEvent).snapshot.value as List<Object?>) {
-                      Map<String, dynamic> map = Map<String, dynamic>.from(
-                          item as Map<dynamic?, dynamic?>);
-                      numbers.add(map["number"]);
-                      names.add(map["with"]);
-
-                      check.add(map["check"]?.contains("heewon"));
-                      room.add(map);
+                  stream: FirebaseDatabase.instance.ref().child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').onValue,
+                  builder: (BuildContext context, snapshot) {
+                    if (ConnectionState.waiting == snapshot.connectionState) {
+                      return Center(child: CircularProgressIndicator());
                     }
-                    print(check);
-                    return ListView.separated(
-                      padding: EdgeInsets.only(top: 15),
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemCount: names.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return GestureDetector(
-                          onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(builder: (context) =>
-                                  ChatRoom(names[index], numbers[index]))),
-                          child: Container(
-                            child: ListTile(
-                              dense: true,
-                              leading: CircleAvatar(child: Text(names[index][0])),
-                              title: Text(names[index], style: TextStyle(fontSize: 14),),
-                              subtitle: check[index] ? Text("") : Text("새로운 메시지가 있습니다.",style: TextStyle(fontSize: 12),),
-                              trailing: check[index] ? null : Icon(Icons.mark_email_unread, color: Colors.red,),
+                    else if (snapshot.hasError) {
+                      return Text("error");
+                    }
+                    else if (snapshot.data == null) {
+                      return Text("no data");
+                    }
+                    else if (snapshot.hasData && snapshot.data != null){
+                      names.clear();
+                      numbers.clear();
+                      check.clear();
+                      room.clear();
+                      for (var item in (snapshot.data as DatabaseEvent).snapshot.value as List<Object?>) {
+                        Map<String, dynamic> map = Map<String, dynamic>.from(
+                            item as Map<dynamic?, dynamic?>);
+                        numbers.add(map["number"]);
+                        names.add(map["with"]);
+
+                        check.add(map["check"]?.contains("yang"));
+                        room.add(map);
+                      }
+                      print(check);
+                      return ListView.separated(
+                        padding: EdgeInsets.only(top: 15),
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemCount: names.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return GestureDetector(
+                            onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) =>
+                                    ChatRoom(names[index], numbers[index]))),
+                            child: Container(
+                              child: ListTile(
+                                dense: true,
+                                leading: CircleAvatar(child: Text(names[index][0])),
+                                title: Text(names[index], style: TextStyle(fontSize: 14),),
+                                subtitle: check[index] ? Text("") : Text("새로운 메시지가 있습니다.",style: TextStyle(fontSize: 12),),
+                                trailing: check[index] ? null : Icon(Icons.mark_email_unread, color: Colors.red,),
+                              ),
+                              // child: Row(
+                              //   crossAxisAlignment: CrossAxisAlignment.start,
+                              //   children: <Widget>[
+                              //     Container(
+                              //       margin: const EdgeInsets.only(right: 16),
+                              //       child: CircleAvatar(child: Text(names[index][0])),
+                              //     ),
+                              //     Expanded(
+                              //       child: Column(
+                              //         crossAxisAlignment: CrossAxisAlignment.start,
+                              //         children: <Widget>[
+                              //           Text(names[index]),
+                              //         ],
+                              //       ),
+                              //     )
+                              //   ],
+                              // ),
                             ),
-                            // child: Row(
-                            //   crossAxisAlignment: CrossAxisAlignment.start,
-                            //   children: <Widget>[
-                            //     Container(
-                            //       margin: const EdgeInsets.only(right: 16),
-                            //       child: CircleAvatar(child: Text(names[index][0])),
-                            //     ),
-                            //     Expanded(
-                            //       child: Column(
-                            //         crossAxisAlignment: CrossAxisAlignment.start,
-                            //         children: <Widget>[
-                            //           Text(names[index]),
-                            //         ],
-                            //       ),
-                            //     )
-                            //   ],
-                            // ),
-                          ),
-                        );
-                      },
-                      separatorBuilder: (BuildContext context,
-                          int index) => const Divider(),
-                    );
+                          );
+                        },
+                        separatorBuilder: (BuildContext context,
+                            int index) => const Divider(),
+                      );
+                    }
+                    else {
+                      return Text("no data");
+                    }
                   }
-                  else {
-                    return Text("no data");
-                  }
-                }
               ),
 
             ],

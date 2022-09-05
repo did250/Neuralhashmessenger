@@ -136,7 +136,7 @@ class FriendTile extends StatelessWidget {
           }
         });
         final snapshot3 =
-            await rootRef.child('UserList/$myUid/Num_Chatroom/next').get();
+            await rootRef.child('UserList/$myUid/Next_Chatroom').get();
 
         int nextnumPerUser;
         if (snapshot3.exists) {
@@ -155,9 +155,10 @@ class FriendTile extends StatelessWidget {
         nextnumPerUser++;
         rootRef.child('ChattingRoom').update({'next': nextnumChatroom});
         rootRef
-            .child('UserList/$myUid/Num_Chatroom')
-            .update({'next': nextnumPerUser});
-        //Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatRoom(names[index], numbers[index])));
+            .child('UserList/$myUid')
+            .update({'Next_Chatroom': nextnumPerUser});
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ChatRoom(_friend.name, nextnumChatroom - 1)));
       },
     );
   }

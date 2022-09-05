@@ -43,7 +43,7 @@ class _MyPageState extends State<MyPage> {
       appBar: AppBar(
         title: Text("MyPage"),
         iconTheme: IconThemeData(color: Color(0xFF09126C)),
-        backgroundColor: Color(0xFFB6C7D1),
+        //backgroundColor: Color(0xFFB6C7D1),
         actions: [
           IconButton(
             icon: Icon(
@@ -58,25 +58,19 @@ class _MyPageState extends State<MyPage> {
           )
         ],
       ),
-      body: new Form(
-        key: formKey,
-        child: Column(
-          children: [
-            showUserNameInput(),
-            //ChangeUserNameBtn(),
-            ChangePasswordBtn(),
-            WithdrawalAccountBtn(),
-          ],
-        ),
-      ),
-    );
-  }
 
-  InputDecoration _textFormDecoration(hintText, helperText){
-    return new InputDecoration(
-      contentPadding: EdgeInsets.fromLTRB(0, 16, 0, 0),
-      hintText: hintText,
-      helperText: helperText,
+      body: SingleChildScrollView(
+        child: Form(
+          key: this.formKey,
+          child: Column(
+            children: [
+              showUserNameInput(),
+              ChangeUserNameBtn(),
+              ButtonLine(),
+            ]
+          )
+        )
+      )
     );
   }
 
@@ -86,7 +80,10 @@ class _MyPageState extends State<MyPage> {
           children: [
             Padding(padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: TextFormField(
-                  decoration: _textFormDecoration('Username to change', ''),
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.person),
+                    hintText: 'Username to change',
+                  ),
                   validator: (value) {
                     if (value!.isEmpty || value.length < 4) {
                       userNameChecked = false;
@@ -94,62 +91,58 @@ class _MyPageState extends State<MyPage> {
                     }
                     userNameChecked = true;
                     return null;
-                  },
-                  onSaved: (value) {
-                    userName = value!;
-                  },
-                  onChanged: (value) {
-                    userName = value;
-                  },
+                    },
+                    onSaved: (value) { userName = value!; },
+                    onChanged: (value) { userName = value; },
                 )),
           ],
         ));
   }
 
-  /*Widget ChangeUserNameBtn() {
-    return Padding(padding: EdgeInsets.only(top: 20),
-        child: MaterialButton(
-          height: 50,
-          child: Text('Change Username'),
+  Widget ChangeUserNameBtn() {
+    return Padding(padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            //primary: Colors.orange,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(3.0)
+            ),
+            minimumSize: const Size.fromHeight(50),
+          ),
+          child: Text('Change Username', style: TextStyle(fontSize: 20)),
           onPressed: () async {
-              return await showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      backgroundColor: Color(0xff161619),
-                      title: Text(
-                        'Do you want to change your username?',
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-                      actions: [
-                        TextButton(
-                            onPressed: () async {
-                              formKey.currentState?.validate();
-                              final DatabaseReference ref = FirebaseDatabase
-                                  .instance.ref("UserList");
-                              ref.child(loggedUser!.uid.toString()).update({
-                                "Name": userName,
-                              });
-                              Navigator.pop(context);
-                            },
-                            child: Text('Yes')),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text('No')),
-                      ],
-                    );
-                  });
+            if (formKey.currentState!.validate()) {
+              formKey.currentState!.save();
+
+              final DatabaseReference ref = FirebaseDatabase
+                  .instance.ref("UserList");
+              ref.child(loggedUser!.uid.toString()).update({
+                "Name": userName,
+              });
+              Navigator.pop(context);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Username is changed!'),
+                  duration: Duration(seconds: 5),)
+              );
+            }
           },
-        ));
-  }*/
+        ),
+    );
+  }
 
   Widget ChangePasswordBtn() {
-    return Padding(padding: EdgeInsets.only(top: 40),
-        child: MaterialButton(
-          height: 50,
-          child: Text('Change Password'),
+    return Padding(padding: EdgeInsets.only(top: 20),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            //primary: Colors.orange,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(3.0)
+            ),
+            //minimumSize: const Size.fromHeight(50),
+          ),
+          child: Text('Change Password', style: TextStyle(fontSize: 16)),
           onPressed: () async {
             return await showDialog(
                 context: context,
@@ -182,10 +175,16 @@ class _MyPageState extends State<MyPage> {
   }
 
   Widget WithdrawalAccountBtn() {
-    return Padding(padding: EdgeInsets.only(top: 60),
-        child: MaterialButton(
-          height: 50,
-          child: Text('Withdrawal'),
+    return Padding(padding: EdgeInsets.only(top: 20),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            //primary: Colors.orange,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(3.0)
+            ),
+            //minimumSize: const Size.fromHeight(50),
+          ),
+          child: Text('Withdrawal', style: TextStyle(fontSize: 16)),
           onPressed: () async {
             return await showDialog(
                 context: context,
@@ -216,5 +215,18 @@ class _MyPageState extends State<MyPage> {
                 });
           },
         ));
+  }
+
+  Widget ButtonLine() {
+    return Padding(padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ChangePasswordBtn(),
+          WithdrawalAccountBtn(),
+        ],
+      )
+    );
   }
 }

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'SearchFriendTab.dart';
+import 'ChatRoom.dart';
 
 class FriendTab extends StatefulWidget {
   @override
@@ -14,26 +15,46 @@ class _FriendTabState extends State<FriendTab> {
   List<Friend> myFriendList = [];
   final myUid = FirebaseAuth.instance.currentUser?.uid;
 
-  Future<void> _addFriend(String friendUid) async {
-    DatabaseReference myRef = FirebaseDatabase.instance.ref('UserList/$myUid');
-    final snapshot = await myRef.child('Friend').get();
+  void initState() {
+    _getFriend();
+  }
 
-    List<Map<String, String>> tempFriendList = [];
+  Future<void> _getFriend() async {
+    DatabaseReference myFriendRef = rootRef.child("UserList/$myUid/Friend");
+    final snapshot = await myFriendRef.get();
+    myFriendList = [];
     if (snapshot.exists && snapshot.value != '') {
-      for (var item in List<Object>.from(snapshot.value as List<Object?>)) {
-        Map<String, String> map =
-            Map<String, String>.from(item as Map<dynamic, dynamic>);
-        tempFriendList.add(map);
+      for (String? item
+          in List<String?>.from(snapshot.value as List<Object?>)) {
+        if (item == null) {
+          continue;
+        }
+        myFriendList.add(Friend(item, await _getNameFromUid(item)));
       }
-      /* 중복체크 필요 */
     }
-    Future<String> name = _getNameFromUid(friendUid);
-    name.then(
-      (value) => {
-        tempFriendList.add({'Name': value, 'Uid': friendUid}),
-        myRef.update({'Friend': tempFriendList}),
-      },
-    );
+
+    print(myFriendList);
+
+    setState(() {});
+  }
+
+  Future<void> _addFriend(String friendUid) async {
+    DatabaseReference myFriendRef = rootRef.child("UserList/$myUid/Friend");
+
+    final snapshot = await myFriendRef.get();
+
+    List<String> tempFriendList = [];
+    if (snapshot.exists && snapshot.value != '') {
+      for (String? item
+          in List<String?>.from(snapshot.value as List<Object?>)) {
+        if (item == null) {
+          continue;
+        }
+        tempFriendList.add(item);
+      }
+    }
+    tempFriendList.add(friendUid);
+    rootRef.child('UserList/$myUid').update({'Friend': tempFriendList});
   }
 
   Future<String> _getNameFromUid(String uid) async {
@@ -54,34 +75,8 @@ class _FriendTabState extends State<FriendTab> {
     return Scaffold(
         body: Column(
           children: [
-            StreamBuilder(
-                stream: FirebaseDatabase.instance
-                    .ref()
-                    .child('UserList')
-                    .child(FirebaseAuth.instance.currentUser!.uid.toString())
-                    .child('Friend')
-                    .onValue,
-                builder: (BuildContext context, snapshot) {
-                  if (snapshot.hasData) {
-                    myFriendList.clear();
-                    for (var item in (snapshot.data as DatabaseEvent)
-                        .snapshot
-                        .value as List<Object?>) {
-                      if (item == null) {
-                        continue;
-                      }
-                      Map<String, dynamic> map = Map<String, dynamic>.from(
-                          item as Map<dynamic, dynamic>);
-                      myFriendList.add(Friend(map['Uid']!, map['Name']!));
-                    }
-                    return Container(
-                        height: 500,
-                        width: 200,
-                        child: _buildListView(myFriendList));
-                  } else {
-                    return Container();
-                  }
-                }),
+            Container(
+                height: 500, width: 200, child: _buildListView(myFriendList))
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -89,9 +84,11 @@ class _FriendTabState extends State<FriendTab> {
             final result = await Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SearchFriendTab()));
             if (result == 'error') {
-              //추가필요
+              print('error');
             } else {
-              _addFriend(result);
+              print(result);
+              await _addFriend(result);
+              _getFriend();
             }
           },
         ));
@@ -115,7 +112,53 @@ class FriendTile extends StatelessWidget {
     return ListTile(
       leading: Icon(Icons.person),
       title: Text(_friend.name),
-      onTap: () => null,
+      onTap: () async {
+        /*새 채팅방*/
+        final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
+        final snapshot = await rootRef.child('ChattingRoom/next').get();
+
+        int nextnumChatroom;
+        if (snapshot.exists) {
+          nextnumChatroom = int.parse(snapshot.value.toString());
+        } else {
+          nextnumChatroom = 0;
+        }
+        var myUid = FirebaseAuth.instance.currentUser?.uid;
+        final snapshot2 = await rootRef.child('UserList/$myUid/Name').get();
+        String myname = snapshot2.value.toString();
+        rootRef.child('ChattingRoom').update({
+          '$nextnumChatroom': {
+            'Members': {
+              '0': myname,
+              '1': _friend.name,
+            },
+            'Messages': {}
+          }
+        });
+        final snapshot3 =
+            await rootRef.child('UserList/$myUid/Num_Chatroom/next').get();
+
+        int nextnumPerUser;
+        if (snapshot3.exists) {
+          nextnumPerUser = int.parse(snapshot3.value.toString());
+        } else {
+          nextnumPerUser = 0;
+        }
+
+        rootRef.child('UserList/$myUid/Num_Chatroom').update({
+          '$nextnumPerUser': {
+            'number': nextnumChatroom,
+            'with': _friend.name,
+          }
+        });
+        nextnumChatroom++;
+        nextnumPerUser++;
+        rootRef.child('ChattingRoom').update({'next': nextnumChatroom});
+        rootRef
+            .child('UserList/$myUid/Num_Chatroom')
+            .update({'next': nextnumPerUser});
+        //Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChatRoom(names[index], numbers[index])));
+      },
     );
   }
 }

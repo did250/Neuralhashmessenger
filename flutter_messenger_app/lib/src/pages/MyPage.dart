@@ -142,7 +142,7 @@ class _MyPageState extends State<MyPage> {
             ),
             //minimumSize: const Size.fromHeight(50),
           ),
-          child: Text('Change Password', style: TextStyle(fontSize: 20)),
+          child: Text('Change Password', style: TextStyle(fontSize: 16)),
           onPressed: () async {
             return await showDialog(
                 context: context,
@@ -184,7 +184,7 @@ class _MyPageState extends State<MyPage> {
             ),
             //minimumSize: const Size.fromHeight(50),
           ),
-          child: Text('Withdrawal', style: TextStyle(fontSize: 20)),
+          child: Text('Withdrawal', style: TextStyle(fontSize: 16)),
           onPressed: () async {
             return await showDialog(
                 context: context,
@@ -220,7 +220,7 @@ class _MyPageState extends State<MyPage> {
   Widget ButtonLine() {
     return Padding(padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ChangePasswordBtn(),

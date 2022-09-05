@@ -20,7 +20,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
   bool userNameChecked = false;
 
-  bool isSignupScreen = true;
+  bool isSignupScreen = false;
   final _formKey = GlobalKey<FormState>();
   String userName = '';
   String userEmail = '';

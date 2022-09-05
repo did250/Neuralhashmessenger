@@ -438,7 +438,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
                               DatabaseReference ref = FirebaseDatabase.instance
                                   .ref(
-                                      "UserList/" + loggedUser!.uid.toString());
+                                  "UserList/" + loggedUser!.uid.toString());
 
                               await ref.set({
                                 "Email": userEmail,
@@ -475,7 +475,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
                         try {
                           final newUser =
-                              await _authentication.signInWithEmailAndPassword(
+                          await _authentication.signInWithEmailAndPassword(
                             email: userEmail,
                             password: userPassword,
                           );
@@ -495,7 +495,7 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content:
-                                  Text('Please check your email and password'),
+                              Text('Please check your email and password'),
                               backgroundColor: Colors.blue,
                             ),
                           );
@@ -572,10 +572,8 @@ void main() async{
   Firebase.initializeApp();
   runApp(MyApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -583,10 +581,8 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
 class MyPage extends StatelessWidget {
   const MyPage({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -594,10 +590,8 @@ class MyPage extends StatelessWidget {
     );
   }
 }
-
 class Authentication extends StatelessWidget {
   const Authentication({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -619,19 +613,16 @@ class Authentication extends StatelessWidget {
 
 /*class Login extends StatelessWidget {
   const Login({Key? key}) : super(key: key);
-
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     final GoogleSignInAuthentication? googleAuth =
         await googleUser?.authentication;
-
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -16,7 +16,7 @@ class Home extends StatelessWidget {
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
             if (!snapshot.hasData) {
-              return LoginSignupScreen();
+              return LoginScreen();
             } else {
               return MainPage();
               /*return Center(

@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_messenger_app/src/pages/Home.dart';
 import 'package:flutter_messenger_app/src/pages/Signup.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -22,11 +23,32 @@ class _LoginScreenState extends State<LoginScreen> {
   String userEmail = '';
   String userPassword = '';
 
-  void _tryValidation() {
-    final isValid = formKey.currentState!.validate();
-    if (isValid) {
-      formKey.currentState!.save();
-    }
+  Future<UserCredential> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    final UserCredential authResult = await FirebaseAuth.instance.signInWithCredential(credential);
+
+    final String? uid = authResult.user?.uid;
+    final String? gmail = authResult.user?.email;
+    final String? displayName = authResult.user?.displayName;
+
+    DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + uid.toString());
+
+    await ref.set({
+      "Email": gmail,
+      "Name": displayName,
+      "Friend": "",
+      "Num_Chatroom": "",
+    });
+
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
   @override
@@ -211,32 +233,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-}
-
-Future<UserCredential> signInWithGoogle() async {
-  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-  final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-
-  // Create a new credential
-  final credential = GoogleAuthProvider.credential(
-    accessToken: googleAuth?.accessToken,
-    idToken: googleAuth?.idToken,
-  );
-
-  final UserCredential authResult = await FirebaseAuth.instance.signInWithCredential(credential);
-
-  final String? uid = authResult.user?.uid;
-  final String? gmail = authResult.user?.email;
-  final String? displayName = authResult.user?.displayName;
-
-  DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + uid.toString());
-
-  await ref.set({
-    "Email": gmail,
-    "Name": displayName,
-    "Friend": "",
-    "Num_Chatroom": "",
-  });
-
-  return await FirebaseAuth.instance.signInWithCredential(credential);
 }

@@ -13,12 +13,15 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          title: Text("firebase sns login"),
+        ),
         body: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
             if (!snapshot.hasData) { //new User
               return LoginScreen();
-            } else {
+            } else { //Login
               return MainPage();
               /*return Center(
                 child: Column(

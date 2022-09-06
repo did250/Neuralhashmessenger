@@ -4,6 +4,7 @@ import 'package:flutter_messenger_app/src/pages/Login.dart';
 import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
 import 'package:flutter_messenger_app/src/pages/SettingsTab.dart';
+import 'package:flutter_messenger_app/src/pages/Signup.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class Home extends StatelessWidget {
         body: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
-            if (!snapshot.hasData) {
+            if (!snapshot.hasData) { //new User
               return LoginScreen();
             } else {
               return MainPage();

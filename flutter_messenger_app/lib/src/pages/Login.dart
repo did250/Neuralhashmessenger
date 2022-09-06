@@ -215,11 +215,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
 Future<UserCredential> signInWithGoogle() async {
   final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-  final GoogleSignInAuthentication? googleAuth =
-  await googleUser?.authentication;
+  final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+  // Create a new credential
   final credential = GoogleAuthProvider.credential(
     accessToken: googleAuth?.accessToken,
     idToken: googleAuth?.idToken,
   );
+
+  final UserCredential authResult = await FirebaseAuth.instance.signInWithCredential(credential);
+
+  final String? uid = authResult.user?.uid;
+  final String? gmail = authResult.user?.email;
+  final String? displayName = authResult.user?.displayName;
+
+  DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + uid.toString());
+
+  await ref.set({
+    "Email": gmail,
+    "Name": displayName,
+    "Friend": "",
+    "Num_Chatroom": "",
+  });
+
   return await FirebaseAuth.instance.signInWithCredential(credential);
 }

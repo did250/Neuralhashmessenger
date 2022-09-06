@@ -217,6 +217,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     signInWithGoogle();
                     //Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
+                    Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => Home()),);
                   },
                   style: TextButton.styleFrom(
                       primary: Colors.white,

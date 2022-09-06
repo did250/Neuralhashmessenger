@@ -145,21 +145,35 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
                 if (snapshot.hasData) {
                   _message.clear();
                   _checked.clear();
+                  var noexist = true;
                   for (var item in (snapshot.data as DatabaseEvent).snapshot
                       .value as List<Object?>) {
                     bool mine = false;
                     Map<String, dynamic> map = Map<String, dynamic>.from(
                         item as Map<dynamic?, dynamic?>);
-                    if (map['sender'] == _name) {
-                      mine = true;
+                    if (map['sender'] != 'none' && map['text'] != 'none') {
+                      noexist = false;
                     }
-                    Messages mas = Messages(text: map['text'],
-                      animationController: AnimationController(
-                          duration: Duration(milliseconds: 0), vsync: this),
-                      ismine: mine,);
-                    _message.insert(0, mas);
-                    mas.animationController.forward();
-                    _checked.insert(0, map['checked']);
+                    if (!noexist) {
+                      if (map['sender'] == _name) {
+                        mine = true;
+                      }
+                      Messages mas = Messages(text: map['text'],
+                        animationController: AnimationController(
+                            duration: Duration(milliseconds: 0), vsync: this),
+                        ismine: mine,);
+                      _message.insert(0, mas);
+                      mas.animationController.forward();
+                      _checked.insert(0, map['checked']);
+                    }
+                  }
+                  if (noexist) {
+                    return Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                            child: Text("친구에게 메시지를 보내보세요.", style: TextStyle(fontSize: 20),)
+                        ),
+                     );
                   }
                   return Flexible(child: ListView.builder(
                     padding: const EdgeInsets.all(8.0),

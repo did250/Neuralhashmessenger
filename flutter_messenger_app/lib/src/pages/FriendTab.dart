@@ -33,8 +33,6 @@ class _FriendTabState extends State<FriendTab> {
       }
     }
 
-    print(myFriendList);
-
     setState(() {});
   }
 
@@ -116,6 +114,24 @@ class FriendTile extends StatelessWidget {
         /*새 채팅방*/
         final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
         final snapshot = await rootRef.child('ChattingRoom/next').get();
+        final myUid = FirebaseAuth.instance.currentUser?.uid;
+
+        //중복체크..
+
+        DatabaseReference ref = FirebaseDatabase.instance.ref();
+        Query query = ref
+            .child('UserList/$myUid/Num_Chatroom')
+            .orderByChild('with')
+            .equalTo(_friend.name);
+        DataSnapshot event = await query.get();
+
+        if (event.exists) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => ChatRoom(_friend.name,
+                  int.parse(event.children.elementAt(0).key.toString()))));
+          print("chatroom already exists");
+          return;
+        }
 
         int nextnumChatroom;
         if (snapshot.exists) {
@@ -123,7 +139,7 @@ class FriendTile extends StatelessWidget {
         } else {
           nextnumChatroom = 0;
         }
-        var myUid = FirebaseAuth.instance.currentUser?.uid;
+
         final snapshot2 = await rootRef.child('UserList/$myUid/Name').get();
         String myname = snapshot2.value.toString();
         rootRef.child('ChattingRoom').update({
@@ -147,6 +163,7 @@ class FriendTile extends StatelessWidget {
 
         rootRef.child('UserList/$myUid/Num_Chatroom').update({
           '$nextnumPerUser': {
+            'check': [myname],
             'number': nextnumChatroom,
             'with': _friend.name,
           }

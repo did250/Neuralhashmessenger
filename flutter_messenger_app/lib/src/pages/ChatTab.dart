@@ -19,6 +19,16 @@ class ChatTabState extends State<ChatTab> {
   List<String> messages = <String>[];
   List<bool> check = <bool>[];
 
+  List<String> temp_names = <String>[];
+  List<int> temp_numbers = <int>[];
+  List<bool> temp_check = <bool>[];
+
+  void clearall() {
+    names.clear();
+    numbers.clear();
+    check.clear();
+    room.clear();
+  }
   Future<void> Loaduser() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Name').get();
@@ -84,18 +94,54 @@ class ChatTabState extends State<ChatTab> {
                     else if (snapshot.data == null) {
                       return Text("no data");
                     }
+                    else if ((snapshot.data as DatabaseEvent).snapshot.value == null ) {
+                      print("here");
+                      numbers = temp_numbers;
+                      check = temp_check;
+                      names = temp_names;
+                      print(temp_names);
+                      print(names);
+                      return ListView.separated(
+                        padding: EdgeInsets.only(top: 15),
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemCount: names.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return GestureDetector(
+                            onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) =>
+                                    ChatRoom(names[index], numbers[index]))),
+                            child: Container(
+                              child: ListTile(
+                                dense: true,
+                                leading: CircleAvatar(child: Text(names[index][0])),
+                                title: Text(names[index], style: TextStyle(fontSize: 14),),
+                                subtitle: check[index] ? Text("") : Text("새로운 메시지가 있습니다.",style: TextStyle(fontSize: 12),),
+                                trailing: check[index] ? null : Icon(Icons.mark_email_unread, color: Colors.red,),
+                              ),
+                            ),
+                          );
+                        },
+                        separatorBuilder: (BuildContext context,
+                            int index) => const Divider(),
+                      );
+                    }
                     else if (snapshot.hasData && snapshot.data != null){
+                      print("sss");
                       names.clear();
                       numbers.clear();
                       check.clear();
                       room.clear();
                       for (var item in (snapshot.data as DatabaseEvent).snapshot.value as List<Object?>) {
-                        Map<String, dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+                        Map<String, dynamic> map = Map<String, dynamic>.from(item as Map<dynamic, dynamic>);
                         numbers.add(map["number"]);
                         names.add(map["with"]);
                         check.add(map["check"]?.contains(_name));
                         room.add(map);
                       }
+                      temp_check = check;
+                      temp_names = names;
+                      temp_numbers = numbers;
                       return ListView.separated(
                         padding: EdgeInsets.only(top: 15),
                         scrollDirection: Axis.vertical,

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 String _name = "";
 String _other = "";
+List<Map<String,dynamic>> rooms = [];
 
 class ChatRoom extends StatefulWidget {
   final String name;
@@ -15,7 +16,7 @@ class ChatRoom extends StatefulWidget {
 
 class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
 
-  final List<Map<String,dynamic>> room = [];
+
   List<Messages> _message = <Messages>[];
   List<int> _checked = <int>[];
   String friendname = "";
@@ -60,41 +61,43 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   Future<void> _roomcheck() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').get();
-    if (snapshot.exists){
-      room.clear();
+    if (snapshot.exists && snapshot.value != null){
+      print("cc");
+      rooms.clear();
       for ( var item in (snapshot.value as List<Object?>)) {
         Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
-        room.add(map);
+        rooms.add(map);
       }
     }
   }
 
   /// 읽음 표시 하는 함
   Future<void> _checking() async {
-    for (var item in room){
+    for (var item in rooms){
       if (item['number'] == this.number){
-        int i = room.indexOf(item);
-        if (!room[i]["check"].contains(_name)) {
-          room[i]["check"] = [_name];
+        int i = rooms.indexOf(item);
+        if (!rooms[i]["check"].contains(_name)) {
+          rooms[i]["check"] = [_name];
+          final DatabaseReference ref = FirebaseDatabase.instance.ref();
+          await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(rooms);
         }
+        break;
       }
     }
-    final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(room);
   }
 
   /// 메시지 보내면 현재 채팅방을 맨 위로
   Future<void> refreshmine() async {
-    for (var item in room){
+    for (var item in rooms){
       if (item['number'] == this.number){
-        int i = room.indexOf(item);
-        room.removeAt(i);
-        room.insert(0, item);
-        room[0]["check"] = [_name];
+        int i = rooms.indexOf(item);
+        rooms.removeAt(i);
+        rooms.insert(0, item);
+        rooms[0]["check"] = [_name];
       }
     }
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(room);
+    await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(rooms);
 
   }
 
@@ -260,6 +263,9 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     for (Messages message in _message){
       message.animationController.dispose();
     }
+    print("room = ?");
+    print(rooms);
+    print("--------");
     _checking();
     super.dispose();
   }

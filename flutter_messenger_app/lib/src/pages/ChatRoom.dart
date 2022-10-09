@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 
 String _name = "";
 String _other = "";
@@ -16,7 +20,10 @@ class ChatRoom extends StatefulWidget {
 
 class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
 
-
+  File? _image;
+  final picker = ImagePicker();
+  String imageString = "";
+  
   List<Messages> _message = <Messages>[];
   List<int> _checked = <int>[];
   String friendname = "";
@@ -25,6 +32,92 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   ChatRoomState(this.friendname, this.number);
   final TextEditingController _textController = TextEditingController();
   bool _exist = false;
+
+  Future uploadimage() async {
+    final uri = Uri.parse("http://10.0.2.2:5000/test");
+    var request = http.MultipartRequest('POST',uri);
+    request.fields['name'] = "test";
+    var pic = await http.MultipartFile.fromPath('images', _image!.path);
+    request.files.add(pic);
+    var streamdresponse = await request.send();
+    var response = await http.Response.fromStream(streamdresponse);
+    print(response.body);
+    if (response.body == "true") {
+      _showDialogT();
+    }
+    else if (response.body == "false") {
+      _showDialogF();
+    }
+  }
+
+  Future getImage(ImageSource imageSource) async {
+    final image = await picker.pickImage(source: imageSource);
+    setState(() {
+      _image = File(image!.path);
+    });
+
+    final imageBytes = await _image!.readAsBytes();
+    imageString = imageBytes.toString();
+    imageString += "123";
+    uploadimage();
+  }
+
+  // 검열 통과 못한 경우 => "true 일 때"
+  void _showDialogT() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("위험한 이미지입니다. 전송할 수 없습니다."),
+          // content: new Text("Alert Dialog body"),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("OK"),
+              onPressed: () {
+                imageString = "";
+                _image = null;
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 검열 통과한 경우 => "false 일 때"
+  void _showDialogF() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text("사진을 전송하시겠습니까?"),
+          // content: new Text("Alert Dialog body"),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("Yes"),
+              onPressed: () {
+                _handleSubmitted(imageString);
+                imageString = "";
+                _image = null;
+                Navigator.pop(context);
+              },
+            ),
+            new FlatButton(
+              child: new Text("No"),
+              onPressed: () {
+                _image = null;
+                imageString = "";
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   /// 사용자 이름 loading
   Future<void> Loaduser() async {
@@ -62,7 +155,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').get();
     if (snapshot.exists && snapshot.value != null){
-      print("cc");
+
       rooms.clear();
       for ( var item in (snapshot.value as List<Object?>)) {
         Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
@@ -210,6 +303,24 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
         margin: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Row(
           children: <Widget>[
+            // TextButton(
+            //   onPressed: null,
+            //   child: Text("+"),
+            // ),
+            FloatingActionButton(
+              child: Icon(Icons.wallpaper),
+              tooltip: 'pick Image',
+              onPressed: () {
+                getImage(ImageSource.gallery);
+              },
+            ),
+            FloatingActionButton(
+              child: Icon(Icons.add_a_photo),
+              tooltip: 'pick Image',
+              onPressed: () {
+                getImage(ImageSource.camera);
+              },
+            ),
             Flexible(
               child: TextField(
                 controller: _textController,
@@ -276,6 +387,8 @@ class Messages extends StatelessWidget {
   final String text;
   final AnimationController animationController;
   final bool ismine;
+
+
   Messages({required this.text, required this.animationController, required this.ismine});
 
   @override
@@ -297,17 +410,30 @@ class Messages extends StatelessWidget {
               child: CircleAvatar(child: Text(_other[0])) ,
             ),
             Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.2
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(3),
-                  border: Border.all(),
-                ),
-                alignment: ismine ? Alignment.centerRight : Alignment.centerLeft,
-                padding: const EdgeInsets.all(5.0),
-                child: Text(text, style: TextStyle(fontSize: 15.0))
+
+              child: ((){
+                if (text.endsWith("123")) {
+                  final st = text.substring(0, text.length-3);
+
+                  //--------------------------------------------------------------------------------------------------
+                  return Text("dd");
+                }
+                else {
+                  return Container(
+                      constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.2
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange,
+                        borderRadius: BorderRadius.circular(3),
+                        border: Border.all(),
+                      ),
+                      alignment: ismine ? Alignment.centerRight : Alignment.centerLeft,
+                      padding: const EdgeInsets.all(5.0),
+                      child: Text(text, style: TextStyle(fontSize: 15.0))
+                  );
+                }
+              })()
             ),
           ],
         ),

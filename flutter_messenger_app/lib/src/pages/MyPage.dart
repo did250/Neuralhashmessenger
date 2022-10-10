@@ -40,25 +40,6 @@ class _MyPageState extends State<MyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("MyPage"),
-        iconTheme: IconThemeData(color: Color(0xFF09126C)),
-        //backgroundColor: Color(0xFFB6C7D1),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.exit_to_app_sharp,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              authentication.signOut();
-              Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
-            },
-          )
-        ],
-      ),
-
       body: SingleChildScrollView(
         child: Form(
           key: this.formKey,

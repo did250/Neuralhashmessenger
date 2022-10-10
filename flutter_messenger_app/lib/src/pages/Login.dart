@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_messenger_app/src/pages/Imagetest.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_messenger_app/src/pages/Home.dart';
 import 'package:flutter_messenger_app/src/pages/Signup.dart';
@@ -23,6 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
   String userEmail = '';
   String userPassword = '';
 
+  /* Google Login */
+  /*
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
@@ -50,6 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
+  */
 
   @override
   Widget build(BuildContext context) {
@@ -213,6 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 16,),
 
+                /*
                 TextButton.icon(
                   onPressed: () {
                     signInWithGoogle();
@@ -227,6 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: Icon(Icons.add),
                     label: Text('Google'),
                   ),
+                  */
                 ],
               ),
             ),

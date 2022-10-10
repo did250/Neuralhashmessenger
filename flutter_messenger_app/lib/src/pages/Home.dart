@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_messenger_app/src/pages/Login.dart';
 import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
+import 'package:flutter_messenger_app/src/pages/MyPage.dart';
 import 'package:flutter_messenger_app/src/pages/SettingsTab.dart';
 import 'package:flutter_messenger_app/src/pages/Signup.dart';
 
@@ -46,6 +47,8 @@ class MainPage extends StatefulWidget {
 class _MainPage extends State<MainPage> {
   int _selectedIndex = 0;
 
+  final authentication = FirebaseAuth.instance;
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -58,7 +61,7 @@ class _MainPage extends State<MainPage> {
     } else if (_selectedIndex == 1) {
       return ChatTab();
     } else {
-      return SettingsTab();
+      return MyPage();
     }
   }
 
@@ -67,6 +70,19 @@ class _MainPage extends State<MainPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("MainPage"),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.exit_to_app_sharp,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              authentication.signOut();
+              Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
+            },
+          )
+        ],
       ),
       body: _getPageData(),
       bottomNavigationBar: BottomNavigationBar(
@@ -84,7 +100,7 @@ class _MainPage extends State<MainPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: 'Settings',
+            label: 'MyPage',
           ),
         ],
         currentIndex: _selectedIndex,

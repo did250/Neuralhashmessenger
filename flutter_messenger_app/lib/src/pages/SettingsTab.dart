@@ -54,9 +54,6 @@ class _SettingsTabState extends State<SettingsTab> {
               leading: Icon(Icons.settings),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) { return MyPage(); },),),
             ),
-            ListTile(
-              title: Text('example'),
-            ),
         ],
       ),
     );

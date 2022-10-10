@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -57,7 +58,8 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     });
 
     final imageBytes = await _image!.readAsBytes();
-    imageString = imageBytes.toString();
+    
+    imageString = base64Encode(imageBytes);
     imageString += "123";
     uploadimage();
   }
@@ -414,9 +416,19 @@ class Messages extends StatelessWidget {
               child: ((){
                 if (text.endsWith("123")) {
                   final st = text.substring(0, text.length-3);
+                  final Uint8List imageBytetest = base64Decode(st);
+
+                  return Container(
+                    height: MediaQuery.of(context).size.height*0.2,
+                    width: MediaQuery.of(context).size.width*0.2,
+                    child: Center(
+                      child: Image.memory(Uint8List.fromList(imageBytetest)),
+                    ),
+                  );
+
 
                   //--------------------------------------------------------------------------------------------------
-                  return Text("dd");
+
                 }
                 else {
                   return Container(

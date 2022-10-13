@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_messenger_app/src/pages/Home.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -23,10 +23,11 @@ class _SignupScreenState extends State<SignupScreen> {
   String userEmail = '';
   String userPassword = '';
 
+  CollectionReference CollectRef = FirebaseFirestore.instance.collection('users');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFECF3F9),
       body: SingleChildScrollView(
         child: Container(
           alignment: Alignment.center,
@@ -46,7 +47,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       letterSpacing: 1.0,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF09126C),
+                      color: Colors.black38,
                     ),
                   ),
                 ),
@@ -125,22 +126,22 @@ class _SignupScreenState extends State<SignupScreen> {
 
               SizedBox(height: 8,),
 
-              TextFormField(
-                obscureText: true,
-                key: ValueKey(3),
-                validator: (value) {
-                  if (value!.isEmpty || value.length < 6) {
-                    return 'Password must be at least 6 characters long.';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  userPassword = value!;
-                },
-                onChanged: (value) {
-                  userPassword = value;
-                },
-                decoration: InputDecoration(
+                TextFormField(
+                  obscureText: true,
+                  key: ValueKey(3),
+                  validator: (value) {
+                    if (value!.isEmpty || value.length < 6) {
+                      return 'Password must be at least 6 characters long.';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    userPassword = value!;
+                  },
+                  onChanged: (value) {
+                    userPassword = value;
+                  },
+                  decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.lock,
                       color: Color(0xFFB6C7D1),
@@ -157,84 +158,72 @@ class _SignupScreenState extends State<SignupScreen> {
                         fontSize: 14,
                         color: Color(0XFFA7BCC7)),
                     contentPadding: EdgeInsets.all(10)),
-              ),
+                ),
 
-              SizedBox(height: 8,),
+                SizedBox(height: 8,),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  //primary: Colors.orange,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(3.0)
-                  ),
-                  minimumSize: const Size.fromHeight(50),
-                  ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.white24,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(3.0)
+                    ),
+                    minimumSize: const Size.fromHeight(50),
+                    ),
 
-                  child: Text('Welcome', style: TextStyle(fontSize: 20)),
-                  onPressed: () async {
-                    if (formKey.currentState!.validate()) {
-                      formKey.currentState!.save();
+                    child: Text('Welcome', style: TextStyle(fontSize: 20)),
+                    onPressed: () async {
+                      if (formKey.currentState!.validate()) {
+                        formKey.currentState!.save();
 
-                      if (userNameChecked) {
-                        try {
-                          final newUser = await authentication
-                              .createUserWithEmailAndPassword(
-                            email: userEmail,
-                            password: userPassword,
-                          );
+                        if (userNameChecked) {
+                          try {
+                            final newUser = await authentication.createUserWithEmailAndPassword(
+                              email: userEmail,
+                              password: userPassword,
+                            );
 
-                          if (newUser.user != null) {
-                            //SIGNUP SUCCESS
-
-                            try {
-                              final user = authentication.currentUser;
-                              if (user != null) {
-                                loggedUser = user;
-                                //print(loggedUser!.email.toString());
+                            if (newUser.user != null) { //SIGNUP SUCCESS
+                              try {
+                                final user = authentication.currentUser;
+                                if (user != null) {
+                                  loggedUser = user;
+                                }
+                              } catch (e) {
+                                print(e);
                               }
-                            } catch (e) {
-                              print(e);
+
+                              DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + loggedUser!.uid.toString());
+
+                              await ref.set({
+                                "Email": userEmail,
+                                "Name": userName,
+                                "Friend": "",
+                                "Num_Chatroom": "",
+                                "Profile_img": "",
+                              });
+
+                              await CollectRef.add({'uid': loggedUser!.uid.toString(), 'Email': userEmail, 'Name': userName, 'Friend': ""});
+
+                              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                  return Home(); },
+                              ),);
                             }
-
-                            DatabaseReference ref = FirebaseDatabase.instance
-                                .ref(
-                                "UserList/" + loggedUser!.uid.toString());
-
-                            await ref.set({
-                              "Email": userEmail,
-                              "Name": userName,
-                              "Friend": "",
-                              "Num_Chatroom": "",
-                            });
-
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return Home();
-                                },
-                              ),
+                          } catch (e) {//SIGNUP FAILED
+                            print(e);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(
+                                  'Please check your email and password'),
+                                  backgroundColor: Colors.blue,),
                             );
                           }
-                        } catch (e) {
-                          //SIGNUP FAILED
-                          print(e);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  'Please check your email and password'),
-                              backgroundColor: Colors.blue,
-                            ),
-                          );
                         }
                       }
-                    }
-                  },
-              )
-            ],
+                    },
+                )
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

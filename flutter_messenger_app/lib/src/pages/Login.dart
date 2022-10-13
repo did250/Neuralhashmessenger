@@ -69,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: StreamBuilder(
+      body: StreamBuilder(
           stream: CollectRef.snapshots(),
           builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
             if (streamSnapshot.hasData) {
@@ -247,10 +247,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => Home()),);
                           },
                           style: TextButton.styleFrom(
-                            primary: Colors.white,
-                            minimumSize: Size(155, 40),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            backgroundColor: Color(0xFFDE4B39)),
+                              primary: Colors.white,
+                              minimumSize: Size(155, 40),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              backgroundColor: Color(0xFFDE4B39)),
                           icon: Icon(Icons.add),
                           label: Text('Google'),
                         ),

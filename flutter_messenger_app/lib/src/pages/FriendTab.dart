@@ -1,9 +1,13 @@
+import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'SearchFriendTab.dart';
 import 'ChatRoom.dart';
+import 'package:cryptography/cryptography.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class FriendTab extends StatefulWidget {
   @override
@@ -14,9 +18,98 @@ class _FriendTabState extends State<FriendTab> {
   final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
   List<Friend> myFriendList = [];
   final myUid = FirebaseAuth.instance.currentUser?.uid;
+  final storage = FlutterSecureStorage();
+  Uint8List tempbytes = Uint8List(10);
 
   void initState() {
     _getFriend();
+  }
+
+  Future<void> _firstTime() async {
+    final algorithmDF = X25519();
+    final myKeyPair = await algorithmDF.newKeyPair();
+    final myPublicKey = await myKeyPair.extractPublicKey();
+    final myPrivateKey = await myKeyPair.extractPrivateKeyBytes();
+    // secure storage에 private key 저장, firebase에 public key 저장
+    await storage.write(key: 'myPrivateKey', value: base64Encode(myPrivateKey));
+    rootRef
+        .child('UserList/$myUid')
+        .update({'PublicKey': base64Encode(myPublicKey.bytes)});
+  }
+
+  Future<void> _keyExchange() async {
+    final algorithmDF = X25519();
+    final myPrivateKey =
+        base64Decode((await storage.read(key: 'myPrivateKey'))!);
+    /* 임시 */
+    var friendUid = myUid;
+    final reomotePublicKeySnapshot =
+        await rootRef.child('UserList/$friendUid/PublicKey').get();
+    final myPublicKeySnapshot =
+        await rootRef.child('UserList/$myUid/PublicKey').get();
+    if (!reomotePublicKeySnapshot.exists || !myPublicKeySnapshot.exists) {
+      return;
+    }
+    final remotePublicKey = SimplePublicKey(
+        base64Decode(reomotePublicKeySnapshot.value.toString()),
+        type: KeyPairType.x25519);
+    final myPublicKey = SimplePublicKey(
+        base64Decode(myPublicKeySnapshot.value.toString()),
+        type: KeyPairType.x25519);
+
+    final myKeyPair = SimpleKeyPairData(myPrivateKey,
+        publicKey: myPublicKey, type: KeyPairType.x25519);
+
+    final sharedSecret = await algorithmDF.sharedSecretKey(
+      keyPair: myKeyPair,
+      remotePublicKey: remotePublicKey,
+    );
+    final sharedSecretKeyBytes = await sharedSecret.extractBytes();
+    print('sharedSecretKeyBytes : ' + sharedSecretKeyBytes.toString());
+    await storage.write(
+        key: '$friendUid', value: base64Encode(sharedSecretKeyBytes));
+  }
+
+  Future<void> _encryptTest() async {
+    var friendUid = myUid; //임시 제거필요
+    /*****암호화 통신***** */
+    // Choose the cipher
+    final message = utf8.encode('Hello encryption!');
+    final algorithmAes = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
+    final testkey = algorithmAes.newSecretKey();
+
+    final storageData = await storage.read(key: friendUid!);
+
+    final SecretKey secretKey;
+    if (storageData == null) {
+      secretKey = await algorithmAes.newSecretKey();
+    } else {
+      secretKey = SecretKey(base64Decode(storageData)); //채팅방 번호로?
+
+    }
+
+    /******** Encrypt **********/
+    final secretBox = await algorithmAes.encrypt(
+      message,
+      secretKey: secretKey,
+    );
+
+    print('Nonce: ${secretBox.nonce}');
+    print('Ciphertext: ${secretBox.cipherText}');
+    print('MAC: ${secretBox.mac.bytes}');
+
+    /******** Decrypt **********/
+
+    final remoteSecretBox = SecretBox(secretBox.cipherText,
+        nonce: secretBox.nonce, mac: secretBox.mac);
+    final clearText = await algorithmAes.decrypt(
+      remoteSecretBox,
+      secretKey: secretKey,
+    );
+
+    remoteSecretBox.toString();
+    print('Cleartext: ${utf8.decode(clearText)}');
+    print(remoteSecretBox.toString());
   }
 
   Future<void> _getFriend() async {

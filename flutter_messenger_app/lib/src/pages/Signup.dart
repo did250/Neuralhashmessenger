@@ -31,18 +31,19 @@ class _SignupScreenState extends State<SignupScreen> {
 
   final storage = FlutterSecureStorage();
   final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
-  final myUid = FirebaseAuth.instance.currentUser?.uid;
+  late final myPublicKey;
+  //final myUid = FirebaseAuth.instance.currentUser?.uid;
 
   Future<void> _firstTime() async {
     final algorithmDF = X25519();
     final myKeyPair = await algorithmDF.newKeyPair();
-    final myPublicKey = await myKeyPair.extractPublicKey();
+    myPublicKey = await myKeyPair.extractPublicKey();
     final myPrivateKey = await myKeyPair.extractPrivateKeyBytes();
     // secure storage에 private key 저장, firebase에 public key 저장
     await storage.write(key: 'myPrivateKey', value: base64Encode(myPrivateKey));
-    rootRef
+    /*rootRef
         .child('UserList/$myUid')
-        .update({'PublicKey': base64Encode(myPublicKey.bytes)});
+        .update({'PublicKey': base64Encode(myPublicKey.bytes)});*/
   }
 
   @override
@@ -54,7 +55,7 @@ class _SignupScreenState extends State<SignupScreen> {
           margin: EdgeInsets.only(top: 200),
           padding: EdgeInsets.all(30),
           child: Form(
-          key: formKey,
+            key: formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -89,62 +90,62 @@ class _SignupScreenState extends State<SignupScreen> {
                     userName = value;
                   },
                   decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.account_circle,
-                      color: Color(0xFFB6C7D1),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0XFFA7BCC7)),
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
+                      prefixIcon: Icon(
+                        Icons.account_circle,
+                        color: Color(0xFFB6C7D1),
                       ),
-                    ),
-                    hintText: 'User name',
-                    hintStyle: TextStyle(
-                        fontSize: 14,
-                        color: Color(0XFFA7BCC7)),
-                    contentPadding: EdgeInsets.all(10)),
-              ),
-
-              SizedBox(height: 8,),
-
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                key: ValueKey(2),
-                validator: (value) {
-                  if (value!.isEmpty ||
-                      !value.contains('@')) {
-                    return 'Please enter a valid email address.';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  userEmail = value!;
-                },
-                onChanged: (value) {
-                  userEmail = value;
-                },
-                decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.email,
-                      color: Color(0xFFB6C7D1),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0XFFA7BCC7)),
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Color(0XFFA7BCC7)),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(20.0),
+                        ),
                       ),
-                    ),
-                    hintText: 'email',
-                    hintStyle: TextStyle(
-                        fontSize: 14,
-                        color: Color(0XFFA7BCC7)),
-                    contentPadding: EdgeInsets.all(10)),
-              ),
+                      hintText: 'User name',
+                      hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: Color(0XFFA7BCC7)),
+                      contentPadding: EdgeInsets.all(10)),
+                ),
 
-              SizedBox(height: 8,),
+                SizedBox(height: 8,),
+
+                TextFormField(
+                  keyboardType: TextInputType.emailAddress,
+                  key: ValueKey(2),
+                  validator: (value) {
+                    if (value!.isEmpty ||
+                        !value.contains('@')) {
+                      return 'Please enter a valid email address.';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    userEmail = value!;
+                  },
+                  onChanged: (value) {
+                    userEmail = value;
+                  },
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.email,
+                        color: Color(0xFFB6C7D1),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Color(0XFFA7BCC7)),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(20.0),
+                        ),
+                      ),
+                      hintText: 'email',
+                      hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: Color(0XFFA7BCC7)),
+                      contentPadding: EdgeInsets.all(10)),
+                ),
+
+                SizedBox(height: 8,),
 
                 TextFormField(
                   obscureText: true,
@@ -162,22 +163,22 @@ class _SignupScreenState extends State<SignupScreen> {
                     userPassword = value;
                   },
                   decoration: InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.lock,
-                      color: Color(0xFFB6C7D1),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0XFFA7BCC7)),
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
+                      prefixIcon: Icon(
+                        Icons.lock,
+                        color: Color(0xFFB6C7D1),
                       ),
-                    ),
-                    hintText: 'password',
-                    hintStyle: TextStyle(
-                        fontSize: 14,
-                        color: Color(0XFFA7BCC7)),
-                    contentPadding: EdgeInsets.all(10)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Color(0XFFA7BCC7)),
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(20.0),
+                        ),
+                      ),
+                      hintText: 'password',
+                      hintStyle: TextStyle(
+                          fontSize: 14,
+                          color: Color(0XFFA7BCC7)),
+                      contentPadding: EdgeInsets.all(10)),
                 ),
 
                 SizedBox(height: 8,),
@@ -189,58 +190,59 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(3.0)
                     ),
                     minimumSize: const Size.fromHeight(50),
-                    ),
+                  ),
 
-                    child: Text('Welcome', style: TextStyle(fontSize: 20)),
-                    onPressed: () async {
-                      if (formKey.currentState!.validate()) {
-                        formKey.currentState!.save();
+                  child: Text('Welcome', style: TextStyle(fontSize: 20)),
+                  onPressed: () async {
+                    if (formKey.currentState!.validate()) {
+                      formKey.currentState!.save();
 
-                        if (userNameChecked) {
-                          try {
-                            final newUser = await authentication.createUserWithEmailAndPassword(
-                              email: userEmail,
-                              password: userPassword,
-                            );
+                      if (userNameChecked) {
+                        try {
+                          final newUser = await authentication.createUserWithEmailAndPassword(
+                            email: userEmail,
+                            password: userPassword,
+                          );
 
-                            if (newUser.user != null) { //SIGNUP SUCCESS
-                              try {
-                                final user = authentication.currentUser;
-                                if (user != null) {
-                                  loggedUser = user;
-                                }
-                              } catch (e) {
-                                print(e);
+                          if (newUser.user != null) { //SIGNUP SUCCESS
+                            try {
+                              final user = authentication.currentUser;
+                              if (user != null) {
+                                loggedUser = user;
                               }
-
-                              DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + loggedUser!.uid.toString());
-
-                              await ref.set({
-                                "Email": userEmail,
-                                "Name": userName,
-                                "Friend": "",
-                                "Num_Chatroom": "",
-                                "Profile_img": "",
-                              });
-
-                              await CollectRef.add({'uid': loggedUser!.uid.toString(), 'Email': userEmail, 'Name': userName, 'Friend': ""});
-
-                              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                                  return Home(); },
-                              ),);
-
-                              _firstTime();
+                            } catch (e) {
+                              print(e);
                             }
-                          } catch (e) {//SIGNUP FAILED
-                            print(e);
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(
-                                  'Please check your email and password'),
-                                  backgroundColor: Colors.blue,),
-                            );
+
+                            DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + loggedUser!.uid.toString());
+
+                            _firstTime();
+
+                            await ref.set({
+                              "Email": userEmail,
+                              "Name": userName,
+                              "Friend": "",
+                              "Num_Chatroom": "",
+                              "Profile_img": "",
+                              "PublicKey": base64Encode(myPublicKey.bytes),
+                            });
+
+                            await CollectRef.add({'uid': loggedUser!.uid.toString(), 'Email': userEmail, 'Name': userName, 'Friend': ""});
+
+                            Navigator.push(context, MaterialPageRoute(builder: (context) {
+                              return Home(); },
+                            ),);
                           }
+                        } catch (e) {//SIGNUP FAILED
+                          print(e);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(
+                              'Please check your email and password'),
+                            backgroundColor: Colors.blue,),
+                          );
                         }
                       }
-                    },
+                    }
+                  },
                 )
               ],
             ),

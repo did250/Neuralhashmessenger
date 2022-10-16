@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_messenger_app/src/pages/Home.dart';
 import 'package:flutter_messenger_app/src/pages/Signup.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -26,15 +26,54 @@ class _LoginScreenState extends State<LoginScreen> {
 
   List<String> UidList = [];
 
-  CollectionReference CollectRef =
-      FirebaseFirestore.instance.collection('users');
+  CollectionReference CollectRef = FirebaseFirestore.instance.collection('users');
+  late SharedPreferences pref;
 
-  void initState() {}
+  void initState() {
+    super.initState();
+    load_prefData();
+  }
+
+  void set_prefData(String prefID, String prefPwd) async {
+    pref = await SharedPreferences.getInstance();
+    pref.setString('EmailId', prefID);
+    pref.setString('Password', prefPwd);
+  }
+
+  void load_prefData() async {
+    pref = await SharedPreferences.getInstance();
+    setState(() async {
+      userEmail = (pref.getString('EmailId') ?? '');
+      userPassword = (pref.getString('Password') ?? '');
+      print("userEmail and userPwd is " + pref.getString('EmailId').toString() +
+          " " + pref.getString('Password').toString());
+
+      try {
+        final newUser =
+        await authentication.signInWithEmailAndPassword(
+          email: userEmail,
+          password: userPassword,
+        );
+
+        if (newUser.user != null) {
+          set_prefData(userEmail, userPassword);
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return Home();
+            },),);
+        }
+      } catch (e) {
+        //LOGIN FAILED
+        print(e);
+      }
+    });
+  }
 
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
+    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
@@ -42,17 +81,14 @@ class _LoginScreenState extends State<LoginScreen> {
       idToken: googleAuth?.idToken,
     );
 
-    final UserCredential authResult =
-        await FirebaseAuth.instance.signInWithCredential(credential);
+    final UserCredential authResult = await FirebaseAuth.instance.signInWithCredential(credential);
 
     final String? uid = authResult.user?.uid;
     final String? gmail = authResult.user?.email;
     final String? displayName = authResult.user?.displayName;
 
-    if (UidList.contains(uid) == false) {
-      //new member
-      DatabaseReference ref =
-          FirebaseDatabase.instance.ref("UserList/" + uid.toString());
+    if (UidList.contains(uid) == false) { //new member
+      DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + uid.toString());
 
       await ref.set({
         "Email": gmail,
@@ -62,8 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
         "Profile_img": "",
       });
 
-      await CollectRef.add(
-          {'uid': uid, 'Email': gmail, 'Name': displayName, 'Friend': ""});
+      await CollectRef.add({'uid': uid, 'Email': gmail, 'Name': displayName, 'Friend': ""});
     }
 
     return await FirebaseAuth.instance.signInWithCredential(credential);
@@ -74,14 +109,12 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: StreamBuilder(
           stream: CollectRef.snapshots(),
-          builder: (BuildContext context,
-              AsyncSnapshot<QuerySnapshot> streamSnapshot) {
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
             if (streamSnapshot.hasData) {
               UidList = [];
               int count = streamSnapshot.data!.docs.length;
               for (int i = 0; i < count; i++) {
-                final DocumentSnapshot documentSnapshot =
-                    streamSnapshot.data!.docs[i];
+                final DocumentSnapshot documentSnapshot = streamSnapshot.data!.docs[i];
                 UidList.add(documentSnapshot['uid']);
               }
               return SingleChildScrollView(
@@ -98,8 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 50,
                           width: 400,
                           alignment: Alignment.topCenter,
-                          child: Text(
-                            "LOGIN",
+                          child: Text("LOGIN",
                             style: TextStyle(
                               letterSpacing: 1.0,
                               fontSize: 24,
@@ -108,10 +140,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
+
                         TextFormField(
                           key: ValueKey(4),
                           validator: (value) {
-                            if (value!.isEmpty || !value.contains('@')) {
+                            if (value!.isEmpty ||
+                                !value.contains('@')) {
                               return 'Please enter a valid email address.';
                             }
                             return null;
@@ -128,20 +162,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Color(0xFFB6C7D1),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Color(0XFFA7BCC7)),
+                                borderSide: BorderSide(
+                                    color: Color(0XFFA7BCC7)),
                                 borderRadius: BorderRadius.all(
                                   Radius.circular(20.0),
                                 ),
                               ),
                               hintText: 'email',
                               hintStyle: TextStyle(
-                                  fontSize: 14, color: Color(0XFFA7BCC7)),
+                                  fontSize: 14,
+                                  color: Color(0XFFA7BCC7)),
                               contentPadding: EdgeInsets.all(10)),
                         ),
-                        SizedBox(
-                          height: 8,
-                        ),
+
+                        SizedBox(height: 8,),
+
                         TextFormField(
                           obscureText: true,
                           key: ValueKey(5),
@@ -163,25 +198,27 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Color(0xFFB6C7D1),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Color(0XFFA7BCC7)),
+                                borderSide: BorderSide(
+                                    color: Color(0XFFA7BCC7)),
                                 borderRadius: BorderRadius.all(
                                   Radius.circular(20.0),
                                 ),
                               ),
                               hintText: 'password',
                               hintStyle: TextStyle(
-                                  fontSize: 14, color: Color(0XFFA7BCC7)),
+                                  fontSize: 14,
+                                  color: Color(0XFFA7BCC7)),
                               contentPadding: EdgeInsets.all(10)),
                         ),
-                        SizedBox(
-                          height: 8,
-                        ),
+
+                        SizedBox(height: 8,),
+
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             primary: Colors.white24,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(3.0)),
+                                borderRadius: BorderRadius.circular(3.0)
+                            ),
                             minimumSize: const Size.fromHeight(50),
                           ),
                           child: Text('Login', style: TextStyle(fontSize: 20)),
@@ -190,39 +227,37 @@ class _LoginScreenState extends State<LoginScreen> {
                               formKey.currentState!.save();
 
                               try {
-                                final newUser = await authentication
-                                    .signInWithEmailAndPassword(
+                                final newUser =
+                                await authentication.signInWithEmailAndPassword(
                                   email: userEmail,
                                   password: userPassword,
                                 );
 
                                 if (newUser.user != null) {
+
+                                  set_prefData(userEmail, userPassword);
+
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return Home();
-                                      },
-                                    ),
-                                  );
+                                    MaterialPageRoute(builder: (context) {
+                                      return Home();
+                                    },),);
                                 }
                               } catch (e) {
                                 //LOGIN FAILED
                                 print(e);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        'Please check your email and password'),
-                                    backgroundColor: Colors.blue,
-                                  ),
+                                  SnackBar(content: Text(
+                                      'Please check your email and password'),
+                                    backgroundColor: Colors.blue,),
                                 );
                               }
                             }
                           },
                         ),
-                        SizedBox(
-                          height: 16,
-                        ),
+
+                        SizedBox(height: 16,),
+
                         Center(
                           child: InkWell(
                             child: Text(
@@ -236,44 +271,42 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SignupScreen()),
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) => SignupScreen()),
                               );
                             },
                           ),
                         ),
-                        SizedBox(
-                          height: 16,
-                        ),
+
+                        SizedBox(height: 16,),
+
+
                         TextButton.icon(
                           onPressed: () {
                             signInWithGoogle();
                             //Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Home()),
-                            );
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => Home()),);
                           },
                           style: TextButton.styleFrom(
                               primary: Colors.white,
                               minimumSize: Size(155, 40),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                               backgroundColor: Color(0xFFDE4B39)),
                           icon: Icon(Icons.add),
                           label: Text('Google'),
                         ),
+
                       ],
                     ),
                   ),
                 ),
               );
-            } else {
+            }
+            else {
               return Center(child: CircularProgressIndicator());
             }
-          }),
+          }
+      ),
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
 import 'package:flutter_messenger_app/src/pages/MyPage.dart';
 import 'package:flutter_messenger_app/src/pages/SettingsTab.dart';
 import 'package:flutter_messenger_app/src/pages/Signup.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
@@ -76,8 +77,12 @@ class _MainPage extends State<MainPage> {
               Icons.exit_to_app_sharp,
               color: Colors.white,
             ),
-            onPressed: () {
+            onPressed: () async {
               authentication.signOut();
+
+              SharedPreferences pref = await SharedPreferences.getInstance();
+              pref.clear();
+
               Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
               Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
             },

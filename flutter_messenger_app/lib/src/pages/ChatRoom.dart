@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 
 String _name = "";
 String _other = "";
-List<Map<String,dynamic>> rooms = [];
+List<Map<String, dynamic>> rooms = [];
 
 class ChatRoom extends StatefulWidget {
   final String name;
@@ -19,12 +19,11 @@ class ChatRoom extends StatefulWidget {
   ChatRoomState createState() => ChatRoomState(this.name, this.number);
 }
 
-class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
-
+class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   File? _image;
   final picker = ImagePicker();
   String imageString = "";
-  
+
   List<Messages> _message = <Messages>[];
   List<int> _checked = <int>[];
   String friendname = "";
@@ -36,7 +35,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
 
   Future uploadimage() async {
     final uri = Uri.parse("http://10.0.2.2:5000/test");
-    var request = http.MultipartRequest('POST',uri);
+    var request = http.MultipartRequest('POST', uri);
     request.fields['name'] = "test";
     var pic = await http.MultipartFile.fromPath('images', _image!.path);
     request.files.add(pic);
@@ -45,8 +44,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     print(response.body);
     if (response.body == "true") {
       _showDialogT();
-    }
-    else if (response.body == "false") {
+    } else if (response.body == "false") {
       _showDialogF();
     }
   }
@@ -58,7 +56,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     });
 
     final imageBytes = await _image!.readAsBytes();
-    
+
     imageString = base64Encode(imageBytes);
     imageString += "123";
     uploadimage();
@@ -124,8 +122,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   /// 사용자 이름 loading
   Future<void> Loaduser() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Name').get();
-    if ( snapshot.exists ) {
+    final snapshot = await ref
+        .child('UserList')
+        .child(FirebaseAuth.instance.currentUser!.uid.toString())
+        .child('Name')
+        .get();
+    if (snapshot.exists) {
       setState(() {
         _name = snapshot.value.toString();
       });
@@ -135,7 +137,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   /// 메세지 하나 보낼 때, 서버에 갱신하는 함수
   Future<void> updatemessage(String input) async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    await ref.child('ChattingRoom').child(this.number.toString()).child('Messages').child((_message.length).toString()).set({
+    await ref
+        .child('ChattingRoom')
+        .child(this.number.toString())
+        .child('Messages')
+        .child((_message.length).toString())
+        .set({
       "checked": 1,
       "sender": _name,
       "text": input,
@@ -145,7 +152,8 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   /// 친구 uid 찾기
   Future<void> _searchFriend() async {
     DatabaseReference ref = FirebaseDatabase.instance.ref();
-    Query query = ref.child('UserList').orderByChild('Name').equalTo(this.friendname);
+    Query query =
+        ref.child('UserList').orderByChild('Name').equalTo(this.friendname);
     DataSnapshot event = await query.get();
     setState(() {
       this.frienduid = event.children.elementAt(0).key ?? "error";
@@ -155,12 +163,16 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   /// 채팅방 목록 불러오기
   Future<void> _roomcheck() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    final snapshot = await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').get();
-    if (snapshot.exists && snapshot.value != null){
-
+    final snapshot = await ref
+        .child('UserList')
+        .child(FirebaseAuth.instance.currentUser!.uid.toString())
+        .child('Num_Chatroom')
+        .get();
+    if (snapshot.exists && snapshot.value != null) {
       rooms.clear();
-      for ( var item in (snapshot.value as List<Object?>)) {
-        Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+      for (var item in (snapshot.value as List<Object?>)) {
+        Map<String, dynamic> map =
+            Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
         rooms.add(map);
       }
     }
@@ -168,13 +180,17 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
 
   /// 읽음 표시 하는 함
   Future<void> _checking() async {
-    for (var item in rooms){
-      if (item['number'] == this.number){
+    for (var item in rooms) {
+      if (item['number'] == this.number) {
         int i = rooms.indexOf(item);
         if (!rooms[i]["check"].contains(_name)) {
           rooms[i]["check"] = [_name];
           final DatabaseReference ref = FirebaseDatabase.instance.ref();
-          await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(rooms);
+          await ref
+              .child('UserList')
+              .child(FirebaseAuth.instance.currentUser!.uid.toString())
+              .child('Num_Chatroom')
+              .set(rooms);
         }
         break;
       }
@@ -183,8 +199,8 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
 
   /// 메시지 보내면 현재 채팅방을 맨 위로
   Future<void> refreshmine() async {
-    for (var item in rooms){
-      if (item['number'] == this.number){
+    for (var item in rooms) {
+      if (item['number'] == this.number) {
         int i = rooms.indexOf(item);
         rooms.removeAt(i);
         rooms.insert(0, item);
@@ -192,31 +208,33 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
       }
     }
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    await ref.child('UserList').child(FirebaseAuth.instance.currentUser!.uid.toString()).child('Num_Chatroom').set(rooms);
-
+    await ref
+        .child('UserList')
+        .child(FirebaseAuth.instance.currentUser!.uid.toString())
+        .child('Num_Chatroom')
+        .set(rooms);
   }
 
   /// 메시지 보내면 친구의 채팅 목록에서 현재 채팅방을 맨 위로
   Future<void> refresh(String target) async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    List<Map<String,dynamic>> map2 = [];
-    final snapshot = await ref.child('UserList').child(target).child('Num_Chatroom').get();
-    if ( snapshot.exists ){
-      for ( var item in (snapshot.value as List<Object?>)) {
-        Map<String,dynamic> map = Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+    List<Map<String, dynamic>> map2 = [];
+    final snapshot =
+        await ref.child('UserList').child(target).child('Num_Chatroom').get();
+    if (snapshot.exists) {
+      for (var item in (snapshot.value as List<Object?>)) {
+        Map<String, dynamic> map =
+            Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
         if (map["number"] != this.number) {
           map2.add(map);
-        }
-        else {
+        } else {
           map2.insert(0, map);
           map2[0]["check"] = [_name];
         }
       }
     }
-   await ref.child('UserList').child(target).child('Num_Chatroom').set(map2);
-
+    await ref.child('UserList').child(target).child('Num_Chatroom').set(map2);
   }
-
 
   @override
   void initState() {
@@ -231,61 +249,69 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: Text(widget.name)
-      ),
+      appBar: AppBar(title: Text(widget.name)),
       body: Container(
         child: Column(
           children: <Widget>[
             StreamBuilder(
-              stream: FirebaseDatabase.instance.ref().child("ChattingRoom").child(this.number.toString()).child('Messages').onValue,
-              builder: (BuildContext context, snapshot) {
-                if (snapshot.hasData) {
-                  _message.clear();
-                  _checked.clear();
-                  var noexist = true;
-                  for (var item in (snapshot.data as DatabaseEvent).snapshot
-                      .value as List<Object?>) {
-                    bool mine = false;
-                    Map<String, dynamic> map = Map<String, dynamic>.from(
-                        item as Map<dynamic?, dynamic?>);
-                    if (map['sender'] != 'none' && map['text'] != 'none') {
-                      noexist = false;
-                    }
-                    if (!noexist) {
-                      if (map['sender'] == _name) {
-                        mine = true;
+                //수정할곳 end to end
+                stream: FirebaseDatabase.instance
+                    .ref()
+                    .child("ChattingRoom")
+                    .child(this.number.toString())
+                    .child('Messages')
+                    .onValue,
+                builder: (BuildContext context, snapshot) {
+                  if (snapshot.hasData) {
+                    _message.clear();
+                    _checked.clear();
+                    var noexist = true;
+                    for (var item in (snapshot.data as DatabaseEvent)
+                        .snapshot
+                        .value as List<Object?>) {
+                      bool mine = false;
+                      Map<String, dynamic> map = Map<String, dynamic>.from(
+                          item as Map<dynamic?, dynamic?>);
+                      if (map['sender'] != 'none' && map['text'] != 'none') {
+                        noexist = false;
                       }
-                      Messages mas = Messages(text: map['text'],
-                        animationController: AnimationController(
-                            duration: Duration(milliseconds: 0), vsync: this),
-                        ismine: mine,);
-                      _message.insert(0, mas);
-                      mas.animationController.forward();
-                      _checked.insert(0, map['checked']);
+                      if (!noexist) {
+                        if (map['sender'] == _name) {
+                          mine = true;
+                        }
+                        Messages mas = Messages(
+                          text: map['text'],
+                          animationController: AnimationController(
+                              duration: Duration(milliseconds: 0), vsync: this),
+                          ismine: mine,
+                        );
+                        _message.insert(0, mas);
+                        mas.animationController.forward();
+                        _checked.insert(0, map['checked']);
+                      }
                     }
-                  }
-                  if (noexist) {
-                    return Expanded(
+                    if (noexist) {
+                      return Expanded(
                         child: Container(
-                          alignment: Alignment.center,
-                            child: Text("친구에게 메시지를 보내보세요.", style: TextStyle(fontSize: 20),)
-                        ),
-                     );
+                            alignment: Alignment.center,
+                            child: Text(
+                              "친구에게 메시지를 보내보세요.",
+                              style: TextStyle(fontSize: 20),
+                            )),
+                      );
+                    }
+                    return Flexible(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(8.0),
+                        reverse: true,
+                        itemCount: _message.length,
+                        itemBuilder: (_, index) => _message[index],
+                      ),
+                    );
+                  } else {
+                    return Container();
                   }
-                  return Flexible(child: ListView.builder(
-                    padding: const EdgeInsets.all(8.0),
-                    reverse: true,
-                    itemCount: _message.length,
-                    itemBuilder: (_, index) => _message[index],
-                  ),
-                  );
-                }
-                else {
-                  return Container();
-                }
-              }
-            ),
+                }),
             Divider(height: 1.0),
             Container(
               decoration: BoxDecoration(
@@ -298,7 +324,8 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
       ),
     );
   }
-  Widget _buildTextComposer(){
+
+  Widget _buildTextComposer() {
     return IconTheme(
       data: IconThemeData(color: Theme.of(context).accentColor),
       child: Container(
@@ -326,20 +353,23 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
             Flexible(
               child: TextField(
                 controller: _textController,
-                onChanged: (text){
+                onChanged: (text) {
                   setState(() {
                     _exist = text.length > 0;
                   });
                 },
                 onSubmitted: _exist ? _handleSubmitted : null,
-                decoration: InputDecoration.collapsed(hintText: "Send a message"),
+                decoration:
+                    InputDecoration.collapsed(hintText: "Send a message"),
               ),
             ),
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 4.0),
               child: CupertinoButton(
                 child: Text("보내기"),
-                onPressed: _exist ? () => _handleSubmitted(_textController.text) :null,
+                onPressed: _exist
+                    ? () => _handleSubmitted(_textController.text)
+                    : null,
               ),
             ),
           ],
@@ -348,6 +378,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     );
   }
 
+  //수정할곳 end to end
   void _handleSubmitted(String text) {
     _textController.clear();
     setState(() {
@@ -363,7 +394,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
       ismine: true,
     );
     setState(() {
-      _message.insert(0,message);
+      _message.insert(0, message);
     });
     _roomcheck();
     refresh(this.frienduid);
@@ -373,7 +404,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
 
   @override
   void dispose() {
-    for (Messages message in _message){
+    for (Messages message in _message) {
       message.animationController.dispose();
     }
     print("room = ?");
@@ -382,7 +413,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin{
     _checking();
     super.dispose();
   }
-
 }
 
 class Messages extends StatelessWidget {
@@ -390,63 +420,64 @@ class Messages extends StatelessWidget {
   final AnimationController animationController;
   final bool ismine;
 
-
-  Messages({required this.text, required this.animationController, required this.ismine});
+  Messages(
+      {required this.text,
+      required this.animationController,
+      required this.ismine});
 
   @override
   Widget build(BuildContext context) {
     return SizeTransition(
       sizeFactor:
-      CurvedAnimation(parent: animationController, curve: Curves.easeOut),
+          CurvedAnimation(parent: animationController, curve: Curves.easeOut),
       axisAlignment: 0.0,
       child: Container(
-        margin: ismine? const EdgeInsets.only(top: 10, bottom: 10, left: 150.0) : const EdgeInsets.only(top: 10, bottom: 10, left: 0, right: 130.0),
+        margin: ismine
+            ? const EdgeInsets.only(top: 10, bottom: 10, left: 150.0)
+            : const EdgeInsets.only(top: 10, bottom: 10, left: 0, right: 130.0),
         child: Row(
-          mainAxisAlignment: ismine ? MainAxisAlignment.end : MainAxisAlignment.start,
+          mainAxisAlignment:
+              ismine ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            ismine ? Container(
-              margin: const EdgeInsets.only(right: 10.0),
-            ) : Container(
-              margin: const EdgeInsets.only(right: 10.0),
-              child: CircleAvatar(child: Text(_other[0])) ,
-            ),
-            Container(
+            ismine
+                ? Container(
+                    margin: const EdgeInsets.only(right: 10.0),
+                  )
+                : Container(
+                    margin: const EdgeInsets.only(right: 10.0),
+                    child: CircleAvatar(child: Text(_other[0])),
+                  ),
+            Container(child: (() {
+              if (text.endsWith("123")) {
+                final st = text.substring(0, text.length - 3);
+                final Uint8List imageBytetest = base64Decode(st);
 
-              child: ((){
-                if (text.endsWith("123")) {
-                  final st = text.substring(0, text.length-3);
-                  final Uint8List imageBytetest = base64Decode(st);
+                return Container(
+                  height: MediaQuery.of(context).size.height * 0.2,
+                  width: MediaQuery.of(context).size.width * 0.2,
+                  child: Center(
+                    child: Image.memory(Uint8List.fromList(imageBytetest)),
+                  ),
+                );
 
-                  return Container(
-                    height: MediaQuery.of(context).size.height*0.2,
-                    width: MediaQuery.of(context).size.width*0.2,
-                    child: Center(
-                      child: Image.memory(Uint8List.fromList(imageBytetest)),
+                //--------------------------------------------------------------------------------------------------
+
+              } else {
+                return Container(
+                    constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.2),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(3),
+                      border: Border.all(),
                     ),
-                  );
-
-
-                  //--------------------------------------------------------------------------------------------------
-
-                }
-                else {
-                  return Container(
-                      constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.2
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(3),
-                        border: Border.all(),
-                      ),
-                      alignment: ismine ? Alignment.centerRight : Alignment.centerLeft,
-                      padding: const EdgeInsets.all(5.0),
-                      child: Text(text, style: TextStyle(fontSize: 15.0))
-                  );
-                }
-              })()
-            ),
+                    alignment:
+                        ismine ? Alignment.centerRight : Alignment.centerLeft,
+                    padding: const EdgeInsets.all(5.0),
+                    child: Text(text, style: TextStyle(fontSize: 15.0)));
+              }
+            })()),
           ],
         ),
       ),

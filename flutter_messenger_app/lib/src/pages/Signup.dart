@@ -1,8 +1,12 @@
+import 'dart:convert';
+
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_messenger_app/src/pages/Home.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -24,6 +28,22 @@ class _SignupScreenState extends State<SignupScreen> {
   String userPassword = '';
 
   CollectionReference CollectRef = FirebaseFirestore.instance.collection('users');
+
+  final storage = FlutterSecureStorage();
+  final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
+  final myUid = FirebaseAuth.instance.currentUser?.uid;
+
+  Future<void> _firstTime() async {
+    final algorithmDF = X25519();
+    final myKeyPair = await algorithmDF.newKeyPair();
+    final myPublicKey = await myKeyPair.extractPublicKey();
+    final myPrivateKey = await myKeyPair.extractPrivateKeyBytes();
+    // secure storage에 private key 저장, firebase에 public key 저장
+    await storage.write(key: 'myPrivateKey', value: base64Encode(myPrivateKey));
+    rootRef
+        .child('UserList/$myUid')
+        .update({'PublicKey': base64Encode(myPublicKey.bytes)});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -208,6 +228,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               Navigator.push(context, MaterialPageRoute(builder: (context) {
                                   return Home(); },
                               ),);
+
+                              _firstTime();
                             }
                           } catch (e) {//SIGNUP FAILED
                             print(e);

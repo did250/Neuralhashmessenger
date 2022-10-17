@@ -43,7 +43,7 @@ class _FriendTabState extends State<FriendTab> {
         .child('UserList/$myUid')
         .update({'PublicKey': base64Encode(myPublicKey.bytes)});
     //} else {
-    print('myprivatkey: ' + base64Encode(myPublicKey.bytes));
+    print('d: ' + base64Encode(myPublicKey.bytes));
     print('myPublicKey: ' + base64Encode(myPrivateKey));
     //}
   }

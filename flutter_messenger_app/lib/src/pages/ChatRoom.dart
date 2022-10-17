@@ -143,10 +143,9 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     final message = utf8.encode(input);
 
     final storageData = await storage.read(key: friendUid);
-
     final SecretKey secretKey;
-    if (storageData == null) {
-      print('error no secret key');
+
+    if (true) {
       //generate secret key
       /* generate AES Key */
       final myUid = FirebaseAuth.instance.currentUser?.uid;
@@ -176,18 +175,19 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         remotePublicKey: remotePublicKey,
       );
       final sharedSecretKeyBytes = await sharedSecret.extractBytes();
-      //print('sharedSecretKeyBytes : ' + sharedSecretKeyBytes.toString());
+      print('sharedSecretKeyBytes : ' + sharedSecretKeyBytes.toString());
       await storage.write(
           key: friendUid, value: base64Encode(sharedSecretKeyBytes));
       secretKey = SecretKey(sharedSecretKeyBytes);
-    } else {
+    }
+    /*
+    else {
       secretKey = SecretKey(base64Decode(storageData)); //채팅방 번호로?
 
-    }
+    }*/
 
     /******** Encrypt **********/
     final algorithmAes = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
-    final algorithmAaa = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
 
     final encryptedBox = await algorithmAes.encrypt(
       message,
@@ -209,12 +209,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       "sender": _name,
       "text": encryptedString,
     });
-    var temp = encryptedString.split(' ');
-
-    var test = SecretBox(base64Decode(temp[0]),
-        nonce: base64Decode(temp[1]), mac: Mac(base64Decode(temp[2])));
-    var clearText = await algorithmAaa.decrypt(test, secretKey: secretKey);
-    print('Cleartext: ${utf8.decode(clearText)}');
   }
 
   /// 친구 uid 찾기

@@ -27,23 +27,24 @@ class _SignupScreenState extends State<SignupScreen> {
   String userEmail = '';
   String userPassword = '';
 
-  CollectionReference CollectRef = FirebaseFirestore.instance.collection('users');
+  CollectionReference CollectRef =
+      FirebaseFirestore.instance.collection('users');
 
   final storage = FlutterSecureStorage();
   final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
-  late final myPublicKey;
   //final myUid = FirebaseAuth.instance.currentUser?.uid;
 
-  Future<void> _firstTime() async {
+  Future<void> _firstTime(String myUid) async {
     final algorithmDF = X25519();
     final myKeyPair = await algorithmDF.newKeyPair();
-    myPublicKey = await myKeyPair.extractPublicKey();
+    final myPublicKey = await myKeyPair.extractPublicKey();
     final myPrivateKey = await myKeyPair.extractPrivateKeyBytes();
     // secure storage에 private key 저장, firebase에 public key 저장
-    await storage.write(key: 'myPrivateKey', value: base64Encode(myPrivateKey));
-    /*rootRef
+    await storage.write(
+        key: 'private_$myUid', value: base64Encode(myPrivateKey));
+    rootRef
         .child('UserList/$myUid')
-        .update({'PublicKey': base64Encode(myPublicKey.bytes)});*/
+        .update({'PublicKey': base64Encode(myPublicKey.bytes)});
   }
 
   @override
@@ -63,7 +64,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   height: 50,
                   width: 400,
                   alignment: Alignment.topCenter,
-                  child: Text("SIGNUP",
+                  child: Text(
+                    "SIGNUP",
                     style: TextStyle(
                       letterSpacing: 1.0,
                       fontSize: 24,
@@ -72,7 +74,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-
                 TextFormField(
                   key: ValueKey(1),
                   validator: (value) {
@@ -95,27 +96,24 @@ class _SignupScreenState extends State<SignupScreen> {
                         color: Color(0xFFB6C7D1),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color(0XFFA7BCC7)),
+                        borderSide: BorderSide(color: Color(0XFFA7BCC7)),
                         borderRadius: BorderRadius.all(
                           Radius.circular(20.0),
                         ),
                       ),
                       hintText: 'User name',
-                      hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: Color(0XFFA7BCC7)),
+                      hintStyle:
+                          TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
                       contentPadding: EdgeInsets.all(10)),
                 ),
-
-                SizedBox(height: 8,),
-
+                SizedBox(
+                  height: 8,
+                ),
                 TextFormField(
                   keyboardType: TextInputType.emailAddress,
                   key: ValueKey(2),
                   validator: (value) {
-                    if (value!.isEmpty ||
-                        !value.contains('@')) {
+                    if (value!.isEmpty || !value.contains('@')) {
                       return 'Please enter a valid email address.';
                     }
                     return null;
@@ -132,21 +130,19 @@ class _SignupScreenState extends State<SignupScreen> {
                         color: Color(0xFFB6C7D1),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color(0XFFA7BCC7)),
+                        borderSide: BorderSide(color: Color(0XFFA7BCC7)),
                         borderRadius: BorderRadius.all(
                           Radius.circular(20.0),
                         ),
                       ),
                       hintText: 'email',
-                      hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: Color(0XFFA7BCC7)),
+                      hintStyle:
+                          TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
                       contentPadding: EdgeInsets.all(10)),
                 ),
-
-                SizedBox(height: 8,),
-
+                SizedBox(
+                  height: 8,
+                ),
                 TextFormField(
                   obscureText: true,
                   key: ValueKey(3),
@@ -168,30 +164,26 @@ class _SignupScreenState extends State<SignupScreen> {
                         color: Color(0xFFB6C7D1),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color(0XFFA7BCC7)),
+                        borderSide: BorderSide(color: Color(0XFFA7BCC7)),
                         borderRadius: BorderRadius.all(
                           Radius.circular(20.0),
                         ),
                       ),
                       hintText: 'password',
-                      hintStyle: TextStyle(
-                          fontSize: 14,
-                          color: Color(0XFFA7BCC7)),
+                      hintStyle:
+                          TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
                       contentPadding: EdgeInsets.all(10)),
                 ),
-
-                SizedBox(height: 8,),
-
+                SizedBox(
+                  height: 8,
+                ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     primary: Colors.white24,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(3.0)
-                    ),
+                        borderRadius: BorderRadius.circular(3.0)),
                     minimumSize: const Size.fromHeight(50),
                   ),
-
                   child: Text('Welcome', style: TextStyle(fontSize: 20)),
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
@@ -199,12 +191,14 @@ class _SignupScreenState extends State<SignupScreen> {
 
                       if (userNameChecked) {
                         try {
-                          final newUser = await authentication.createUserWithEmailAndPassword(
+                          final newUser = await authentication
+                              .createUserWithEmailAndPassword(
                             email: userEmail,
                             password: userPassword,
                           );
 
-                          if (newUser.user != null) { //SIGNUP SUCCESS
+                          if (newUser.user != null) {
+                            //SIGNUP SUCCESS
                             try {
                               final user = authentication.currentUser;
                               if (user != null) {
@@ -214,9 +208,8 @@ class _SignupScreenState extends State<SignupScreen> {
                               print(e);
                             }
 
-                            DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + loggedUser!.uid.toString());
-
-                            _firstTime();
+                            DatabaseReference ref = FirebaseDatabase.instance
+                                .ref("UserList/" + loggedUser!.uid.toString());
 
                             await ref.set({
                               "Email": userEmail,
@@ -224,20 +217,34 @@ class _SignupScreenState extends State<SignupScreen> {
                               "Friend": "",
                               "Num_Chatroom": "",
                               "Profile_img": "",
-                              "PublicKey": base64Encode(myPublicKey.bytes),
+                            });
+                            _firstTime(loggedUser!.uid.toString());
+
+                            await CollectRef.add({
+                              'uid': loggedUser!.uid.toString(),
+                              'Email': userEmail,
+                              'Name': userName,
+                              'Friend': ""
                             });
 
-                            await CollectRef.add({'uid': loggedUser!.uid.toString(), 'Email': userEmail, 'Name': userName, 'Friend': ""});
-
-                            Navigator.push(context, MaterialPageRoute(builder: (context) {
-                              return Home(); },
-                            ),);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return Home();
+                                },
+                              ),
+                            );
                           }
-                        } catch (e) {//SIGNUP FAILED
+                        } catch (e) {
+                          //SIGNUP FAILED
                           print(e);
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(
-                              'Please check your email and password'),
-                            backgroundColor: Colors.blue,),
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text('Please check your email and password'),
+                              backgroundColor: Colors.blue,
+                            ),
                           );
                         }
                       }

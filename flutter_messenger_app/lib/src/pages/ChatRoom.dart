@@ -7,6 +7,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:cryptography/cryptography.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 String _name = "";
 String _other = "";
@@ -135,8 +137,35 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   }
 
   /// 메세지 하나 보낼 때, 서버에 갱신하는 함수
-  Future<void> updatemessage(String input) async {
+  Future<void> updatemessage(String input, String friendUid) async {
+    final storage = FlutterSecureStorage();
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    final message = utf8.encode(input);
+    final algorithmAes = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
+    final storageData = await storage.read(key: friendUid);
+    print(friendUid);
+
+    final SecretKey secretKey;
+    if (storageData == null) {
+      print('error no secret key');
+      return;
+    } else {
+      secretKey = SecretKey(base64Decode(storageData)); //채팅방 번호로?
+
+    }
+
+    /******** Encrypt **********/
+
+    final encryptedBox = await algorithmAes.encrypt(
+      message,
+      secretKey: secretKey,
+    );
+
+    var encryptedString = base64Encode(encryptedBox.nonce) +
+        " " +
+        base64Encode(encryptedBox.cipherText) +
+        " " +
+        base64Encode(encryptedBox.mac.bytes);
     await ref
         .child('ChattingRoom')
         .child(this.number.toString())
@@ -145,7 +174,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         .set({
       "checked": 1,
       "sender": _name,
-      "text": input,
+      "text": encryptedString,
     });
   }
 
@@ -208,11 +237,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       }
     }
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    /*
     await ref
         .child('UserList')
         .child(FirebaseAuth.instance.currentUser!.uid.toString())
         .child('Num_Chatroom')
-        .set(rooms);
+        .set(rooms);*/
   }
 
   /// 메시지 보내면 친구의 채팅 목록에서 현재 채팅방을 맨 위로
@@ -248,6 +278,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final storage = FlutterSecureStorage();
     return Scaffold(
       appBar: AppBar(title: Text(widget.name)),
       body: Container(
@@ -279,6 +310,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                         if (map['sender'] == _name) {
                           mine = true;
                         }
+
                         Messages mas = Messages(
                           text: map['text'],
                           animationController: AnimationController(
@@ -378,12 +410,11 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     );
   }
 
-  //수정할곳 end to end
   void _handleSubmitted(String text) {
     _textController.clear();
     setState(() {
       _exist = false;
-      updatemessage(text);
+      updatemessage(text, frienduid);
     });
     Messages message = Messages(
       text: text,
@@ -423,7 +454,7 @@ class Messages extends StatelessWidget {
   Messages(
       {required this.text,
       required this.animationController,
-      required this.ismine});
+      required this.ismine}) {}
 
   @override
   Widget build(BuildContext context) {

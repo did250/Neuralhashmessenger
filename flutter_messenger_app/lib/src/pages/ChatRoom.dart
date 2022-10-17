@@ -36,7 +36,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   bool _exist = false;
 
   Future uploadimage() async {
-    final uri = Uri.parse("http://10.0.2.2:5000/test");
+    final uri = Uri.parse("https://10.0.2.2:5000/test");
     var request = http.MultipartRequest('POST', uri);
     request.fields['name'] = "test";
     var pic = await http.MultipartFile.fromPath('images', _image!.path);

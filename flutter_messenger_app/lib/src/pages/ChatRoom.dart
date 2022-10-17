@@ -141,7 +141,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     final storage = FlutterSecureStorage();
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     final message = utf8.encode(input);
-    final algorithmAes = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
+
     final storageData = await storage.read(key: friendUid);
 
     final SecretKey secretKey;
@@ -186,16 +186,18 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     }
 
     /******** Encrypt **********/
+    final algorithmAes = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
+    final algorithmAaa = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
 
     final encryptedBox = await algorithmAes.encrypt(
       message,
       secretKey: secretKey,
     );
 
-    var encryptedString = base64Encode(encryptedBox.nonce) +
-        " " +
-        base64Encode(encryptedBox.cipherText) +
-        " " +
+    var encryptedString = base64Encode(encryptedBox.cipherText) +
+        ' ' +
+        base64Encode(encryptedBox.nonce) +
+        ' ' +
         base64Encode(encryptedBox.mac.bytes);
     await ref
         .child('ChattingRoom')
@@ -207,6 +209,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       "sender": _name,
       "text": encryptedString,
     });
+    var temp = encryptedString.split(' ');
+
+    var test = SecretBox(base64Decode(temp[0]),
+        nonce: base64Decode(temp[1]), mac: Mac(base64Decode(temp[2])));
+    var clearText = await algorithmAaa.decrypt(test, secretKey: secretKey);
+    print('Cleartext: ${utf8.decode(clearText)}');
   }
 
   /// 친구 uid 찾기

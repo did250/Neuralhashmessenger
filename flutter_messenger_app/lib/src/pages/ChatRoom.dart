@@ -143,7 +143,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     final message = utf8.encode(input);
     final algorithmAes = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
     final storageData = await storage.read(key: friendUid);
-    print(friendUid);
 
     final SecretKey secretKey;
     if (storageData == null) {
@@ -180,7 +179,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       //print('sharedSecretKeyBytes : ' + sharedSecretKeyBytes.toString());
       await storage.write(
           key: friendUid, value: base64Encode(sharedSecretKeyBytes));
-      return;
+      secretKey = SecretKey(sharedSecretKeyBytes);
     } else {
       secretKey = SecretKey(base64Decode(storageData)); //채팅방 번호로?
 

@@ -27,24 +27,25 @@ class _FriendTabState extends State<FriendTab> {
 
   Future<void> _firstTime() async {
     final algorithmDF = X25519();
-
+    /*
     var myPrivateKey = await storage.read(key: 'private_$myUid');
     final myPublicKeySnapshot =
         await rootRef.child('UserList/$myUid/PublicKey').get();
-
-    if (myPrivateKey == null || !myPublicKeySnapshot.exists) {
-      final myKeyPair = await algorithmDF.newKeyPair();
-      final myPublicKey = await myKeyPair.extractPublicKey();
-      final myPrivateKey = await myKeyPair.extractPrivateKeyBytes();
-      // secure storage에 private key 저장, firebase에 public key 저장
-      await storage.write(
-          key: 'private_${myUid!}', value: base64Encode(myPrivateKey));
-      await rootRef
-          .child('UserList/$myUid')
-          .update({'PublicKey': base64Encode(myPublicKey.bytes)});
-    } else {
-      print(myPrivateKey);
-    }
+    */
+    //if (myPrivateKey == null || !myPublicKeySnapshot.exists) {
+    final myKeyPair = await algorithmDF.newKeyPair();
+    final myPublicKey = await myKeyPair.extractPublicKey();
+    final myPrivateKey = await myKeyPair.extractPrivateKeyBytes();
+    // secure storage에 private key 저장, firebase에 public key 저장
+    await storage.write(
+        key: 'private_${myUid!}', value: base64Encode(myPrivateKey));
+    await rootRef
+        .child('UserList/$myUid')
+        .update({'PublicKey': base64Encode(myPublicKey.bytes)});
+    //} else {
+    print('myprivatkey: ' + base64Encode(myPublicKey.bytes));
+    print('myPublicKey: ' + base64Encode(myPrivateKey));
+    //}
   }
 
   Future<void> _generateAESKey() async {

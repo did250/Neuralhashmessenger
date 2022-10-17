@@ -319,6 +319,7 @@ class FriendTile extends StatelessWidget {
             key: _friend.uid, value: base64Encode(sharedSecretKeyBytes));
 
         print(await storage.read(key: _friend.uid));
+
         /* generate new chatroom */
         final snapshotChat = await rootRef.child('ChattingRoom/next').get();
         int nextnumChatroom;

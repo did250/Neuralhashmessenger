@@ -148,6 +148,38 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     final SecretKey secretKey;
     if (storageData == null) {
       print('error no secret key');
+      //generate secret key
+      /* generate AES Key */
+      final myUid = FirebaseAuth.instance.currentUser?.uid;
+      final algorithmDF = X25519();
+      final myPrivateKey =
+          base64Decode((await storage.read(key: 'private_${myUid!}'))!);
+      final reomotePublicKeySnapshot =
+          await ref.child('UserList/$friendUid/PublicKey').get();
+      final myPublicKeySnapshot =
+          await ref.child('UserList/$myUid/PublicKey').get();
+      if (!reomotePublicKeySnapshot.exists || !myPublicKeySnapshot.exists) {
+        print('error remotepublic key or my public key does not exist');
+        return;
+      }
+      final remotePublicKey = SimplePublicKey(
+          base64Decode(reomotePublicKeySnapshot.value.toString()),
+          type: KeyPairType.x25519);
+      final myPublicKey = SimplePublicKey(
+          base64Decode(myPublicKeySnapshot.value.toString()),
+          type: KeyPairType.x25519);
+
+      final myKeyPair = SimpleKeyPairData(myPrivateKey,
+          publicKey: myPublicKey, type: KeyPairType.x25519);
+
+      final sharedSecret = await algorithmDF.sharedSecretKey(
+        keyPair: myKeyPair,
+        remotePublicKey: remotePublicKey,
+      );
+      final sharedSecretKeyBytes = await sharedSecret.extractBytes();
+      //print('sharedSecretKeyBytes : ' + sharedSecretKeyBytes.toString());
+      await storage.write(
+          key: friendUid, value: base64Encode(sharedSecretKeyBytes));
       return;
     } else {
       secretKey = SecretKey(base64Decode(storageData)); //채팅방 번호로?

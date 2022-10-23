@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,7 +27,7 @@ class _SignupScreenState extends State<SignupScreen> {
   String userPassword = '';
 
   CollectionReference CollectRef =
-      FirebaseFirestore.instance.collection('users');
+  FirebaseFirestore.instance.collection('users');
 
   final storage = FlutterSecureStorage();
   final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
@@ -53,27 +52,23 @@ class _SignupScreenState extends State<SignupScreen> {
       body: SingleChildScrollView(
         child: Container(
           alignment: Alignment.center,
-          margin: EdgeInsets.only(top: 200),
+          margin: EdgeInsets.only(top: 100),
           padding: EdgeInsets.all(30),
           child: Form(
             key: formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  height: 50,
-                  width: 400,
-                  alignment: Alignment.topCenter,
-                  child: Text(
-                    "SIGNUP",
-                    style: TextStyle(
-                      letterSpacing: 1.0,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black38,
-                    ),
-                  ),
+                Center(
+                    child: Image(
+                      image: AssetImage('assets/images/profile_img.jpg'),
+                      width: 170,
+                      height: 190,
+                    )
                 ),
+
+                SizedBox(height: 20,),
+
                 TextFormField(
                   key: ValueKey(1),
                   validator: (value) {
@@ -103,12 +98,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       hintText: 'User name',
                       hintStyle:
-                          TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
+                      TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
                       contentPadding: EdgeInsets.all(10)),
                 ),
-                SizedBox(
-                  height: 8,
-                ),
+
+                SizedBox(height: 8,),
+
                 TextFormField(
                   keyboardType: TextInputType.emailAddress,
                   key: ValueKey(2),
@@ -137,12 +132,12 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       hintText: 'email',
                       hintStyle:
-                          TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
+                      TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
                       contentPadding: EdgeInsets.all(10)),
                 ),
-                SizedBox(
-                  height: 8,
-                ),
+
+                SizedBox(height: 8,),
+
                 TextFormField(
                   obscureText: true,
                   key: ValueKey(3),
@@ -171,20 +166,20 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       hintText: 'password',
                       hintStyle:
-                          TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
+                      TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
                       contentPadding: EdgeInsets.all(10)),
                 ),
-                SizedBox(
-                  height: 8,
-                ),
+
+                SizedBox(height: 20,),
+
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    primary: Colors.white24,
+                    primary: Colors.orangeAccent,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(3.0)),
                     minimumSize: const Size.fromHeight(50),
                   ),
-                  child: Text('Welcome', style: TextStyle(fontSize: 20)),
+                  child: Text('SIGN UP', style: TextStyle(fontSize: 20)),
                   onPressed: () async {
                     if (formKey.currentState!.validate()) {
                       formKey.currentState!.save();
@@ -242,7 +237,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content:
-                                  Text('Please check your email and password'),
+                              Text('Please check your email and password'),
                               backgroundColor: Colors.blue,
                             ),
                           );
@@ -250,7 +245,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       }
                     }
                   },
-                )
+                ),
               ],
             ),
           ),

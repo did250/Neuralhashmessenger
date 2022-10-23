@@ -5,7 +5,6 @@ import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
 import 'package:flutter_messenger_app/src/pages/MyPage.dart';
 import 'package:flutter_messenger_app/src/pages/SettingsTab.dart';
-import 'package:flutter_messenger_app/src/pages/Signup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatelessWidget {
@@ -22,14 +21,6 @@ class Home extends StatelessWidget {
               return LoginScreen();
             } else { //Login
               return MainPage();
-              /*return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("${snapshot.data?.displayName}님 반갑습니다."),
-                  ],
-                ),
-              );*/
             }
           },
         ),
@@ -70,12 +61,27 @@ class _MainPage extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("MainPage"),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+                width: 100,
+                height: 80,
+                alignment: Alignment.center,
+                child: Image(
+                  image: AssetImage('assets/images/logo.png'),
+                )
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+
         actions: [
           IconButton(
             icon: Icon(
               Icons.exit_to_app_sharp,
-              color: Colors.white,
+              color: Colors.black,
             ),
             onPressed: () async {
               authentication.signOut();
@@ -97,15 +103,15 @@ class _MainPage extends State<MainPage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.contact_page),
-            label: 'Contacts',
+            label: '',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
-            label: 'Chats',
+            label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'MyPage',
+            icon: Icon(Icons.account_circle),
+            label: '',
           ),
         ],
         currentIndex: _selectedIndex,

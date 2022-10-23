@@ -128,18 +128,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          height: 50,
-                          width: 400,
+                          width: 500,
+                          height: 80,
                           alignment: Alignment.topCenter,
-                          child: Text("LOGIN",
-                            style: TextStyle(
-                              letterSpacing: 1.0,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black38,
-                            ),
-                          ),
+                            child: Image(
+                              image: AssetImage('assets/images/logo.png'),
+                            )
                         ),
+
+                        SizedBox(height: 20,),
 
                         TextFormField(
                           key: ValueKey(4),
@@ -211,17 +208,17 @@ class _LoginScreenState extends State<LoginScreen> {
                               contentPadding: EdgeInsets.all(10)),
                         ),
 
-                        SizedBox(height: 8,),
+                        SizedBox(height: 20,),
 
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.white24,
+                            primary: Colors.orangeAccent,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(3.0)
                             ),
                             minimumSize: const Size.fromHeight(50),
                           ),
-                          child: Text('Login', style: TextStyle(fontSize: 20)),
+                          child: Text('LOGIN', style: TextStyle(fontSize: 20)),
                           onPressed: () async {
                             if (formKey.currentState!.validate()) {
                               formKey.currentState!.save();
@@ -256,7 +253,26 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
 
-                        SizedBox(height: 16,),
+                        SizedBox(height: 40,),
+
+                        Center(
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(height: 1, color: Colors.grey),
+                                ),
+                                Text(
+                                  "  or  ",
+                                  style: TextStyle(color: Colors.grey[700]),
+                                ),
+                                Expanded(
+                                  child: Container(height: 1, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                        ),
+
+                        SizedBox(height: 40,),
 
                         Center(
                           child: InkWell(

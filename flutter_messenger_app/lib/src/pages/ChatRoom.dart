@@ -5,10 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 String _name = "";
 String _other = "";
@@ -138,67 +140,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
   /// 메세지 하나 보낼 때, 서버에 갱신하는 함수
   Future<void> updatemessage(String input, String friendUid) async {
-    final storage = FlutterSecureStorage();
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    final message = utf8.encode(input);
-
-    final storageData = await storage.read(key: friendUid);
-    final SecretKey secretKey;
-
-    if (true) {
-      //generate secret key
-      /* generate AES Key */
-      final myUid = FirebaseAuth.instance.currentUser?.uid;
-      final algorithmDF = X25519();
-      final myPrivateKey =
-          base64Decode((await storage.read(key: 'private_${myUid!}'))!);
-      final reomotePublicKeySnapshot =
-          await ref.child('UserList/$friendUid/PublicKey').get();
-      final myPublicKeySnapshot =
-          await ref.child('UserList/$myUid/PublicKey').get();
-      if (!reomotePublicKeySnapshot.exists || !myPublicKeySnapshot.exists) {
-        print('error remotepublic key or my public key does not exist');
-        return;
-      }
-      final remotePublicKey = SimplePublicKey(
-          base64Decode(reomotePublicKeySnapshot.value.toString()),
-          type: KeyPairType.x25519);
-      final myPublicKey = SimplePublicKey(
-          base64Decode(myPublicKeySnapshot.value.toString()),
-          type: KeyPairType.x25519);
-
-      final myKeyPair = SimpleKeyPairData(myPrivateKey,
-          publicKey: myPublicKey, type: KeyPairType.x25519);
-
-      final sharedSecret = await algorithmDF.sharedSecretKey(
-        keyPair: myKeyPair,
-        remotePublicKey: remotePublicKey,
-      );
-      final sharedSecretKeyBytes = await sharedSecret.extractBytes();
-      print('sharedSecretKeyBytes : ' + sharedSecretKeyBytes.toString());
-      await storage.write(
-          key: friendUid, value: base64Encode(sharedSecretKeyBytes));
-      secretKey = SecretKey(sharedSecretKeyBytes);
-    }
-    /*
-    else {
-      secretKey = SecretKey(base64Decode(storageData)); //채팅방 번호로?
-
-    }*/
 
     /******** Encrypt **********/
-    final algorithmAes = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
+    final aesKey = encrypt.Key.fromBase64(await getAESKey(friendUid));
+    final encryptedData = await encryptData(input, aesKey);
 
-    final encryptedBox = await algorithmAes.encrypt(
-      message,
-      secretKey: secretKey,
-    );
-
-    var encryptedString = base64Encode(encryptedBox.cipherText) +
-        ' ' +
-        base64Encode(encryptedBox.nonce) +
-        ' ' +
-        base64Encode(encryptedBox.mac.bytes);
     await ref
         .child('ChattingRoom')
         .child(this.number.toString())
@@ -207,7 +154,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         .set({
       "checked": 1,
       "sender": _name,
-      "text": encryptedString,
+      "text": encryptedData,
     });
   }
 

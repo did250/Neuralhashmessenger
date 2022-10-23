@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'SearchFriendTab.dart';
 import 'ChatRoom.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 class FriendTab extends StatefulWidget {
   @override
@@ -25,152 +25,34 @@ class _FriendTabState extends State<FriendTab> {
     _getFriend();
   }
 
-  Future<void> _firstTime() async {
-    final algorithmDF = X25519();
-    /*
-    var myPrivateKey = await storage.read(key: 'private_$myUid');
-    final myPublicKeySnapshot =
-        await rootRef.child('UserList/$myUid/PublicKey').get();
-    */
-    //if (myPrivateKey == null || !myPublicKeySnapshot.exists) {
-    final myKeyPair = await algorithmDF.newKeyPair();
-    final myPublicKey = await myKeyPair.extractPublicKey();
-    final myPrivateKey = await myKeyPair.extractPrivateKeyBytes();
-    // secure storage에 private key 저장, firebase에 public key 저장
-    await storage.write(
-        key: 'private_${myUid!}', value: base64Encode(myPrivateKey));
-    await rootRef
-        .child('UserList/$myUid')
-        .update({'PublicKey': base64Encode(myPublicKey.bytes)});
-    //} else {
-    print('d: ' + base64Encode(myPublicKey.bytes));
-    print('myPublicKey: ' + base64Encode(myPrivateKey));
-    //}
+  Future<void> temp1() async {
+    final aesKey =
+        encrypt.Key.fromBase64(await getAESKey('STnBBGCGJNOjQqtmnFAt7Al1HQM2'));
+    final encryptedBase64 =
+        await encryptData('this is the plain text to be encrypted', aesKey);
+    rootRef.child('UserList/$myUid').update({'Test': encryptedBase64});
   }
 
-  Future<void> _generateAESKey() async {
-    final algorithmDF = X25519();
-    final myPrivateKey =
-        base64Decode((await storage.read(key: 'private_${myUid!}'))!);
-    /* 임시 */
-    var friendUid = myUid;
-    final reomotePublicKeySnapshot =
-        await rootRef.child('UserList/$friendUid/PublicKey').get();
-    final myPublicKeySnapshot =
-        await rootRef.child('UserList/$myUid/PublicKey').get();
-    if (!reomotePublicKeySnapshot.exists || !myPublicKeySnapshot.exists) {
-      return;
+  Future<void> temp2() async {
+    await onLogout();
+    final encryptedSnapshot = await rootRef.child('UserList/$myUid/Test').get();
+    final encryptedBase64 = encryptedSnapshot.value.toString();
+    final aesKey =
+        encrypt.Key.fromBase64(await getAESKey('STnBBGCGJNOjQqtmnFAt7Al1HQM2'));
+    final decrypteddata = decryptData(encryptedBase64, aesKey);
+    print(decrypteddata);
+  }
+
+  String decryptData(String data, encrypt.Key key) {
+    final iv = encrypt.IV.fromLength(16);
+    final encrypter = encrypt.Encrypter(encrypt.AES(key));
+    try {
+      final decrypted =
+          encrypter.decrypt(encrypt.Encrypted.fromBase64(data), iv: iv);
+      return decrypted;
+    } catch (exception) {
+      return 'error key does not match';
     }
-    final remotePublicKey = SimplePublicKey(
-        base64Decode(reomotePublicKeySnapshot.value.toString()),
-        type: KeyPairType.x25519);
-    final myPublicKey = SimplePublicKey(
-        base64Decode(myPublicKeySnapshot.value.toString()),
-        type: KeyPairType.x25519);
-
-    final myKeyPair = SimpleKeyPairData(myPrivateKey,
-        publicKey: myPublicKey, type: KeyPairType.x25519);
-
-    final sharedSecret = await algorithmDF.sharedSecretKey(
-      keyPair: myKeyPair,
-      remotePublicKey: remotePublicKey,
-    );
-    final sharedSecretKeyBytes = await sharedSecret.extractBytes();
-    print('sharedSecretKeyBytes : ' + sharedSecretKeyBytes.toString());
-    await storage.write(
-        key: '$friendUid', value: base64Encode(sharedSecretKeyBytes));
-  }
-
-  Future<void> _sendMessage() async {
-    var friendUid = '임시uid';
-    // Choose the cipher
-    final message = utf8.encode('message');
-    final algorithmAes = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
-    var storageData = await storage.read(key: friendUid) ?? 'null';
-    var tempSecretKey = await algorithmAes.newSecretKey();
-
-    /* This is for test */
-    if (storageData == 'null') {
-      tempSecretKey = await algorithmAes.newSecretKey();
-
-      final encryptedBox = await algorithmAes.encrypt(
-        message,
-        secretKey: tempSecretKey,
-      );
-      var newString = base64Encode(encryptedBox.nonce) +
-          " " +
-          base64Encode(encryptedBox.cipherText) +
-          " " +
-          base64Encode(encryptedBox.mac.bytes);
-      print(newString);
-
-      var strings = newString.split(' ');
-      print(strings[0]);
-      print(strings[1]);
-      print(strings[2]);
-    } else {
-      storageData = (await storage.read(key: friendUid))!;
-      final savedKeyBytes = base64Decode(storageData);
-
-      final encryptedBox = await algorithmAes.encrypt(
-        message,
-        secretKey: SecretKey(savedKeyBytes),
-      );
-      var newString = base64Encode(encryptedBox.nonce) +
-          " " +
-          base64Encode(encryptedBox.cipherText) +
-          " " +
-          base64Encode(encryptedBox.mac.bytes);
-      print(newString);
-    }
-  }
-
-  Future<void> _encryptTest() async {
-    var friendUid = myUid; //임시 제거필요
-    /*****암호화 통신***** */
-    // Choose the cipher
-    final message = utf8.encode('Hello encryption!');
-    final algorithmAes = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
-    final testkey = algorithmAes.newSecretKey();
-
-    final storageData = await storage.read(key: friendUid!);
-
-    final SecretKey secretKey;
-    if (storageData == null) {
-      secretKey = await algorithmAes.newSecretKey();
-    } else {
-      secretKey = SecretKey(base64Decode(storageData)); //채팅방 번호로?
-
-    }
-
-    /******** Encrypt **********/
-    final secretBox = await algorithmAes.encrypt(
-      message,
-      secretKey: secretKey,
-    );
-
-    print('Nonce: ${secretBox.nonce}');
-    print('Ciphertext: ${secretBox.cipherText}');
-    print('MAC: ${secretBox.mac.bytes}');
-
-    /******** Decrypt **********/
-  }
-
-  Future<void> _decrypt() async {
-    String encryptedString = 'a b c';
-    var strings = encryptedString.split(' ');
-    final algorithmAes = AesCtr.with256bits(macAlgorithm: Hmac.sha256());
-
-    final remoteSecretBox = SecretBox(base64Decode(strings[1]),
-        nonce: base64Decode(strings[0]), mac: Mac(base64Decode(strings[2])));
-    final clearText = await algorithmAes.decrypt(
-      remoteSecretBox,
-      secretKey: SecretKey(base64Decode((await storage.read(key: '친구 uid'))!)),
-    );
-
-    remoteSecretBox.toString();
-    print('Cleartext: ${utf8.decode(clearText)}');
-    print(remoteSecretBox.toString());
   }
 
   Future<void> _getFriend() async {
@@ -228,12 +110,15 @@ class _FriendTabState extends State<FriendTab> {
         body: Column(
           children: [
             Container(
-                height: 500, width: 200, child: _buildListView(myFriendList))
+                height: 500, width: 200, child: _buildListView(myFriendList)),
+            TextButton(
+                onPressed: onSignUp, child: Text('onSignUp(generate Keypair)')),
+            TextButton(onPressed: temp1, child: Text('generateAESKey')),
+            TextButton(onPressed: temp2, child: Text('getkey'))
           ],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-            /*
             final result = await Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SearchFriendTab()));
             if (result == 'error') {
@@ -242,8 +127,7 @@ class _FriendTabState extends State<FriendTab> {
               print(result);
               await _addFriend(result);
               _getFriend();
-            }*/
-            _firstTime();
+            }
           },
         ));
   }
@@ -289,37 +173,7 @@ class FriendTile extends StatelessWidget {
         }
 
         /* generate AES Key */
-        final algorithmDF = X25519();
-        final myPrivateKey =
-            base64Decode((await storage.read(key: 'private_${myUid!}'))!);
-        final reomotePublicKeySnapshot =
-            await rootRef.child('UserList/${_friend.uid}/PublicKey').get();
-        final myPublicKeySnapshot =
-            await rootRef.child('UserList/$myUid/PublicKey').get();
-        if (!reomotePublicKeySnapshot.exists || !myPublicKeySnapshot.exists) {
-          print('error remotepublic key or my public key does not exist');
-          return;
-        }
-        final remotePublicKey = SimplePublicKey(
-            base64Decode(reomotePublicKeySnapshot.value.toString()),
-            type: KeyPairType.x25519);
-        final myPublicKey = SimplePublicKey(
-            base64Decode(myPublicKeySnapshot.value.toString()),
-            type: KeyPairType.x25519);
-
-        final myKeyPair = SimpleKeyPairData(myPrivateKey,
-            publicKey: myPublicKey, type: KeyPairType.x25519);
-
-        final sharedSecret = await algorithmDF.sharedSecretKey(
-          keyPair: myKeyPair,
-          remotePublicKey: remotePublicKey,
-        );
-        final sharedSecretKeyBytes = await sharedSecret.extractBytes();
-        //print('sharedSecretKeyBytes : ' + sharedSecretKeyBytes.toString());
-        await storage.write(
-            key: _friend.uid, value: base64Encode(sharedSecretKeyBytes));
-
-        print(await storage.read(key: _friend.uid));
+        await getAESKey(_friend.uid);
 
         /* generate new chatroom */
         final snapshotChat = await rootRef.child('ChattingRoom/next').get();
@@ -393,4 +247,165 @@ class Friend {
   String uid;
   String name;
   Friend(this.uid, this.name);
+}
+
+Future<String> getAESKey(String friendUid) async {
+  final storage = FlutterSecureStorage();
+  final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
+  final myUid = FirebaseAuth.instance.currentUser?.uid;
+
+  final algorithmDF = X25519();
+  var sharedAESKey = await storage.read(key: friendUid);
+
+  /*저장된 키 있을경우 secure storage에서 복원 */
+  if (sharedAESKey != null) {
+    print('get aes key fromstorage');
+    return sharedAESKey;
+  }
+  /* 없을경우 Diffie-Hellman으로 생성 */
+  print('generate aes key from diffie-hellman');
+  final myPrivateKey = base64Decode(await getPrivateKey());
+
+  final reomotePublicKeySnapshot =
+      await rootRef.child('UserList/$friendUid/PublicKey').get();
+  final myPublicKeySnapshot =
+      await rootRef.child('UserList/$myUid/PublicKey').get();
+  if (!reomotePublicKeySnapshot.exists || !myPublicKeySnapshot.exists) {
+    //
+  }
+  final remotePublicKey = SimplePublicKey(
+      base64Decode(reomotePublicKeySnapshot.value.toString()),
+      type: KeyPairType.x25519);
+  final myPublicKey = SimplePublicKey(
+      base64Decode(myPublicKeySnapshot.value.toString()),
+      type: KeyPairType.x25519);
+
+  final myKeyPair = SimpleKeyPairData(myPrivateKey,
+      publicKey: myPublicKey, type: KeyPairType.x25519);
+
+  final sharedSecret = await algorithmDF.sharedSecretKey(
+    keyPair: myKeyPair,
+    remotePublicKey: remotePublicKey,
+  );
+  final sharedSecretKeyBytes = await sharedSecret.extractBytes();
+  //print('sharedSecretKeyBytes : ' + sharedSecretKeyBytes.toString());
+  await storage.write(
+      key: friendUid, value: base64Encode(sharedSecretKeyBytes));
+
+  return base64Encode(sharedSecretKeyBytes);
+}
+
+Future<encrypt.Key> generatePbkdf2(String password, Uint8List salt) async {
+  final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
+  final myUid = FirebaseAuth.instance.currentUser?.uid;
+  final pbkdf2 = Pbkdf2(
+    macAlgorithm: Hmac.sha256(),
+    iterations: 100000,
+    bits: 256,
+  );
+  /* generate secretKey from password */
+  final secretKeyFromPass = SecretKey(utf8.encode(password));
+
+  /* generated pbkdf2 from password, salt */
+  //int temp = DateTime.now().millisecondsSinceEpoch;
+  final generatedPbkdf2 = await pbkdf2.deriveKey(
+    secretKey: secretKeyFromPass,
+    nonce: salt,
+  );
+  //print((DateTime.now().millisecondsSinceEpoch - temp));
+  //print(await generatedPbkdf2.extractBytes());
+  //save salt in server
+  await rootRef.child('UserList/$myUid').update({
+    'Salt': base64.encode(salt),
+  });
+  return encrypt.Key.fromBase64(
+      base64Encode(await generatedPbkdf2.extractBytes()));
+}
+
+Future<void> onLogout() async {
+  final storage = FlutterSecureStorage();
+  await storage.deleteAll();
+}
+
+Future<void> onSignUp() async {
+  final storage = FlutterSecureStorage();
+  final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
+  final myUid = FirebaseAuth.instance.currentUser?.uid;
+
+  String password = 'testpassword';
+
+  final myKeyPair = await generateECDHKey();
+  final myPublicKey = await myKeyPair.extractPublicKey();
+  final myPrivateKey = await myKeyPair.extractPrivateKeyBytes();
+
+  final salt = encrypt.IV.fromSecureRandom(8).bytes;
+
+  final keyFromPass = await generatePbkdf2(password, salt);
+
+  final encrypter = encrypt.Encrypter(encrypt.AES(keyFromPass));
+  final iv = encrypt.IV.fromLength(16);
+
+  final encrypted = encrypter.encrypt(base64Encode(myPrivateKey), iv: iv);
+  await rootRef.child('UserList/$myUid').update({
+    'PublicKey': base64Encode(myPublicKey.bytes),
+    'PrivateKey': encrypted.base64,
+    'Salt': base64Encode(salt),
+  });
+  await storage.write(key: 'myPrivateKey', value: base64Encode(myPrivateKey));
+}
+
+Future<String> getPrivateKey() async {
+  final storage = FlutterSecureStorage();
+  final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
+  final myUid = FirebaseAuth.instance.currentUser?.uid;
+  String password = 'testpassword';
+  final myPrivateKey = await storage.read(key: 'myPrivateKey');
+
+  /* secure storage에 존재할 경우 */
+  if (myPrivateKey != null) {
+    print('get private key from secure storage');
+    return myPrivateKey;
+
+    /* get from server and decrypt */
+  } else {
+    print('get encrypted private key from server');
+    final myRef = await rootRef.child('UserList/$myUid').get();
+
+    final encryptedPrivateKey = myRef.child('PrivateKey').value.toString();
+    final salt = myRef.child('Salt').value.toString();
+    final iv = encrypt.IV.fromLength(16);
+
+    final keyFromPass = await generatePbkdf2(password, base64Decode(salt));
+
+    final encrypter = encrypt.Encrypter(encrypt.AES(keyFromPass));
+
+    final decrypted = encrypter
+        .decrypt(encrypt.Encrypted.fromBase64(encryptedPrivateKey), iv: iv);
+
+    await storage.write(key: 'myPrivateKey', value: decrypted);
+
+    return decrypted;
+  }
+}
+
+Future<SimpleKeyPair> generateECDHKey() async {
+  final algorithmDF = X25519();
+  final myKeyPair = await algorithmDF.newKeyPair();
+
+  return myKeyPair;
+}
+
+Future<String> encryptData(String data, encrypt.Key aesKey) async {
+  final iv = encrypt.IV.fromLength(16);
+
+  final encrypter = encrypt.Encrypter(encrypt.AES(aesKey));
+
+  final encrypted = encrypter.encrypt(data, iv: iv);
+  print('encrypted : ${encrypted.base64}');
+  encrypt.Encrypted temp = encrypt.Encrypted.fromBase64(encrypted.base64);
+  final decrypted = encrypter.decrypt(temp, iv: iv);
+
+  print(decrypted);
+
+  return encrypted.base64;
 }

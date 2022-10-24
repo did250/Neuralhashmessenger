@@ -114,46 +114,46 @@ class _MyPageState extends State<MyPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder(
-        stream: FirebaseDatabase.instance.ref().child("UserList").child(loggedUser!.uid.toString()).onValue,
-        builder: (BuildContext context, snapshot) {
-          if (snapshot.hasData) {
-            return SingleChildScrollView(
-            child: Form(
-                key: this.formKey,
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(height: 25.0, ),
+          stream: FirebaseDatabase.instance.ref().child("UserList").child(loggedUser!.uid.toString()).onValue,
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.hasData) {
+              return SingleChildScrollView(
+                  child: Form(
+                      key: this.formKey,
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 25.0, ),
 
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(width: 7, ),
-                          Column(
-                            children: [
-                              showProfileImage(),
-                              Profile_img_opt(),
-                          ]),
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(width: 7, ),
+                                  Column(
+                                      children: [
+                                        showProfileImage(),
+                                        Profile_img_opt(),
+                                      ]),
 
-                          SizedBox(width: 30, ),
-                          Column(
-                            children: [
-                              ChangeLine(),
-                              showUserInfo(),
-                            ]
-                          )
-                        ]
-                      ),
+                                  SizedBox(width: 30, ),
+                                  Column(
+                                      children: [
+                                        ChangeLine(),
+                                        showUserInfo(),
+                                      ]
+                                  )
+                                ]
+                            ),
 
-                      SizedBox(height: 450.0, ),
-                      ButtonLine(),
-                    ]
-                )
-            )
-        );}
-          else {
-            return Center(child: CircularProgressIndicator());
-          }}),
+                            SizedBox(height: 450.0, ),
+                            ButtonLine(),
+                          ]
+                      )
+                  )
+              );}
+            else {
+              return Center(child: CircularProgressIndicator());
+            }}),
     );
   }
 
@@ -165,9 +165,9 @@ class _MyPageState extends State<MyPage> {
         child: Container(
             child: Center(
                 child: Container(
-                    //child: Img8List.isEmpty
-                        //? Image(image: AssetImage('assets/images/profile_img.jpg'),)
-                        child: _image == null
+                  //child: Img8List.isEmpty
+                  //? Image(image: AssetImage('assets/images/profile_img.jpg'),)
+                    child: _image == null
                         ? Image.memory(Uint8List.fromList(Img8List))
                         : Image.file(File(_image!.path))))));
   }
@@ -177,58 +177,58 @@ class _MyPageState extends State<MyPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Container(
-                    child: Column(
-                      children: [
-                        Text(friend_count.toString(),
-                          style: TextStyle(
-                            letterSpacing: 1.0,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                        child: Column(
+                            children: [
+                              Text(friend_count.toString(),
+                                style: TextStyle(
+                                  letterSpacing: 1.0,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
 
-                        SizedBox(height: 10),
+                              SizedBox(height: 10),
 
-                        Text("FREIND",
-                          style: TextStyle(
-                            letterSpacing: 1.0,
-                            fontSize: 10,
-                            color: Colors.black,
-                          )
-                        ),
-                  ])),
+                              Text("FREIND",
+                                  style: TextStyle(
+                                    letterSpacing: 1.0,
+                                    fontSize: 10,
+                                    color: Colors.black,
+                                  )
+                              ),
+                            ])),
 
-                  SizedBox(width: 30),
+                    SizedBox(width: 30),
 
-                  Container(
-                      child: Column(
-                        children: [
-                          Text(chatroom_count.toString(),
-                            style: TextStyle(
-                              letterSpacing: 1.0,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                          ),
+                    Container(
+                        child: Column(
+                            children: [
+                              Text(chatroom_count.toString(),
+                                style: TextStyle(
+                                  letterSpacing: 1.0,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
 
-                          SizedBox(height: 10),
+                              SizedBox(height: 10),
 
-                          Text("CHATROOM",
-                              style: TextStyle(
-                                letterSpacing: 1.0,
-                                fontSize: 10,
-                                color: Colors.black,
-                              )
-                          ),
-                        ])),
-              ]
-            )
+                              Text("CHATROOM",
+                                  style: TextStyle(
+                                    letterSpacing: 1.0,
+                                    fontSize: 10,
+                                    color: Colors.black,
+                                  )
+                              ),
+                            ])),
+                  ]
+              )
           ),
         ]
     );

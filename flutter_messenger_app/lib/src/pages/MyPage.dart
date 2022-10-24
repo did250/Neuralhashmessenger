@@ -194,7 +194,7 @@ class _MyPageState extends State<MyPage> {
 
                               SizedBox(height: 10),
 
-                              Text("FREIND",
+                              Text("FRIEND",
                                   style: TextStyle(
                                     letterSpacing: 1.0,
                                     fontSize: 10,

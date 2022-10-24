@@ -5,12 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:cryptography/cryptography.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:encrypt/encrypt.dart' as encrypt;
 
 String _name = "";
 String _other = "";
@@ -38,7 +34,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   bool _exist = false;
 
   Future uploadimage() async {
-    final uri = Uri.parse("https://10.0.2.2:5000/test");
+    final uri = Uri.parse("http://10.0.2.2:5000/test");
     var request = http.MultipartRequest('POST', uri);
     request.fields['name'] = "test";
     var pic = await http.MultipartFile.fromPath('images', _image!.path);
@@ -139,13 +135,8 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   }
 
   /// 메세지 하나 보낼 때, 서버에 갱신하는 함수
-  Future<void> updatemessage(String input, String friendUid) async {
+  Future<void> updatemessage(String input) async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-
-    /******** Encrypt **********/
-    final aesKey = encrypt.Key.fromBase64(await getAESKey(friendUid));
-    final encryptedData = await encryptData(input, aesKey);
-
     await ref
         .child('ChattingRoom')
         .child(this.number.toString())
@@ -154,7 +145,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         .set({
       "checked": 1,
       "sender": _name,
-      "text": encryptedData,
+      "text": input,
     });
   }
 
@@ -217,12 +208,11 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       }
     }
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    /*
     await ref
         .child('UserList')
         .child(FirebaseAuth.instance.currentUser!.uid.toString())
         .child('Num_Chatroom')
-        .set(rooms);*/
+        .set(rooms);
   }
 
   /// 메시지 보내면 친구의 채팅 목록에서 현재 채팅방을 맨 위로
@@ -258,9 +248,13 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final storage = FlutterSecureStorage();
     return Scaffold(
-      appBar: AppBar(title: Text(widget.name)),
+      appBar: AppBar(
+        title: Text(widget.name, style:TextStyle(fontSize: 16, color: Colors.black)),
+        iconTheme: IconThemeData(color: Colors.black,),
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: Container(
         child: Column(
           children: <Widget>[
@@ -290,7 +284,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                         if (map['sender'] == _name) {
                           mine = true;
                         }
-
                         Messages mas = Messages(
                           text: map['text'],
                           animationController: AnimationController(
@@ -342,26 +335,40 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       data: IconThemeData(color: Theme.of(context).accentColor),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(
+            color: Colors.grey.shade400,
+          )
+        ),
         child: Row(
           children: <Widget>[
             // TextButton(
             //   onPressed: null,
             //   child: Text("+"),
             // ),
-            FloatingActionButton(
-              child: Icon(Icons.wallpaper),
+            SizedBox(width: 10),
+            IconButton(
+              icon: Icon(Icons.add_a_photo),
+              color: Colors.black,
               tooltip: 'pick Image',
-              onPressed: () {
-                getImage(ImageSource.gallery);
-              },
-            ),
-            FloatingActionButton(
-              child: Icon(Icons.add_a_photo),
-              tooltip: 'pick Image',
+              padding: EdgeInsets.all(5),
+              constraints: BoxConstraints(),
               onPressed: () {
                 getImage(ImageSource.camera);
               },
             ),
+            IconButton(
+              icon: Icon(Icons.wallpaper),
+              color: Colors.black,
+              tooltip: 'pick Image',
+              padding: EdgeInsets.all(5),
+              constraints: BoxConstraints(),
+              onPressed: () {
+                getImage(ImageSource.gallery);
+              },
+            ),
+            SizedBox(width: 5),
             Flexible(
               child: TextField(
                 controller: _textController,
@@ -377,8 +384,9 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
             ),
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: CupertinoButton(
-                child: Text("보내기"),
+              child: IconButton(
+                icon: Icon(Icons.send),
+                color: Colors.black,
                 onPressed: _exist
                     ? () => _handleSubmitted(_textController.text)
                     : null,
@@ -390,11 +398,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     );
   }
 
+  //수정할곳 end to end
   void _handleSubmitted(String text) {
     _textController.clear();
     setState(() {
       _exist = false;
-      updatemessage(text, frienduid);
+      updatemessage(text);
     });
     Messages message = Messages(
       text: text,
@@ -434,7 +443,7 @@ class Messages extends StatelessWidget {
   Messages(
       {required this.text,
       required this.animationController,
-      required this.ismine}) {}
+      required this.ismine});
 
   @override
   Widget build(BuildContext context) {
@@ -479,9 +488,11 @@ class Messages extends StatelessWidget {
                     constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width * 0.2),
                     decoration: BoxDecoration(
-                      color: Colors.orange,
-                      borderRadius: BorderRadius.circular(3),
-                      border: Border.all(),
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                      ),
                     ),
                     alignment:
                         ismine ? Alignment.centerRight : Alignment.centerLeft,

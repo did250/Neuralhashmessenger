@@ -29,6 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
   CollectionReference CollectRef = FirebaseFirestore.instance.collection('users');
   late SharedPreferences pref;
 
+  TextEditingController userEmailController = TextEditingController(text: '');
+  TextEditingController userPwdController = TextEditingController(text: '');
+
   void initState() {
     super.initState();
     load_prefData();
@@ -45,6 +48,10 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() async {
       userEmail = (pref.getString('EmailId') ?? '');
       userPassword = (pref.getString('Password') ?? '');
+
+      userEmailController = TextEditingController(text: pref.getString('EmailId') ?? '');
+      userPwdController = TextEditingController(text: pref.getString('Password') ?? '');
+
       print("userEmail and userPwd is " + pref.getString('EmailId').toString() +
           " " + pref.getString('Password').toString());
 
@@ -139,6 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(height: 20,),
 
                         TextFormField(
+                          controller: userEmailController,
                           key: ValueKey(4),
                           validator: (value) {
                             if (value!.isEmpty ||
@@ -175,6 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         SizedBox(height: 8,),
 
                         TextFormField(
+                          controller: userPwdController,
                           obscureText: true,
                           key: ValueKey(5),
                           validator: (value) {
@@ -295,7 +304,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
 
                         SizedBox(height: 16,),
-
 
                         TextButton.icon(
                           onPressed: () {

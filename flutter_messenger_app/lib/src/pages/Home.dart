@@ -103,15 +103,15 @@ class _MainPage extends State<MainPage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.contact_page),
-            label: '',
+            label: 'Contact',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
-            label: '',
+            label: 'Chat',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle),
-            label: '',
+            label: 'Account',
           ),
         ],
         currentIndex: _selectedIndex,

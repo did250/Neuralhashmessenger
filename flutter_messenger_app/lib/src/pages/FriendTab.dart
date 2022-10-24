@@ -65,7 +65,7 @@ class _FriendTabState extends State<FriendTab> {
         if (item == null) {
           continue;
         }
-        myFriendList.add(Friend(item, await _getNameFromUid(item)));
+        myFriendList.add(Friend(item, await _getNameFromUid(item), await _getProfileImgFromUid(item)));
       }
     }
 
@@ -100,24 +100,35 @@ class _FriendTabState extends State<FriendTab> {
       return "null";
     }
   }
-
   _refreshState() {
     setState(() {});
   }
 
+  Future<String> _getProfileImgFromUid(String uid) async {
+    DatabaseReference ref = FirebaseDatabase.instance.ref('UserList/$uid/Profile_img');
+    final snapshot = await ref.get();
+    if (snapshot.exists) {
+      return snapshot.value.toString();
+    } else {
+      return "null";
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-          children: [
-            Container(
-                height: 500, width: 200, child: _buildListView(myFriendList)),
-            TextButton(
-                onPressed: onSignUp, child: Text('onSignUp(generate Keypair)')),
-            TextButton(onPressed: temp1, child: Text('generateAESKey')),
-            TextButton(onPressed: temp2, child: Text('getkey'))
-          ],
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(height: 500, width: 200, child: _buildListView(myFriendList)),
+              TextButton(onPressed: onSignUp, child: Text('onSignUp(generate Keypair)')),
+              TextButton(onPressed: temp1, child: Text('generateAESKey')),
+              TextButton(onPressed: temp2, child: Text('getkey'))
+            ],
+          ),
         ),
         floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add,),
+          backgroundColor: Colors.deepPurpleAccent.shade200,
           onPressed: () async {
             final result = await Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SearchFriendTab()));
@@ -148,8 +159,12 @@ class FriendTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(Icons.person),
-      title: Text(_friend.name),
+      leading: Image.memory(Uint8List.fromList(base64Decode(_friend.profile_img.toString()))),
+      title: Container(
+        height: 53,
+        alignment: Alignment.centerLeft,
+        child: Text(_friend.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, ),),
+      ),
       onTap: () async {
         final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
         /*새 채팅방*/
@@ -243,10 +258,13 @@ class FriendTile extends StatelessWidget {
   }
 }
 
+
+
 class Friend {
   String uid;
   String name;
-  Friend(this.uid, this.name);
+  String profile_img;
+  Friend(this.uid, this.name, this.profile_img);
 }
 
 Future<String> getAESKey(String friendUid) async {

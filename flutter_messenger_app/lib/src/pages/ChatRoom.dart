@@ -13,7 +13,9 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 String _name = "";
 String _other = "";
 List<Map<String, dynamic>> rooms = [];
-
+String _fuid ="";
+List<Messages> _message = <Messages>[];
+int len = 0;
 class ChatRoom extends StatefulWidget {
   final String name;
   final int number;
@@ -26,7 +28,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   final picker = ImagePicker();
   String imageString = "";
 
-  List<Messages> _message = <Messages>[];
+
   List<int> _checked = <int>[];
   String friendname = "";
   String frienduid = "";
@@ -34,6 +36,22 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   ChatRoomState(this.friendname, this.number);
   final TextEditingController _textController = TextEditingController();
   bool _exist = false;
+
+  Future<String> encryptData(String data, encrypt.Key aesKey) async {
+    final iv = encrypt.IV.fromLength(16);
+
+    final encrypter = encrypt.Encrypter(encrypt.AES(aesKey));
+
+    final encrypted = encrypter.encrypt(data, iv: iv);
+    print('encrypted : ${encrypted.base64}');
+    encrypt.Encrypted temp = encrypt.Encrypted.fromBase64(encrypted.base64);
+    final decrypted = encrypter.decrypt(temp, iv: iv);
+
+    print(decrypted);
+
+    return encrypted.base64;
+  }
+
 
   Future uploadimage() async {
     final uri = Uri.parse("http://10.0.2.2:5000/test");
@@ -134,6 +152,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         _name = snapshot.value.toString();
       });
     }
+
   }
 
   /// 메세지 하나 보낼 때, 서버에 갱신하는 함수
@@ -141,6 +160,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     final aesKey = encrypt.Key.fromBase64(await getAESKey(frienduid));
     final encryptedMessage = await encryptData(input, aesKey);
+
     await ref
         .child('ChattingRoom')
         .child(this.number.toString())
@@ -161,6 +181,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     DataSnapshot event = await query.get();
     setState(() {
       this.frienduid = event.children.elementAt(0).key ?? "error";
+      _fuid = this.frienduid;
     });
   }
 
@@ -278,12 +299,16 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                     _message.clear();
                     _checked.clear();
                     var noexist = true;
+                    int k = 0;
+                    print("cycle");
                     for (var item in (snapshot.data as DatabaseEvent)
                         .snapshot
                         .value as List<Object?>) {
+
                       bool mine = false;
                       Map<String, dynamic> map = Map<String, dynamic>.from(
                           item as Map<dynamic?, dynamic?>);
+
                       if (map['sender'] != 'none' && map['text'] != 'none') {
                         noexist = false;
                       }
@@ -297,10 +322,15 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                               duration: Duration(milliseconds: 0), vsync: this),
                           ismine: mine,
                         );
-                        _message.insert(0, mas);
-                        mas.animationController.forward();
-                        _checked.insert(0, map['checked']);
+
+                        if ( _message.length <= k) {
+                          print("in");
+                          _message.insert(0, mas);
+                          mas.animationController.forward();
+                          _checked.insert(0, map['checked']);
+                        }
                       }
+                      k += 1;
                     }
                     if (noexist) {
                       return Expanded(
@@ -441,6 +471,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   }
 }
 
+var _aesKey = null;
 class Messages extends StatelessWidget {
   final String text;
   final AnimationController animationController;
@@ -450,6 +481,35 @@ class Messages extends StatelessWidget {
       {required this.text,
       required this.animationController,
       required this.ismine});
+
+
+  String _decryptData(String data, encrypt.Key key) {
+    final iv = encrypt.IV.fromLength(16);
+    final encrypter = encrypt.Encrypter(encrypt.AES(key));
+    try {
+      final decrypted =
+      encrypter.decrypt(encrypt.Encrypted.fromBase64(data), iv: iv);
+      return decrypted;
+    } catch (exception) {
+      return 'error key does not match';
+    }
+  }
+  Future<String> _temp2(String input) async {
+    await onLogout();
+    _aesKey = encrypt.Key.fromBase64(await getAESKey(_fuid));
+
+    print("===========");
+    if (_aesKey == null) {
+      print("null입니다 ");
+    }
+    else {
+      print("not null");
+    }
+    final decrypteddata = _decryptData(input, _aesKey);
+    // print(decrypteddata.runtimeType);
+    // print(decrypteddata);
+    return decrypteddata;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -490,20 +550,74 @@ class Messages extends StatelessWidget {
                 //--------------------------------------------------------------------------------------------------
 
               } else {
-                return Container(
-                    constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.2),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
+                if (_aesKey == null) {
+                  return FutureBuilder<String>(
+                    future: _temp2(text),
+                    builder: (BuildContext context, AsyncSnapshot<
+                        String> snapshot) {
+                      if (ConnectionState.waiting == snapshot.connectionState) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      return Container(
+
+
+                          constraints: BoxConstraints(
+                              maxWidth: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width * 0.2),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                            ),
+                          ),
+                          alignment:
+                          ismine ? Alignment.centerRight : Alignment.centerLeft,
+                          padding: const EdgeInsets.all(5.0),
+
+                          child: Text(snapshot.data!,
+                              style: TextStyle(fontSize: 15.0)));
+                    },
+                    // child: Container(
+                    //
+                    //     constraints: BoxConstraints(
+                    //         maxWidth: MediaQuery.of(context).size.width * 0.2),
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.grey.shade300,
+                    //       borderRadius: BorderRadius.circular(10),
+                    //       border: Border.all(
+                    //         color: Colors.grey.shade300,
+                    //       ),
+                    //     ),
+                    //     alignment:
+                    //         ismine ? Alignment.centerRight : Alignment.centerLeft,
+                    //     padding: const EdgeInsets.all(5.0),
+                    //     child: Text("Loading", style: TextStyle(fontSize: 15.0))),
+                  );
+                }
+                else {
+                  return Container(
+                      constraints: BoxConstraints(
+                          maxWidth: MediaQuery
+                              .of(context)
+                              .size
+                              .width * 0.2),
+                      decoration: BoxDecoration(
                         color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                        ),
                       ),
-                    ),
-                    alignment:
-                        ismine ? Alignment.centerRight : Alignment.centerLeft,
-                    padding: const EdgeInsets.all(5.0),
-                    child: Text(text, style: TextStyle(fontSize: 15.0)));
+                      alignment:
+                      ismine ? Alignment.centerRight : Alignment.centerLeft,
+                      padding: const EdgeInsets.all(5.0),
+
+                      child: Text(_decryptData(text, _aesKey),
+                          style: TextStyle(fontSize: 15.0)));
+                }
               }
             })()),
           ],

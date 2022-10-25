@@ -5,8 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 String _name = "";
 String _other = "";
@@ -137,6 +139,8 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   /// 메세지 하나 보낼 때, 서버에 갱신하는 함수
   Future<void> updatemessage(String input) async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    final aesKey = encrypt.Key.fromBase64(await getAESKey(frienduid));
+    final encryptedMessage = await encryptData(input, aesKey);
     await ref
         .child('ChattingRoom')
         .child(this.number.toString())
@@ -145,7 +149,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         .set({
       "checked": 1,
       "sender": _name,
-      "text": input,
+      "text": encryptedMessage,
     });
   }
 
@@ -250,8 +254,11 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.name, style:TextStyle(fontSize: 16, color: Colors.black)),
-        iconTheme: IconThemeData(color: Colors.black,),
+        title: Text(widget.name,
+            style: TextStyle(fontSize: 16, color: Colors.black)),
+        iconTheme: IconThemeData(
+          color: Colors.black,
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -336,11 +343,10 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8.0),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          border: Border.all(
-            color: Colors.grey.shade400,
-          )
-        ),
+            borderRadius: BorderRadius.circular(50),
+            border: Border.all(
+              color: Colors.grey.shade400,
+            )),
         child: Row(
           children: <Widget>[
             // TextButton(

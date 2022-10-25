@@ -43,18 +43,6 @@ class _FriendTabState extends State<FriendTab> {
     print(decrypteddata);
   }
 
-  String decryptData(String data, encrypt.Key key) {
-    final iv = encrypt.IV.fromLength(16);
-    final encrypter = encrypt.Encrypter(encrypt.AES(key));
-    try {
-      final decrypted =
-          encrypter.decrypt(encrypt.Encrypted.fromBase64(data), iv: iv);
-      return decrypted;
-    } catch (exception) {
-      return 'error key does not match';
-    }
-  }
-
   Future<void> _getFriend() async {
     DatabaseReference myFriendRef = rootRef.child("UserList/$myUid/Friend");
     final snapshot = await myFriendRef.get();
@@ -65,7 +53,8 @@ class _FriendTabState extends State<FriendTab> {
         if (item == null) {
           continue;
         }
-        myFriendList.add(Friend(item, await _getNameFromUid(item), await _getProfileImgFromUid(item)));
+        myFriendList.add(Friend(item, await _getNameFromUid(item),
+            await _getProfileImgFromUid(item)));
       }
     }
 
@@ -100,12 +89,14 @@ class _FriendTabState extends State<FriendTab> {
       return "null";
     }
   }
+
   _refreshState() {
     setState(() {});
   }
 
   Future<String> _getProfileImgFromUid(String uid) async {
-    DatabaseReference ref = FirebaseDatabase.instance.ref('UserList/$uid/Profile_img');
+    DatabaseReference ref =
+        FirebaseDatabase.instance.ref('UserList/$uid/Profile_img');
     final snapshot = await ref.get();
     if (snapshot.exists) {
       return snapshot.value.toString();
@@ -119,15 +110,20 @@ class _FriendTabState extends State<FriendTab> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Container(height: 500, width: 200, child: _buildListView(myFriendList)),
-              TextButton(onPressed: onSignUp, child: Text('onSignUp(generate Keypair)')),
+              Container(
+                  height: 500, width: 200, child: _buildListView(myFriendList)),
+              TextButton(
+                  onPressed: onSignUp,
+                  child: Text('onSignUp(generate Keypair)')),
               TextButton(onPressed: temp1, child: Text('generateAESKey')),
               TextButton(onPressed: temp2, child: Text('getkey'))
             ],
           ),
         ),
         floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add,),
+          child: Icon(
+            Icons.add,
+          ),
           backgroundColor: Colors.deepPurpleAccent.shade200,
           onPressed: () async {
             final result = await Navigator.push(context,
@@ -159,11 +155,18 @@ class FriendTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Image.memory(Uint8List.fromList(base64Decode(_friend.profile_img.toString()))),
+      leading: Image.memory(
+          Uint8List.fromList(base64Decode(_friend.profile_img.toString()))),
       title: Container(
         height: 53,
         alignment: Alignment.centerLeft,
-        child: Text(_friend.name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, ),),
+        child: Text(
+          _friend.name,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       onTap: () async {
         final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
@@ -257,8 +260,6 @@ class FriendTile extends StatelessWidget {
     );
   }
 }
-
-
 
 class Friend {
   String uid;
@@ -426,4 +427,16 @@ Future<String> encryptData(String data, encrypt.Key aesKey) async {
   print(decrypted);
 
   return encrypted.base64;
+}
+
+String decryptData(String data, encrypt.Key key) {
+  final iv = encrypt.IV.fromLength(16);
+  final encrypter = encrypt.Encrypter(encrypt.AES(key));
+  try {
+    final decrypted =
+        encrypter.decrypt(encrypt.Encrypted.fromBase64(data), iv: iv);
+    return decrypted;
+  } catch (exception) {
+    return 'error key does not match';
+  }
 }

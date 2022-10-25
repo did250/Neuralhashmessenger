@@ -13,9 +13,10 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 String _name = "";
 String _other = "";
 List<Map<String, dynamic>> rooms = [];
-String _fuid ="";
+String _fuid = "";
 List<Messages> _message = <Messages>[];
 int len = 0;
+
 class ChatRoom extends StatefulWidget {
   final String name;
   final int number;
@@ -27,7 +28,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   File? _image;
   final picker = ImagePicker();
   String imageString = "";
-
 
   List<int> _checked = <int>[];
   String friendname = "";
@@ -51,7 +51,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
     return encrypted.base64;
   }
-
 
   Future uploadimage() async {
     final uri = Uri.parse("http://10.0.2.2:5000/test");
@@ -152,7 +151,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         _name = snapshot.value.toString();
       });
     }
-
   }
 
   /// 메세지 하나 보낼 때, 서버에 갱신하는 함수
@@ -304,7 +302,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                     for (var item in (snapshot.data as DatabaseEvent)
                         .snapshot
                         .value as List<Object?>) {
-
                       bool mine = false;
                       Map<String, dynamic> map = Map<String, dynamic>.from(
                           item as Map<dynamic?, dynamic?>);
@@ -323,7 +320,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                           ismine: mine,
                         );
 
-                        if ( _message.length <= k) {
+                        if (_message.length <= k) {
                           print("in");
                           _message.insert(0, mas);
                           mas.animationController.forward();
@@ -472,6 +469,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 }
 
 var _aesKey = null;
+
 class Messages extends StatelessWidget {
   final String text;
   final AnimationController animationController;
@@ -482,27 +480,25 @@ class Messages extends StatelessWidget {
       required this.animationController,
       required this.ismine});
 
-
   String _decryptData(String data, encrypt.Key key) {
     final iv = encrypt.IV.fromLength(16);
     final encrypter = encrypt.Encrypter(encrypt.AES(key));
     try {
       final decrypted =
-      encrypter.decrypt(encrypt.Encrypted.fromBase64(data), iv: iv);
+          encrypter.decrypt(encrypt.Encrypted.fromBase64(data), iv: iv);
       return decrypted;
     } catch (exception) {
       return 'error key does not match';
     }
   }
+
   Future<String> _temp2(String input) async {
-    await onLogout();
     _aesKey = encrypt.Key.fromBase64(await getAESKey(_fuid));
 
     print("===========");
     if (_aesKey == null) {
       print("null입니다 ");
-    }
-    else {
+    } else {
       print("not null");
     }
     final decrypteddata = _decryptData(input, _aesKey);
@@ -553,19 +549,15 @@ class Messages extends StatelessWidget {
                 if (_aesKey == null) {
                   return FutureBuilder<String>(
                     future: _temp2(text),
-                    builder: (BuildContext context, AsyncSnapshot<
-                        String> snapshot) {
+                    builder:
+                        (BuildContext context, AsyncSnapshot<String> snapshot) {
                       if (ConnectionState.waiting == snapshot.connectionState) {
                         return Center(child: CircularProgressIndicator());
                       }
                       return Container(
-
-
                           constraints: BoxConstraints(
-                              maxWidth: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width * 0.2),
+                              maxWidth:
+                                  MediaQuery.of(context).size.width * 0.2),
                           decoration: BoxDecoration(
                             color: Colors.grey.shade300,
                             borderRadius: BorderRadius.circular(10),
@@ -573,10 +565,10 @@ class Messages extends StatelessWidget {
                               color: Colors.grey.shade300,
                             ),
                           ),
-                          alignment:
-                          ismine ? Alignment.centerRight : Alignment.centerLeft,
+                          alignment: ismine
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
                           padding: const EdgeInsets.all(5.0),
-
                           child: Text(snapshot.data!,
                               style: TextStyle(fontSize: 15.0)));
                     },
@@ -596,14 +588,10 @@ class Messages extends StatelessWidget {
                     //     padding: const EdgeInsets.all(5.0),
                     //     child: Text("Loading", style: TextStyle(fontSize: 15.0))),
                   );
-                }
-                else {
+                } else {
                   return Container(
                       constraints: BoxConstraints(
-                          maxWidth: MediaQuery
-                              .of(context)
-                              .size
-                              .width * 0.2),
+                          maxWidth: MediaQuery.of(context).size.width * 0.2),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade300,
                         borderRadius: BorderRadius.circular(10),
@@ -612,9 +600,8 @@ class Messages extends StatelessWidget {
                         ),
                       ),
                       alignment:
-                      ismine ? Alignment.centerRight : Alignment.centerLeft,
+                          ismine ? Alignment.centerRight : Alignment.centerLeft,
                       padding: const EdgeInsets.all(5.0),
-
                       child: Text(_decryptData(text, _aesKey),
                           style: TextStyle(fontSize: 15.0)));
                 }

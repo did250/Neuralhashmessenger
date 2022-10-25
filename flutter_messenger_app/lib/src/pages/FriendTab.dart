@@ -34,7 +34,7 @@ class _FriendTabState extends State<FriendTab> {
   }
 
   Future<void> temp2() async {
-    await onLogout();
+    onLogOut();
     final encryptedSnapshot = await rootRef.child('UserList/$myUid/Test').get();
     final encryptedBase64 = encryptedSnapshot.value.toString();
     final aesKey =
@@ -113,7 +113,7 @@ class _FriendTabState extends State<FriendTab> {
               Container(
                   height: 500, width: 200, child: _buildListView(myFriendList)),
               TextButton(
-                  onPressed: onSignUp,
+                  onPressed: () => onSignUp('testpassword'),
                   child: Text('onSignUp(generate Keypair)')),
               TextButton(onPressed: temp1, child: Text('generateAESKey')),
               TextButton(onPressed: temp2, child: Text('getkey'))
@@ -341,17 +341,15 @@ Future<encrypt.Key> generatePbkdf2(String password, Uint8List salt) async {
       base64Encode(await generatedPbkdf2.extractBytes()));
 }
 
-Future<void> onLogout() async {
+void onLogOut() async {
   final storage = FlutterSecureStorage();
   await storage.deleteAll();
 }
 
-Future<void> onSignUp() async {
+void onSignUp(String password) async {
   final storage = FlutterSecureStorage();
   final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
   final myUid = FirebaseAuth.instance.currentUser?.uid;
-
-  String password = 'testpassword';
 
   final myKeyPair = await generateECDHKey();
   final myPublicKey = await myKeyPair.extractPublicKey();

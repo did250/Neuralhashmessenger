@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_messenger_app/src/pages/Home.dart';
@@ -32,28 +33,29 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController userEmailController = TextEditingController(text: '');
   TextEditingController userPwdController = TextEditingController(text: '');
 
+  final storage = FlutterSecureStorage();
+
   void initState() {
     super.initState();
     load_prefData();
   }
 
   void set_prefData(String prefID, String prefPwd) async {
-    pref = await SharedPreferences.getInstance();
-    pref.setString('EmailId', prefID);
-    pref.setString('Password', prefPwd);
+    final storage = FlutterSecureStorage();
+    await storage.write(key: 'prefEmailId', value: prefID);
+    await storage.write(key: 'prefPassword', value: prefPwd);
   }
 
   void load_prefData() async {
     pref = await SharedPreferences.getInstance();
+    final storage = FlutterSecureStorage();
+
     setState(() async {
-      userEmail = (pref.getString('EmailId') ?? '');
-      userPassword = (pref.getString('Password') ?? '');
+      userEmail = (await storage.read(key: 'prefEmailId') ?? '');
+      userPassword = (await storage.read(key: 'prefPassword') ?? '');
 
-      userEmailController = TextEditingController(text: pref.getString('EmailId') ?? '');
-      userPwdController = TextEditingController(text: pref.getString('Password') ?? '');
-
-      print("userEmail and userPwd is " + pref.getString('EmailId').toString() +
-          " " + pref.getString('Password').toString());
+      userEmailController = TextEditingController(text: await storage.read(key: 'prefEmailId') ?? '');
+      userPwdController = TextEditingController(text: await storage.read(key: 'prefPassword') ?? '');
 
       try {
         final newUser =

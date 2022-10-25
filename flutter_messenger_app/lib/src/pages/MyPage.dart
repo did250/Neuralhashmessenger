@@ -444,6 +444,12 @@ class _MyPageState extends State<MyPage> {
                       onPressed: () async {
                         await authentication.sendPasswordResetEmail(email: loggedUser!.email.toString());
                         authentication.signOut();
+
+                        SharedPreferences pref = await SharedPreferences.getInstance();
+                        pref.clear();
+
+                        onLogOut();
+
                         Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
                         Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
                       },
@@ -497,6 +503,8 @@ class _MyPageState extends State<MyPage> {
 
                             SharedPreferences pref = await SharedPreferences.getInstance();
                             pref.clear();
+
+                            onLogOut();
 
                             Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
                             Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);},

@@ -25,12 +25,9 @@ class _FriendTabState extends State<FriendTab> {
     _getFriend();
   }
 
-  Future<void> temp1() async {
-    final aesKey =
-        encrypt.Key.fromBase64(await getAESKey('STnBBGCGJNOjQqtmnFAt7Al1HQM2'));
-    final encryptedBase64 =
-        await encryptData('this is the plain text to be encrypted', aesKey);
-    rootRef.child('UserList/$myUid').update({'Test': encryptedBase64});
+  Future<void> keyReset() async {
+    onLogOut();
+    onSignUp((await storage.read(key: 'prefPassword'))!);
   }
 
   Future<void> temp2() async {
@@ -113,10 +110,12 @@ class _FriendTabState extends State<FriendTab> {
               Container(
                   height: 500, width: 200, child: _buildListView(myFriendList)),
               TextButton(
-                  onPressed: () => onSignUp('testpassword'),
-                  child: Text('onSignUp(generate Keypair)')),
-              TextButton(onPressed: temp1, child: Text('generateAESKey')),
-              TextButton(onPressed: temp2, child: Text('getkey'))
+                  onPressed: () {
+                    keyReset();
+                  },
+                  child: Text('Reset Key Pair')),
+              //TextButton(onPressed: temp1, child: Text('generateAESKey')),
+              //TextButton(onPressed: temp2, child: Text('getkey'))
             ],
           ),
         ),
@@ -278,12 +277,15 @@ Future<String> getAESKey(String friendUid) async {
 
   /*저장된 키 있을경우 secure storage에서 복원 */
   if (sharedAESKey != null) {
-    print('get aes key fromstorage');
+    print('get aes key from local storage');
     return sharedAESKey;
   }
   /* 없을경우 Diffie-Hellman으로 생성 */
   print('generate aes key from diffie-hellman');
-  final myPrivateKey = base64Decode(await getPrivateKey());
+  final password = (await storage.read(key: 'prefPassword'))!;
+  final encodedPrivateKey = await getPrivateKey(password);
+
+  final myPrivateKey = base64Decode(encodedPrivateKey);
 
   final reomotePublicKeySnapshot =
       await rootRef.child('UserList/$friendUid/PublicKey').get();
@@ -371,11 +373,10 @@ void onSignUp(String password) async {
   await storage.write(key: 'myPrivateKey', value: base64Encode(myPrivateKey));
 }
 
-Future<String> getPrivateKey() async {
+Future<String> getPrivateKey(String password) async {
   final storage = FlutterSecureStorage();
   final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
   final myUid = FirebaseAuth.instance.currentUser?.uid;
-  String password = 'testpassword';
   final myPrivateKey = await storage.read(key: 'myPrivateKey');
 
   /* secure storage에 존재할 경우 */

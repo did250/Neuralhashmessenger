@@ -26,18 +26,11 @@ class _FriendTabState extends State<FriendTab> {
   }
 
   Future<void> keyReset() async {
+    String temp = (await storage.read(key: 'prefPassword'))!;
     onLogOut();
-    onSignUp((await storage.read(key: 'prefPassword'))!);
-  }
+    await storage.write(key: 'prefPassword', value: temp);
 
-  Future<void> temp2() async {
-    onLogOut();
-    final encryptedSnapshot = await rootRef.child('UserList/$myUid/Test').get();
-    final encryptedBase64 = encryptedSnapshot.value.toString();
-    final aesKey =
-        encrypt.Key.fromBase64(await getAESKey('STnBBGCGJNOjQqtmnFAt7Al1HQM2'));
-    final decrypteddata = decryptData(encryptedBase64, aesKey);
-    print(decrypteddata);
+    onSignUp((await storage.read(key: 'prefPassword'))!);
   }
 
   Future<void> _getFriend() async {

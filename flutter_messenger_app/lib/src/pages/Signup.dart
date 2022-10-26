@@ -206,9 +206,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
                             await CollectRef.add({
                               'uid': loggedUser!.uid.toString(),
-                              'Email': userEmail,
-                              'Name': userName,
-                              'Friend': ""
                             });
 
                             Navigator.push(

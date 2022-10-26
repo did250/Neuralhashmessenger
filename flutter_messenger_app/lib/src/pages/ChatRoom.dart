@@ -53,7 +53,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   }
 
   Future uploadimage() async {
-    final uri = Uri.parse("http://10.0.2.2:5000/test");
+    final uri = Uri.parse("https://10.0.2.2:5000/test");
     var request = http.MultipartRequest('POST', uri);
     request.fields['name'] = "test";
     var pic = await http.MultipartFile.fromPath('images', _image!.path);
@@ -492,7 +492,7 @@ class Messages extends StatelessWidget {
     }
   }
 
-  Future<String> _temp2(String input) async {
+  Future<String> _getAes(String input) async {
     _aesKey = encrypt.Key.fromBase64(await getAESKey(_fuid));
 
     print("===========");
@@ -548,7 +548,7 @@ class Messages extends StatelessWidget {
               } else {
                 if (_aesKey == null) {
                   return FutureBuilder<String>(
-                    future: _temp2(text),
+                    future: _getAes(text),
                     builder:
                         (BuildContext context, AsyncSnapshot<String> snapshot) {
                       if (ConnectionState.waiting == snapshot.connectionState) {

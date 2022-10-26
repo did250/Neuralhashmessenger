@@ -27,8 +27,10 @@ class _FriendTabState extends State<FriendTab> {
 
   Future<void> keyReset() async {
     String temp = (await storage.read(key: 'prefPassword'))!;
+    String temp2 = (await storage.read(key: 'prefEmailId'))!;
     onLogOut();
     await storage.write(key: 'prefPassword', value: temp);
+    await storage.write(key: 'prefEmailId', value: temp2);
 
     onSignUp((await storage.read(key: 'prefPassword'))!);
   }

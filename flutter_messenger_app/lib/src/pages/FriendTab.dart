@@ -28,7 +28,7 @@ class _FriendTabState extends State<FriendTab> {
   Future<void> keyReset() async {
     String temp = (await storage.read(key: 'prefPassword'))!;
     String temp2 = (await storage.read(key: 'prefEmailId'))!;
-    onLogOut();
+    await onLogOut();
     await storage.write(key: 'prefPassword', value: temp);
     await storage.write(key: 'prefEmailId', value: temp2);
 
@@ -338,7 +338,7 @@ Future<encrypt.Key> generatePbkdf2(String password, Uint8List salt) async {
       base64Encode(await generatedPbkdf2.extractBytes()));
 }
 
-void onLogOut() async {
+Future<void> onLogOut() async {
   final storage = FlutterSecureStorage();
   await storage.deleteAll();
 }

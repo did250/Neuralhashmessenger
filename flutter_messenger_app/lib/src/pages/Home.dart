@@ -5,7 +5,6 @@ import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
 import 'package:flutter_messenger_app/src/pages/MyPage.dart';
 import 'package:flutter_messenger_app/src/pages/SettingsTab.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
@@ -17,9 +16,11 @@ class Home extends StatelessWidget {
         body: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (BuildContext context, AsyncSnapshot<User?> snapshot) {
-            if (!snapshot.hasData) { //new User
+            if (!snapshot.hasData) {
+              //new User
               return LoginScreen();
-            } else { //Login
+            } else {
+              //Login
               return MainPage();
             }
           },
@@ -70,13 +71,11 @@ class _MainPage extends State<MainPage> {
                 alignment: Alignment.center,
                 child: Image(
                   image: AssetImage('assets/images/logo.png'),
-                )
-            ),
+                )),
           ],
         ),
         backgroundColor: Colors.white,
         elevation: 0,
-
         actions: [
           IconButton(
             icon: Icon(
@@ -86,11 +85,13 @@ class _MainPage extends State<MainPage> {
             onPressed: () async {
               authentication.signOut();
 
-              SharedPreferences pref = await SharedPreferences.getInstance();
-              pref.clear();
+              await onLogOut();
 
               Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+              );
             },
           )
         ],

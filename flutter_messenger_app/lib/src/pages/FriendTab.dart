@@ -35,6 +35,13 @@ class _FriendTabState extends State<FriendTab> {
     onSignUp((await storage.read(key: 'prefPassword'))!);
   }
 
+  Future<void> checkKey() async {
+    storage.delete(key: 'fBnzi31wIPfI6xDejCq8AV9n9vj1');
+    storage.delete(key: '0G8WsuiGipVyTFHjs6Xhjs9apHq1');
+    print(base64Decode(await getAESKey('fBnzi31wIPfI6xDejCq8AV9n9vj1')));
+    print(base64Decode(await getAESKey('0G8WsuiGipVyTFHjs6Xhjs9apHq1')));
+  }
+
   Future<void> _getFriend() async {
     DatabaseReference myFriendRef = rootRef.child("UserList/$myUid/Friend");
     final snapshot = await myFriendRef.get();
@@ -106,9 +113,9 @@ class _FriendTabState extends State<FriendTab> {
                   height: 500, width: 200, child: _buildListView(myFriendList)),
               TextButton(
                   onPressed: () {
-                    keyReset();
+                    checkKey();
                   },
-                  child: Text('Reset Key Pair')),
+                  child: Text('check aes Key')),
               //TextButton(onPressed: temp1, child: Text('generateAESKey')),
               //TextButton(onPressed: temp2, child: Text('getkey'))
             ],
@@ -125,7 +132,7 @@ class _FriendTabState extends State<FriendTab> {
             if (result == 'error') {
               print('error');
             } else {
-              print(result);
+              //print(result);
               await _addFriend(result);
               _getFriend();
             }

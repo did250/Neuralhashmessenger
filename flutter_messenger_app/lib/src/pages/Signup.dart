@@ -205,6 +205,10 @@ class _SignupScreenState extends State<SignupScreen> {
                             });
                             onSignUp(userPassword);
 
+                            final storage = FlutterSecureStorage();
+                            await storage.write(key: 'prefEmailId', value: userEmail);
+                            await storage.write(key: 'prefPassword', value: userPassword);
+
                             await CollectRef.add({
                               'uid': loggedUser!.uid.toString(),
                             });

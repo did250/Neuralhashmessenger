@@ -7,7 +7,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_messenger_app/src/pages/Home.dart';
 import 'package:flutter_messenger_app/src/pages/Signup.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -27,9 +26,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   List<String> UidList = [];
 
-  CollectionReference CollectRef =
-      FirebaseFirestore.instance.collection('users');
-  late SharedPreferences pref;
+  CollectionReference CollectRef = FirebaseFirestore.instance.collection('users');
+
 
   TextEditingController userEmailController = TextEditingController(text: '');
   TextEditingController userPwdController = TextEditingController(text: '');
@@ -48,7 +46,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void load_prefData() async {
-    //pref = await SharedPreferences.getInstance();
     final storage = FlutterSecureStorage();
 
     setState(() async {

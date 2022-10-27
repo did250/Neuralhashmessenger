@@ -483,6 +483,7 @@ class Messages extends StatelessWidget {
   String _decryptData(String data, encrypt.Key key) {
     final iv = encrypt.IV.fromLength(16);
     final encrypter = encrypt.Encrypter(encrypt.AES(key));
+    print(key.bytes);
     try {
       final decrypted =
           encrypter.decrypt(encrypt.Encrypted.fromBase64(data), iv: iv);

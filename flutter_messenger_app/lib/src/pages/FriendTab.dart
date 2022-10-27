@@ -36,9 +36,8 @@ class _FriendTabState extends State<FriendTab> {
   }
 
   Future<void> checkKey() async {
-    storage.delete(key: 'fBnzi31wIPfI6xDejCq8AV9n9vj1');
     storage.delete(key: '0G8WsuiGipVyTFHjs6Xhjs9apHq1');
-    print(base64Decode(await getAESKey('fBnzi31wIPfI6xDejCq8AV9n9vj1')));
+
     print(base64Decode(await getAESKey('0G8WsuiGipVyTFHjs6Xhjs9apHq1')));
   }
 
@@ -286,6 +285,8 @@ Future<String> getAESKey(String friendUid) async {
   print('generate aes key from diffie-hellman');
   final password = (await storage.read(key: 'prefPassword'))!;
   final encodedPrivateKey = await getPrivateKey(password);
+  print('password : ' + password);
+  print('encoded private key : ' + encodedPrivateKey);
 
   final myPrivateKey = base64Decode(encodedPrivateKey);
 

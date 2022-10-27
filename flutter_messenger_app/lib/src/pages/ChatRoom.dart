@@ -547,65 +547,46 @@ class Messages extends StatelessWidget {
                 //--------------------------------------------------------------------------------------------------
 
               } else {
-                if (_aesKey == null) {
-                  return FutureBuilder<String>(
-                    future: _getAes(text),
-                    builder:
-                        (BuildContext context, AsyncSnapshot<String> snapshot) {
-                      if (ConnectionState.waiting == snapshot.connectionState) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      return Container(
-                          constraints: BoxConstraints(
-                              maxWidth:
-                                  MediaQuery.of(context).size.width * 0.2),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: Colors.grey.shade300,
-                            ),
-                          ),
-                          alignment: ismine
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          padding: const EdgeInsets.all(5.0),
-                          child: Text(snapshot.data!,
-                              style: TextStyle(fontSize: 15.0)));
-                    },
-                    // child: Container(
-                    //
-                    //     constraints: BoxConstraints(
-                    //         maxWidth: MediaQuery.of(context).size.width * 0.2),
-                    //     decoration: BoxDecoration(
-                    //       color: Colors.grey.shade300,
-                    //       borderRadius: BorderRadius.circular(10),
-                    //       border: Border.all(
-                    //         color: Colors.grey.shade300,
-                    //       ),
-                    //     ),
-                    //     alignment:
-                    //         ismine ? Alignment.centerRight : Alignment.centerLeft,
-                    //     padding: const EdgeInsets.all(5.0),
-                    //     child: Text("Loading", style: TextStyle(fontSize: 15.0))),
-                  );
-                } else {
-                  return Container(
-                      constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.2),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
+                return FutureBuilder<String>(
+                  future: _getAes(text),
+                  builder:
+                      (BuildContext context, AsyncSnapshot<String> snapshot) {
+                    if (ConnectionState.waiting == snapshot.connectionState) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    return Container(
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.2),
+                        decoration: BoxDecoration(
                           color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                          ),
                         ),
-                      ),
-                      alignment:
-                          ismine ? Alignment.centerRight : Alignment.centerLeft,
-                      padding: const EdgeInsets.all(5.0),
-                      child: Text(_decryptData(text, _aesKey),
-                          style: TextStyle(fontSize: 15.0)));
-                }
+                        alignment: ismine
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        padding: const EdgeInsets.all(5.0),
+                        child: Text(snapshot.data!,
+                            style: TextStyle(fontSize: 15.0)));
+                  },
+                  // child: Container(
+                  //
+                  //     constraints: BoxConstraints(
+                  //         maxWidth: MediaQuery.of(context).size.width * 0.2),
+                  //     decoration: BoxDecoration(
+                  //       color: Colors.grey.shade300,
+                  //       borderRadius: BorderRadius.circular(10),
+                  //       border: Border.all(
+                  //         color: Colors.grey.shade300,
+                  //       ),
+                  //     ),
+                  //     alignment:
+                  //         ismine ? Alignment.centerRight : Alignment.centerLeft,
+                  //     padding: const EdgeInsets.all(5.0),
+                  //     child: Text("Loading", style: TextStyle(fontSize: 15.0))),
+                );
               }
             })()),
           ],

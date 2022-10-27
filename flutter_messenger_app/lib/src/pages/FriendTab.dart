@@ -38,7 +38,7 @@ class _FriendTabState extends State<FriendTab> {
   Future<void> checkKey() async {
     storage.delete(key: '0G8WsuiGipVyTFHjs6Xhjs9apHq1');
 
-    print(base64Decode(await getAESKey('0G8WsuiGipVyTFHjs6Xhjs9apHq1')));
+    print(base64Decode(await getAESKey('HWR8mh2eZLP1JM3cHJDercnFv1A3')));
   }
 
   Future<void> _getFriend() async {
@@ -172,7 +172,6 @@ class FriendTile extends StatelessWidget {
         final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
         /*새 채팅방*/
         final myUid = FirebaseAuth.instance.currentUser?.uid;
-        final storage = FlutterSecureStorage();
 
         /* check duplicates*/
         DatabaseReference ref = FirebaseDatabase.instance.ref();
@@ -269,7 +268,7 @@ class Friend {
 }
 
 Future<String> getAESKey(String friendUid) async {
-  final storage = FlutterSecureStorage();
+  const storage = FlutterSecureStorage();
   final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
   final myUid = FirebaseAuth.instance.currentUser?.uid;
 
@@ -347,12 +346,12 @@ Future<encrypt.Key> generatePbkdf2(String password, Uint8List salt) async {
 }
 
 Future<void> onLogOut() async {
-  final storage = FlutterSecureStorage();
+  const storage = FlutterSecureStorage();
   await storage.deleteAll();
 }
 
 void onSignUp(String password) async {
-  final storage = FlutterSecureStorage();
+  const storage = FlutterSecureStorage();
   final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
   final myUid = FirebaseAuth.instance.currentUser?.uid;
 

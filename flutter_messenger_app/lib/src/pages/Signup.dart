@@ -1,12 +1,9 @@
-import 'dart:convert';
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
-import 'package:flutter_messenger_app/src/pages/Home.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_messenger_app/src/pages/Home.dart';
+import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({Key? key}) : super(key: key);
@@ -26,9 +23,6 @@ class _SignupScreenState extends State<SignupScreen> {
   String userName = '';
   String userEmail = '';
   String userPassword = '';
-
-  CollectionReference CollectRef =
-      FirebaseFirestore.instance.collection('users');
 
   final storage = FlutterSecureStorage();
   final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
@@ -51,10 +45,11 @@ class _SignupScreenState extends State<SignupScreen> {
               children: [
                 Center(
                     child: Image(
-                  image: AssetImage('assets/images/profile_img.jpg'),
-                  width: 170,
-                  height: 190,
-                )),
+                      image: AssetImage('assets/images/profile_img.jpg'),
+                      width: 170,
+                      height: 190,
+                  )
+                ),
                 SizedBox(
                   height: 20,
                 ),
@@ -181,8 +176,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             password: userPassword,
                           );
 
-                          if (newUser.user != null) {
-                            //SIGNUP SUCCESS
+                          if (newUser.user != null) { //SIGNUP SUCCESS
                             try {
                               final user = authentication.currentUser;
                               if (user != null) {
@@ -192,8 +186,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               print(e);
                             }
 
-                            DatabaseReference ref = FirebaseDatabase.instance
-                                .ref("UserList/" + loggedUser!.uid.toString());
+                            DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + loggedUser!.uid.toString());
 
                             await ref.set({
                               "Email": userEmail,
@@ -209,25 +202,16 @@ class _SignupScreenState extends State<SignupScreen> {
                             await storage.write(key: 'prefEmailId', value: userEmail);
                             await storage.write(key: 'prefPassword', value: userPassword);
 
-                            await CollectRef.add({
-                              'uid': loggedUser!.uid.toString(),
-                            });
-
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) {
                                   return Home();
                                 },
                               ),
                             );
                           }
-                        } catch (e) {
-                          //SIGNUP FAILED
+                        } catch (e) { //SIGNUP FAILED
                           print(e);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
+                            SnackBar(content:
                                   Text('Please check your email and password'),
                               backgroundColor: Colors.blue,
                             ),

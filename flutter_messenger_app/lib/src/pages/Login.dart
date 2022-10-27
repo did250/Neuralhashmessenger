@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_messenger_app/src/pages/Home.dart';
 import 'package:flutter_messenger_app/src/pages/Signup.dart';
 
@@ -23,11 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final formKey = GlobalKey<FormState>();
   String userEmail = '';
   String userPassword = '';
-
-  List<String> UidList = [];
-
-  CollectionReference CollectRef = FirebaseFirestore.instance.collection('users');
-
 
   TextEditingController userEmailController = TextEditingController(text: '');
   TextEditingController userPwdController = TextEditingController(text: '');
@@ -66,10 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (newUser.user != null) {
           set_prefData(userEmail, userPassword);
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
                 return Home();
               },
             ),
@@ -82,60 +70,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<UserCredential> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-
-    final UserCredential authResult =
-        await FirebaseAuth.instance.signInWithCredential(credential);
-
-    final String? uid = authResult.user?.uid;
-    final String? gmail = authResult.user?.email;
-    final String? displayName = authResult.user?.displayName;
-
-    if (UidList.contains(uid) == false) {
-      //new member
-      DatabaseReference ref =
-          FirebaseDatabase.instance.ref("UserList/" + uid.toString());
-
-      await ref.set({
-        "Email": gmail,
-        "Name": displayName,
-        "Friend": "",
-        "Num_Chatroom": "",
-        "Profile_img": "",
-      });
-
-      await CollectRef.add(
-          {'uid': uid, 'Email': gmail, 'Name': displayName, 'Friend': ""});
-    }
-
-    return await FirebaseAuth.instance.signInWithCredential(credential);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder(
-          stream: CollectRef.snapshots(),
-          builder: (BuildContext context,
-              AsyncSnapshot<QuerySnapshot> streamSnapshot) {
-            if (streamSnapshot.hasData) {
-              UidList = [];
-              int count = streamSnapshot.data!.docs.length;
-              for (int i = 0; i < count; i++) {
-                final DocumentSnapshot documentSnapshot =
-                    streamSnapshot.data!.docs[i];
-                UidList.add(documentSnapshot['uid']);
-              }
-              return SingleChildScrollView(
+      body: SingleChildScrollView(
                 child: Container(
                   alignment: Alignment.center,
                   margin: EdgeInsets.only(top: 200),
@@ -177,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide:
-                                    BorderSide(color: Color(0XFFA7BCC7)),
+                                BorderSide(color: Color(0XFFA7BCC7)),
                                 borderRadius: BorderRadius.all(
                                   Radius.circular(20.0),
                                 ),
@@ -213,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderSide:
-                                    BorderSide(color: Color(0XFFA7BCC7)),
+                                BorderSide(color: Color(0XFFA7BCC7)),
                                 borderRadius: BorderRadius.all(
                                   Radius.circular(20.0),
                                 ),
@@ -314,36 +252,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             },
                           ),
                         ),
-                        SizedBox(
-                          height: 16,
-                        ),
-                        TextButton.icon(
-                          onPressed: () {
-                            signInWithGoogle();
-                            //Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()),);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Home()),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                              primary: Colors.white,
-                              minimumSize: Size(155, 40),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
-                              backgroundColor: Color(0xFFDE4B39)),
-                          icon: Icon(Icons.add),
-                          label: Text('Google'),
-                        ),
                       ],
                     ),
                   ),
                 ),
-              );
-            } else {
-              return Center(child: CircularProgressIndicator());
-            }
-          }),
-    );
-  }
+              ),
+          );
+      }
 }

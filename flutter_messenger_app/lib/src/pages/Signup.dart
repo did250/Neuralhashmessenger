@@ -192,7 +192,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               "Email": userEmail,
                               "Name": userName,
                               "Friend": "",
-                              "Num_Chatroom": "",
+                              // "Num_Chatroom": "",
                               "Profile_img": profile_img_base64,
                               "Next_Chatroom": 0
                             });

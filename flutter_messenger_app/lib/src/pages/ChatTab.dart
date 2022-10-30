@@ -134,6 +134,7 @@ class ChatTabState extends State<ChatTab> {
                       room.clear();
                       for (var item in (snapshot.data as DatabaseEvent).snapshot.value as List<Object?>) {
                         Map<String, dynamic> map = Map<String, dynamic>.from(item as Map<dynamic, dynamic>);
+
                         numbers.add(map["number"]);
                         names.add(map["with"]);
                         check.add(map["check"]?.contains(_name));

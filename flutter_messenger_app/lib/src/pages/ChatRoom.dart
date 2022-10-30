@@ -61,9 +61,13 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     var streamdresponse = await request.send();
     var response = await http.Response.fromStream(streamdresponse);
 
-    if (response.body == "true") {
-      _showDialogT();
-    } else if (response.body == "false") {
+    if (response.body == "copyright") {
+      _showDialogT("copyright");
+    }
+    else if (response.body == "dangerous"){
+      _showDialogT("dangerous");
+    }
+    else if (response.body == "false") {
       _showDialogF();
     }
   }
@@ -82,13 +86,13 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   }
 
   // 검열 통과 못한 경우 => "true 일 때"
-  void _showDialogT() {
+  void _showDialogT(String reason) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
-          title: new Text("위험한 이미지입니다. 전송할 수 없습니다."),
+          title: new Text(reason + " Image. 전송할 수 없습니다."),
           // content: new Text("Alert Dialog body"),
           actions: <Widget>[
             new FlatButton(

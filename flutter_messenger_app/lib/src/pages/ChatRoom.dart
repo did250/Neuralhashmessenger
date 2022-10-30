@@ -28,7 +28,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   File? _image;
   final picker = ImagePicker();
   String imageString = "";
-
+  int _lastmessage = 0;
   List<int> _checked = <int>[];
   String friendname = "";
   String frienduid = "";
@@ -163,7 +163,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         .child('ChattingRoom')
         .child(this.number.toString())
         .child('Messages')
-        .child((_message.length).toString())
+        .child((_lastmessage).toString())
         .set({
       "checked": 1,
       "sender": _name,
@@ -298,36 +298,49 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                     _checked.clear();
                     var noexist = true;
                     int k = 0;
+                    _lastmessage = 0;
                     print("cycle");
                     for (var item in (snapshot.data as DatabaseEvent)
                         .snapshot
                         .value as List<Object?>) {
-                      bool mine = false;
-                      Map<String, dynamic> map = Map<String, dynamic>.from(
-                          item as Map<dynamic?, dynamic?>);
+                      if (item != null) {
+                        bool mine = false;
+                        Map<String, dynamic> map = Map<String, dynamic>.from(
+                            item as Map<dynamic?, dynamic?>);
 
-                      if (map['sender'] != 'none' && map['text'] != 'none') {
-                        noexist = false;
-                      }
-                      if (!noexist) {
-                        if (map['sender'] == _name) {
-                          mine = true;
+                        if (map['sender'] != 'none' && map['text'] != 'none') {
+                          noexist = false;
                         }
-                        Messages mas = Messages(
-                          text: map['text'],
-                          animationController: AnimationController(
-                              duration: Duration(milliseconds: 0), vsync: this),
-                          ismine: mine,
-                        );
+                        if (!noexist) {
+                          if (map['sender'] == _name) {
+                            mine = true;
+                          }
+                          Messages mas = Messages(
+                            text: map['text'],
+                            animationController: AnimationController(
+                                duration: Duration(milliseconds: 0), vsync: this),
+                            ismine: mine,
+                          );
+                          print("checking");
+                          print(_message.length);
+                          print(_message);
+                          print(k);
+                          if (_message.length <= k) {
+                            print("in");
+                            print(mas.text);
+                            _message.insert(0, mas);
+                            mas.animationController.forward();
+                            _checked.insert(0, map['checked']);
+                            k += 1;
+                          }
+                          print(_message);
+                        }
+                      }
+                      else {
+                        print("nullll");
 
-                        if (_message.length <= k) {
-                          print("in");
-                          _message.insert(0, mas);
-                          mas.animationController.forward();
-                          _checked.insert(0, map['checked']);
-                        }
                       }
-                      k += 1;
+                      _lastmessage += 1;
                     }
                     if (noexist) {
                       return Expanded(

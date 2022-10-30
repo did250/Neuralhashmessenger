@@ -37,6 +37,20 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   bool _exist = false;
 
+  final authentication = FirebaseAuth.instance;
+  User? loggedUser;
+
+  void getCurrentUser() {
+    try {
+      final user = authentication.currentUser;
+      if (user != null) {
+        loggedUser = user;
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
   Future<String> encryptData(String data, encrypt.Key aesKey) async {
     final iv = encrypt.IV.fromLength(16);
 
@@ -270,6 +284,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     _other = this.friendname;
     _searchFriend();
     _roomcheck();
+    getCurrentUser();
     super.initState();
   }
 
@@ -279,11 +294,48 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       appBar: AppBar(
         title: Text(widget.name,
             style: TextStyle(fontSize: 16, color: Colors.black)),
+        automaticallyImplyLeading: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back), onPressed: () {Navigator.pop(context);}
+        ),
         iconTheme: IconThemeData(
           color: Colors.black,
         ),
         backgroundColor: Colors.white,
         elevation: 0,
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text(_name, style: TextStyle(
+                letterSpacing: 1.0,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),),
+              accountEmail: Text(loggedUser!.email.toString(), style: TextStyle(
+                letterSpacing: 1.0,
+                fontSize: 14,
+              ),),
+              decoration: BoxDecoration(
+                color: Colors.deepPurpleAccent.shade100,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20.0),
+                  bottomRight: Radius.circular(20.0),
+                ),
+              ),
+            ),
+            ListTile(
+              title: Text('Item 1'),
+              onTap: () {}
+            ),
+            ListTile(
+              title: Text('Item 2'),
+              onTap: () { }
+          )
+        ]
+        )
       ),
       body: Container(
         child: Column(

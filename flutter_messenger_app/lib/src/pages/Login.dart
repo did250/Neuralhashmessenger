@@ -14,8 +14,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final authentication = FirebaseAuth.instance;
 
-  User? loggedUser;
-
   final formKey = GlobalKey<FormState>();
   String userEmail = '';
   String userPassword = '';
@@ -164,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.orangeAccent,
+                            primary: Colors.deepPurpleAccent.shade200,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(3.0)),
                             minimumSize: const Size.fromHeight(50),

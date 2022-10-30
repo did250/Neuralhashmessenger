@@ -60,7 +60,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     request.files.add(pic);
     var streamdresponse = await request.send();
     var response = await http.Response.fromStream(streamdresponse);
-    print(response.body);
+
     if (response.body == "true") {
       _showDialogT();
     } else if (response.body == "false") {
@@ -299,7 +299,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                     var noexist = true;
                     int k = 0;
                     _lastmessage = 0;
-                    print("cycle");
+
                     for (var item in (snapshot.data as DatabaseEvent)
                         .snapshot
                         .value as List<Object?>) {
@@ -321,19 +321,15 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                                 duration: Duration(milliseconds: 0), vsync: this),
                             ismine: mine,
                           );
-                          print("checking");
-                          print(_message.length);
-                          print(_message);
-                          print(k);
+
                           if (_message.length <= k) {
-                            print("in");
-                            print(mas.text);
+
                             _message.insert(0, mas);
                             mas.animationController.forward();
                             _checked.insert(0, map['checked']);
                             k += 1;
                           }
-                          print(_message);
+
                         }
                       }
                       else {
@@ -473,9 +469,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     for (Messages message in _message) {
       message.animationController.dispose();
     }
-    print("room = ?");
-    print(rooms);
-    print("--------");
     _checking();
     super.dispose();
   }
@@ -508,13 +501,13 @@ class Messages extends StatelessWidget {
 
   Future<String> _getAes(String input) async {
     _aesKey = encrypt.Key.fromBase64(await getAESKey(_fuid));
-
-    print("===========");
-    if (_aesKey == null) {
-      print("null입니다 ");
-    } else {
-      print("not null");
-    }
+    //
+    // print("===========");
+    // if (_aesKey == null) {
+    //   print("null입니다 ");
+    // } else {
+    //   print("not null");
+    // }
     final decrypteddata = _decryptData(input, _aesKey);
     // print(decrypteddata.runtimeType);
     // print(decrypteddata);
@@ -545,27 +538,41 @@ class Messages extends StatelessWidget {
                     child: CircleAvatar(child: Text(_other[0])),
                   ),
             Container(child: (() {
-              if (text.endsWith("123")) {
-                final st = text.substring(0, text.length - 3);
-                final Uint8List imageBytetest = base64Decode(st);
-
-                return Container(
-                  height: MediaQuery.of(context).size.height * 0.2,
-                  width: MediaQuery.of(context).size.width * 0.2,
-                  child: Center(
-                    child: Image.memory(Uint8List.fromList(imageBytetest)),
-                  ),
-                );
-
-                //--------------------------------------------------------------------------------------------------
-
-              } else {
+              // if (text.endsWith("123")) {
+              //   print("image입니다...");
+              //   final st = text.substring(0, text.length - 3);
+              //   final Uint8List imageBytetest = base64Decode(st);
+              //
+              //   return Container(
+              //     height: MediaQuery.of(context).size.height * 0.2,
+              //     width: MediaQuery.of(context).size.width * 0.2,
+              //     child: Center(
+              //       child: Image.memory(Uint8List.fromList(imageBytetest)),
+              //     ),
+              //   );
+              //
+              //   //--------------------------------------------------------------------------------------------------
+              //
+              // } else {
                 return FutureBuilder<String>(
                   future: _getAes(text),
                   builder:
                       (BuildContext context, AsyncSnapshot<String> snapshot) {
                     if (ConnectionState.waiting == snapshot.connectionState) {
                       return Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.data!.endsWith("123")) {
+                      print("image입니다...");
+                      final st = snapshot.data!.substring(0, snapshot.data!.length - 3);
+                      final Uint8List imageBytetest = base64Decode(st);
+                      return Container(
+                        height: MediaQuery.of(context).size.height * 0.2,
+                        width: MediaQuery.of(context).size.width * 0.2,
+                        child: Center(
+                          child: Image.memory(Uint8List.fromList(imageBytetest)),
+                        ),
+                      );
+                      //--------------------------------------------------------------------------------------------------
                     }
                     return Container(
                         constraints: BoxConstraints(
@@ -600,7 +607,7 @@ class Messages extends StatelessWidget {
                   //     padding: const EdgeInsets.all(5.0),
                   //     child: Text("Loading", style: TextStyle(fontSize: 15.0))),
                 );
-              }
+
             })()),
           ],
         ),

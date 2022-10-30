@@ -37,9 +37,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void load_prefData() async {
-    final storage = FlutterSecureStorage();
+      final storage = FlutterSecureStorage();
 
-    setState(() async {
       userEmail = (await storage.read(key: 'prefEmailId') ?? '');
       userPassword = (await storage.read(key: 'prefPassword') ?? '');
 
@@ -67,7 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
         //LOGIN FAILED
         print(e);
       }
-    });
   }
 
   @override

@@ -670,11 +670,9 @@ class Messages extends StatelessWidget {
   }
 }
 
-void exportData(int number, String uid) async {
-  print('$number + $uid');
+void exportData(int roomNumber, String uid) async {
   //채팅방 메시지 복호화해서 텍스트파일로 저장
   final DatabaseReference ref = FirebaseDatabase.instance.ref();
-  int roomNumber = 3;
   final snapshot = await ref.child('ChattingRoom/$roomNumber/Messages').get();
   final aeskeyforexport = encrypt.Key.fromBase64(await getAESKey(uid));
   List<List<dynamic>> temp = [];
@@ -692,16 +690,19 @@ void exportData(int number, String uid) async {
       tmp.add(message);
       temp.add(tmp);
     }
+
+    String csv = const ListToCsvConverter().convert(temp);
+    print(csv);
+
+    /// Write to a file
+    ///
+
+    final directory = await getApplicationDocumentsDirectory();
+    final pathOfTheFileToWrite = directory.path + "/exportedMessage.csv";
+    File file = File(pathOfTheFileToWrite);
+    await file.writeAsString(csv);
+    print('export complete');
+  } else {
+    print('export error');
   }
-  String csv = const ListToCsvConverter().convert(temp);
-  print(csv);
-
-  /// Write to a file
-  ///
-
-  final directory = await getApplicationDocumentsDirectory();
-  final pathOfTheFileToWrite = directory.path + "/myCsvFile.csv";
-  File file = await File(pathOfTheFileToWrite);
-  file.writeAsString(csv);
-  print('save complete');
 }

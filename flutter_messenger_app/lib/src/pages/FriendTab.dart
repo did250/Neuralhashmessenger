@@ -283,7 +283,6 @@ Future<String> getAESKey(String friendUid) async {
   print('generate aes key from diffie-hellman');
   final password = (await storage.read(key: 'prefPassword'))!;
   final encodedPrivateKey = await getPrivateKey(password);
-  print('password : ' + password);
   print('encoded private key : ' + encodedPrivateKey);
 
   final myPrivateKey = base64Decode(encodedPrivateKey);

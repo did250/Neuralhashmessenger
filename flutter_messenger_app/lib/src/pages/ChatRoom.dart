@@ -333,11 +333,10 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
           ),
         ),
         ListTile(
-            title: Text('export data'),
+            title: Text('Export data'),
             onTap: () {
               exportData(this.number, frienduid);
             }),
-        ListTile(title: Text('Item 2'), onTap: () {})
       ])),
       body: Container(
         child: Column(

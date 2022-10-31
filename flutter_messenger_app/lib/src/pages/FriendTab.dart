@@ -15,7 +15,6 @@ class FriendTab extends StatefulWidget {
 }
 
 final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
-final myUid = FirebaseAuth.instance.currentUser?.uid;
 const storage = FlutterSecureStorage();
 
 class _FriendTabState extends State<FriendTab> {
@@ -43,6 +42,7 @@ class _FriendTabState extends State<FriendTab> {
   }
 
   Future<void> _getFriend() async {
+    final myUid = FirebaseAuth.instance.currentUser?.uid;
     DatabaseReference myFriendRef = rootRef.child("UserList/$myUid/Friend");
     final snapshot = await myFriendRef.get();
     myFriendList = [];
@@ -61,6 +61,7 @@ class _FriendTabState extends State<FriendTab> {
   }
 
   Future<void> _addFriend(String friendUid) async {
+    final myUid = FirebaseAuth.instance.currentUser?.uid;
     DatabaseReference myFriendRef = rootRef.child("UserList/$myUid/Friend");
 
     final snapshot = await myFriendRef.get();
@@ -155,6 +156,7 @@ class FriendTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final myUid = FirebaseAuth.instance.currentUser?.uid;
     return ListTile(
       leading: Image.memory(
           Uint8List.fromList(base64Decode(_friend.profile_img.toString()))),
@@ -268,6 +270,7 @@ class Friend {
 }
 
 Future<String> getAESKey(String friendUid) async {
+  final myUid = FirebaseAuth.instance.currentUser?.uid;
   final algorithmDF = X25519();
   var sharedAESKey = await storage.read(key: friendUid);
 
@@ -315,6 +318,7 @@ Future<String> getAESKey(String friendUid) async {
 }
 
 Future<encrypt.Key> generatePbkdf2(String password, Uint8List salt) async {
+  final myUid = FirebaseAuth.instance.currentUser?.uid;
   final pbkdf2 = Pbkdf2(
     macAlgorithm: Hmac.sha256(),
     iterations: 100000,
@@ -344,6 +348,7 @@ Future<void> onLogOut() async {
 }
 
 void onSignUp(String password) async {
+  final myUid = FirebaseAuth.instance.currentUser?.uid;
   final myKeyPair = await generateECDHKey();
   final myPublicKey = await myKeyPair.extractPublicKey();
   final myPrivateKey = await myKeyPair.extractPrivateKeyBytes();
@@ -374,6 +379,7 @@ Future<String> getPrivateKey(String password) async {
 
     /* get from server and decrypt */
   } else {
+    final myUid = FirebaseAuth.instance.currentUser?.uid;
     print('get encrypted private key from server');
     final myRef = await rootRef.child('UserList/$myUid').get();
 

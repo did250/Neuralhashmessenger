@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:path_provider/path_provider.dart';
 
 String _name = "";
 String _other = "";
@@ -77,11 +79,9 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
     if (response.body == "copyright") {
       _showDialogT("copyright");
-    }
-    else if (response.body == "dangerous"){
+    } else if (response.body == "dangerous") {
       _showDialogT("dangerous");
-    }
-    else if (response.body == "false") {
+    } else if (response.body == "false") {
       _showDialogF();
     }
   }
@@ -296,8 +296,10 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
             style: TextStyle(fontSize: 16, color: Colors.black)),
         automaticallyImplyLeading: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back), onPressed: () {Navigator.pop(context);}
-        ),
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pop(context);
+            }),
         iconTheme: IconThemeData(
           color: Colors.black,
         ),
@@ -305,38 +307,38 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         elevation: 0,
       ),
       endDrawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(_name, style: TextStyle(
-                letterSpacing: 1.0,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),),
-              accountEmail: Text(loggedUser!.email.toString(), style: TextStyle(
-                letterSpacing: 1.0,
-                fontSize: 14,
-              ),),
-              decoration: BoxDecoration(
-                color: Colors.deepPurpleAccent.shade100,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20.0),
-                  bottomRight: Radius.circular(20.0),
-                ),
-              ),
+          child: ListView(padding: EdgeInsets.zero, children: [
+        UserAccountsDrawerHeader(
+          accountName: Text(
+            _name,
+            style: TextStyle(
+              letterSpacing: 1.0,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
-            ListTile(
-              title: Text('Item 1'),
-              onTap: () {}
+          ),
+          accountEmail: Text(
+            loggedUser!.email.toString(),
+            style: TextStyle(
+              letterSpacing: 1.0,
+              fontSize: 14,
             ),
-            ListTile(
-              title: Text('Item 2'),
-              onTap: () { }
-          )
-        ]
-        )
-      ),
+          ),
+          decoration: BoxDecoration(
+            color: Colors.deepPurpleAccent.shade100,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20.0),
+              bottomRight: Radius.circular(20.0),
+            ),
+          ),
+        ),
+        ListTile(
+            title: Text('export data'),
+            onTap: () {
+              exportData(this.number, frienduid);
+            }),
+        ListTile(title: Text('Item 2'), onTap: () {})
+      ])),
       body: Container(
         child: Column(
           children: <Widget>[
@@ -374,23 +376,20 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                           Messages mas = Messages(
                             text: map['text'],
                             animationController: AnimationController(
-                                duration: Duration(milliseconds: 0), vsync: this),
+                                duration: Duration(milliseconds: 0),
+                                vsync: this),
                             ismine: mine,
                           );
 
                           if (_message.length <= k) {
-
                             _message.insert(0, mas);
                             mas.animationController.forward();
                             _checked.insert(0, map['checked']);
                             k += 1;
                           }
-
                         }
-                      }
-                      else {
+                      } else {
                         print("nullll");
-
                       }
                       _lastmessage += 1;
                     }
@@ -545,7 +544,7 @@ class Messages extends StatelessWidget {
   String _decryptData(String data, encrypt.Key key) {
     final iv = encrypt.IV.fromLength(16);
     final encrypter = encrypt.Encrypter(encrypt.AES(key));
-    print(key.bytes);
+    //print(key.bytes);
     try {
       final decrypted =
           encrypter.decrypt(encrypt.Encrypted.fromBase64(data), iv: iv);
@@ -610,64 +609,99 @@ class Messages extends StatelessWidget {
               //   //--------------------------------------------------------------------------------------------------
               //
               // } else {
-                return FutureBuilder<String>(
-                  future: _getAes(text),
-                  builder:
-                      (BuildContext context, AsyncSnapshot<String> snapshot) {
-                    if (ConnectionState.waiting == snapshot.connectionState) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                    if (snapshot.data!.endsWith("123")) {
-                      print("image입니다...");
-                      final st = snapshot.data!.substring(0, snapshot.data!.length - 3);
-                      final Uint8List imageBytetest = base64Decode(st);
-                      return Container(
-                        height: MediaQuery.of(context).size.height * 0.2,
-                        width: MediaQuery.of(context).size.width * 0.2,
-                        child: Center(
-                          child: Image.memory(Uint8List.fromList(imageBytetest)),
-                        ),
-                      );
-                      //--------------------------------------------------------------------------------------------------
-                    }
+              return FutureBuilder<String>(
+                future: _getAes(text),
+                builder:
+                    (BuildContext context, AsyncSnapshot<String> snapshot) {
+                  if (ConnectionState.waiting == snapshot.connectionState) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.data!.endsWith("123")) {
+                    print("image입니다...");
+                    final st =
+                        snapshot.data!.substring(0, snapshot.data!.length - 3);
+                    final Uint8List imageBytetest = base64Decode(st);
                     return Container(
-                        constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.2),
-                        decoration: BoxDecoration(
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      width: MediaQuery.of(context).size.width * 0.2,
+                      child: Center(
+                        child: Image.memory(Uint8List.fromList(imageBytetest)),
+                      ),
+                    );
+                    //--------------------------------------------------------------------------------------------------
+                  }
+                  return Container(
+                      constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
                           color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: Colors.grey.shade300,
-                          ),
                         ),
-                        alignment: ismine
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        padding: const EdgeInsets.all(5.0),
-                        child: Text(snapshot.data!,
-                            style: TextStyle(fontSize: 15.0)));
-                  },
-                  // child: Container(
-                  //
-                  //     constraints: BoxConstraints(
-                  //         maxWidth: MediaQuery.of(context).size.width * 0.2),
-                  //     decoration: BoxDecoration(
-                  //       color: Colors.grey.shade300,
-                  //       borderRadius: BorderRadius.circular(10),
-                  //       border: Border.all(
-                  //         color: Colors.grey.shade300,
-                  //       ),
-                  //     ),
-                  //     alignment:
-                  //         ismine ? Alignment.centerRight : Alignment.centerLeft,
-                  //     padding: const EdgeInsets.all(5.0),
-                  //     child: Text("Loading", style: TextStyle(fontSize: 15.0))),
-                );
-
+                      ),
+                      alignment:
+                          ismine ? Alignment.centerRight : Alignment.centerLeft,
+                      padding: const EdgeInsets.all(5.0),
+                      child: Text(snapshot.data!,
+                          style: TextStyle(fontSize: 15.0)));
+                },
+                // child: Container(
+                //
+                //     constraints: BoxConstraints(
+                //         maxWidth: MediaQuery.of(context).size.width * 0.2),
+                //     decoration: BoxDecoration(
+                //       color: Colors.grey.shade300,
+                //       borderRadius: BorderRadius.circular(10),
+                //       border: Border.all(
+                //         color: Colors.grey.shade300,
+                //       ),
+                //     ),
+                //     alignment:
+                //         ismine ? Alignment.centerRight : Alignment.centerLeft,
+                //     padding: const EdgeInsets.all(5.0),
+                //     child: Text("Loading", style: TextStyle(fontSize: 15.0))),
+              );
             })()),
           ],
         ),
       ),
     );
   }
+}
+
+void exportData(int number, String uid) async {
+  print('$number + $uid');
+  //채팅방 메시지 복호화해서 텍스트파일로 저장
+  final DatabaseReference ref = FirebaseDatabase.instance.ref();
+  int roomNumber = 3;
+  final snapshot = await ref.child('ChattingRoom/$roomNumber/Messages').get();
+  final aeskeyforexport = encrypt.Key.fromBase64(await getAESKey(uid));
+  List<List<dynamic>> temp = [];
+
+  //이미지면 예외처리 필요
+  //첫번째 key does not match : none 임시메시지 때문ㅇ
+  //var
+  if (snapshot.exists && snapshot.value != '') {
+    for (Map<dynamic, dynamic> item
+        in List<dynamic>.from(snapshot.value as List<Object?>)) {
+      List<dynamic> tmp = [];
+
+      var message = decryptData(item['text'], aeskeyforexport);
+      tmp.add(item['sender']);
+      tmp.add(message);
+      temp.add(tmp);
+    }
+  }
+  String csv = const ListToCsvConverter().convert(temp);
+  print(csv);
+
+  /// Write to a file
+  ///
+
+  final directory = await getApplicationDocumentsDirectory();
+  final pathOfTheFileToWrite = directory.path + "/myCsvFile.csv";
+  File file = await File(pathOfTheFileToWrite);
+  file.writeAsString(csv);
+  print('save complete');
 }

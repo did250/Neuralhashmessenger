@@ -14,11 +14,12 @@ class FriendTab extends StatefulWidget {
   _FriendTabState createState() => _FriendTabState();
 }
 
+final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
+final myUid = FirebaseAuth.instance.currentUser?.uid;
+const storage = FlutterSecureStorage();
+
 class _FriendTabState extends State<FriendTab> {
-  final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
   List<Friend> myFriendList = [];
-  final myUid = FirebaseAuth.instance.currentUser?.uid;
-  final storage = const FlutterSecureStorage();
   Uint8List tempbytes = Uint8List(10);
 
   void initState() {
@@ -109,12 +110,12 @@ class _FriendTabState extends State<FriendTab> {
           child: Column(
             children: [
               Container(
-                  height: 500, width: 200, child: _buildListView(myFriendList)),
-              TextButton(
+                  height: 500, width: 420, child: _buildListView(myFriendList)),
+              /*TextButton(
                   onPressed: () {
                     checkKey();
                   },
-                  child: Text('check aes Key')),
+                  child: Text('check aes Key')),*/
               //TextButton(onPressed: temp1, child: Text('generateAESKey')),
               //TextButton(onPressed: temp2, child: Text('getkey'))
             ],
@@ -169,9 +170,7 @@ class FriendTile extends StatelessWidget {
         ),
       ),
       onTap: () async {
-        final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
         /*새 채팅방*/
-        final myUid = FirebaseAuth.instance.currentUser?.uid;
 
         /* check duplicates*/
         DatabaseReference ref = FirebaseDatabase.instance.ref();
@@ -182,9 +181,10 @@ class FriendTile extends StatelessWidget {
         DataSnapshot event = await query.get();
 
         if (event.exists) {
+          int roomnum = int.parse(
+              event.children.elementAt(0).child('number').value.toString());
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => ChatRoom(_friend.name,
-                  int.parse(event.children.elementAt(0).key.toString()))));
+              builder: (context) => ChatRoom(_friend.name, roomnum)));
           print("chatroom already exists");
           return;
         }
@@ -268,10 +268,6 @@ class Friend {
 }
 
 Future<String> getAESKey(String friendUid) async {
-  const storage = FlutterSecureStorage();
-  final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
-  final myUid = FirebaseAuth.instance.currentUser?.uid;
-
   final algorithmDF = X25519();
   var sharedAESKey = await storage.read(key: friendUid);
 
@@ -319,8 +315,6 @@ Future<String> getAESKey(String friendUid) async {
 }
 
 Future<encrypt.Key> generatePbkdf2(String password, Uint8List salt) async {
-  final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
-  final myUid = FirebaseAuth.instance.currentUser?.uid;
   final pbkdf2 = Pbkdf2(
     macAlgorithm: Hmac.sha256(),
     iterations: 100000,
@@ -346,15 +340,10 @@ Future<encrypt.Key> generatePbkdf2(String password, Uint8List salt) async {
 }
 
 Future<void> onLogOut() async {
-  const storage = FlutterSecureStorage();
   await storage.deleteAll();
 }
 
 void onSignUp(String password) async {
-  const storage = FlutterSecureStorage();
-  final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
-  final myUid = FirebaseAuth.instance.currentUser?.uid;
-
   final myKeyPair = await generateECDHKey();
   final myPublicKey = await myKeyPair.extractPublicKey();
   final myPrivateKey = await myKeyPair.extractPrivateKeyBytes();
@@ -376,9 +365,6 @@ void onSignUp(String password) async {
 }
 
 Future<String> getPrivateKey(String password) async {
-  final storage = FlutterSecureStorage();
-  final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
-  final myUid = FirebaseAuth.instance.currentUser?.uid;
   final myPrivateKey = await storage.read(key: 'myPrivateKey');
 
   /* secure storage에 존재할 경우 */
@@ -421,11 +407,8 @@ Future<String> encryptData(String data, encrypt.Key aesKey) async {
   final encrypter = encrypt.Encrypter(encrypt.AES(aesKey));
 
   final encrypted = encrypter.encrypt(data, iv: iv);
-  print('encrypted : ${encrypted.base64}');
   encrypt.Encrypted temp = encrypt.Encrypted.fromBase64(encrypted.base64);
   final decrypted = encrypter.decrypt(temp, iv: iv);
-
-  print(decrypted);
 
   return encrypted.base64;
 }

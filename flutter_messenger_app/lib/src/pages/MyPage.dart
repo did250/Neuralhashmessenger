@@ -101,7 +101,7 @@ class _MyPageState extends State<MyPage> {
 
     if (friendshot.exists && friendshot.value != '') {
       for (String? item
-          in List<String?>.from(friendshot.value as List<Object?>)) {
+      in List<String?>.from(friendshot.value as List<Object?>)) {
         if (item == null) {
           continue;
         }
@@ -197,8 +197,8 @@ class _MyPageState extends State<MyPage> {
         child: Container(
             child: Center(
                 child: Container(
-                    //child: Img8List.isEmpty
-                    //? Image(image: AssetImage('assets/images/profile_img.jpg'),)
+                  //child: Img8List.isEmpty
+                  //? Image(image: AssetImage('assets/images/profile_img.jpg'),)
                     child: _image == null
                         ? Image.memory(Uint8List.fromList(Img8List))
                         : Image.file(File(_image!.path))))));
@@ -208,47 +208,47 @@ class _MyPageState extends State<MyPage> {
     return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       Container(
           child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-        Container(
-            child: Column(children: [
-          Text(
-            friend_count.toString(),
-            style: TextStyle(
-              letterSpacing: 1.0,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text("FRIEND",
-              style: TextStyle(
-                letterSpacing: 1.0,
-                fontSize: 10,
-                color: Theme.of(context).primaryColor,
-              )),
-        ])),
-        SizedBox(width: 30),
-        Container(
-            child: Column(children: [
-          Text(
-            chatroom_count.toString(),
-            style: TextStyle(
-              letterSpacing: 1.0,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text("CHATROOM",
-              style: TextStyle(
-                letterSpacing: 1.0,
-                fontSize: 10,
-                color: Theme.of(context).primaryColor,
-              )),
-        ])),
-      ])),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+            Container(
+                child: Column(children: [
+                  Text(
+                    friend_count.toString(),
+                    style: TextStyle(
+                      letterSpacing: 1.0,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text("FRIEND",
+                      style: TextStyle(
+                        letterSpacing: 1.0,
+                        fontSize: 10,
+                        color: Theme.of(context).primaryColor,
+                      )),
+                ])),
+            SizedBox(width: 30),
+            Container(
+                child: Column(children: [
+                  Text(
+                    chatroom_count.toString(),
+                    style: TextStyle(
+                      letterSpacing: 1.0,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text("CHATROOM",
+                      style: TextStyle(
+                        letterSpacing: 1.0,
+                        fontSize: 10,
+                        color: Theme.of(context).primaryColor,
+                      )),
+                ])),
+          ])),
     ]);
   }
 
@@ -295,7 +295,7 @@ class _MyPageState extends State<MyPage> {
           formKey.currentState!.save();
 
           final DatabaseReference ref =
-              FirebaseDatabase.instance.ref("UserList");
+          FirebaseDatabase.instance.ref("UserList");
           ref.child(loggedUser!.uid.toString()).update({
             "Name": userName,
           });
@@ -362,7 +362,7 @@ class _MyPageState extends State<MyPage> {
                             child: Text('Save'),
                             onPressed: () async {
                               DatabaseReference ref =
-                                  FirebaseDatabase.instance.ref("UserList");
+                              FirebaseDatabase.instance.ref("UserList");
                               ref.child(loggedUser!.uid.toString()).update({
                                 "Profile_img": profile_img_base64,
                               });
@@ -415,7 +415,7 @@ class _MyPageState extends State<MyPage> {
                             final imageBytes = await _image!.readAsBytesSync();
                             image64String = base64Encode(imageBytes);
                             DatabaseReference ref =
-                                FirebaseDatabase.instance.ref("UserList");
+                            FirebaseDatabase.instance.ref("UserList");
                             ref.child(loggedUser!.uid.toString()).update({
                               "Profile_img": image64String,
                             });
@@ -440,50 +440,50 @@ class _MyPageState extends State<MyPage> {
 
   Widget ChangePasswordBtn() {
     return Padding(
-        padding: EdgeInsets.fromLTRB(30, 0, 20, 0),
-          child: InkWell(
-            child: Text('  Change password',
-              style: TextStyle(
-                letterSpacing: 1.0,
-                fontSize: 16,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            onTap: () async {
-              return await showDialog(
-                context: context, builder: (BuildContext context) {
-                  return AlertDialog(
-                    backgroundColor: Color(0xff161619),
-                    title: Text(
-                      'Do you want to change your password? You can change your password via a message sent by email.',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () async {
-                          await authentication.sendPasswordResetEmail(
-                              email: loggedUser!.email.toString());
-                          authentication.signOut();
-
-                          await onLogOut();
-
-                          Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-                          Navigator.push(context,
-                            MaterialPageRoute(
-                              builder: (context) => LoginScreen()),
-                          );
-                        },
-                        child: Text('Yes')),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text('No')),
-                    ],
-                  );
-                });
-            },
+      padding: EdgeInsets.fromLTRB(30, 0, 20, 0),
+      child: InkWell(
+        child: Text('  Change password',
+          style: TextStyle(
+            letterSpacing: 1.0,
+            fontSize: 16,
+            color: Theme.of(context).primaryColor,
           ),
+        ),
+        onTap: () async {
+          return await showDialog(
+              context: context, builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: Color(0xff161619),
+              title: Text(
+                'Do you want to change your password? You can change your password via a message sent by email.',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () async {
+                      await authentication.sendPasswordResetEmail(
+                          email: loggedUser!.email.toString());
+                      authentication.signOut();
+
+                      await onLogOut();
+
+                      Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+                      Navigator.push(context,
+                        MaterialPageRoute(
+                            builder: (context) => LoginScreen()),
+                      );
+                    },
+                    child: Text('Yes')),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('No')),
+              ],
+            );
+          });
+        },
+      ),
     );
   }
 
@@ -505,51 +505,51 @@ class _MyPageState extends State<MyPage> {
                 ),
                 onTap: () async {
                   return await showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        backgroundColor: Color(0xff161619),
-                        title: Text(
-                          'Do you want to withdrawal your account?',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
-                        actions: [
-                          TextButton(
-                              onPressed: () async {
-                                await authentication.currentUser?.delete();
-                                final DatabaseReference ref =
-                                    FirebaseDatabase.instance.ref("UserList");
-                                ref.child(loggedUser!.uid.toString()).remove();
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: Color(0xff161619),
+                          title: Text(
+                            'Do you want to withdrawal your account?',
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                          actions: [
+                            TextButton(
+                                onPressed: () async {
+                                  await authentication.currentUser?.delete();
+                                  final DatabaseReference ref =
+                                  FirebaseDatabase.instance.ref("UserList");
+                                  ref.child(loggedUser!.uid.toString()).remove();
 
-                                int count = streamSnapshot.data!.docs.length;
-                                for (int i = 0; i < count; i++) {
-                                  final DocumentSnapshot documentSnapshot =
-                                      streamSnapshot.data!.docs[i];
-                                  if (documentSnapshot['uid'] ==
-                                      loggedUser!.uid.toString()) {
-                                    Delete_FireStore(documentSnapshot.id);
-                                    break;
+                                  int count = streamSnapshot.data!.docs.length;
+                                  for (int i = 0; i < count; i++) {
+                                    final DocumentSnapshot documentSnapshot =
+                                    streamSnapshot.data!.docs[i];
+                                    if (documentSnapshot['uid'] ==
+                                        loggedUser!.uid.toString()) {
+                                      Delete_FireStore(documentSnapshot.id);
+                                      break;
+                                    }
                                   }
-                                }
-                                onLogOut();
+                                  onLogOut();
 
-                                Navigator.pushNamedAndRemoveUntil(
-                                    context, '/', (_) => false);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => LoginScreen()),
-                                );
-                              },
-                              child: Text('Yes')),
-                          TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text('No')),
-                        ],
-                      );
-                    });
+                                  Navigator.pushNamedAndRemoveUntil(
+                                      context, '/', (_) => false);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => LoginScreen()),
+                                  );
+                                },
+                                child: Text('Yes')),
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text('No')),
+                          ],
+                        );
+                      });
                 },
               ),
             );

@@ -60,44 +60,43 @@ class _MainPage extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
+    return WillPopScope(
+        child: Scaffold(
+          appBar: AppBar(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
                 width: 100,
                 height: 80,
                 alignment: Alignment.center,
                 child: Image(
                   image: AssetImage('assets/images/logo.png'),
-                )),
+                )
+              ),
+            ],
+          ),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.exit_to_app_sharp,
+                color: Colors.black,
+              ),
+              onPressed: () async {
+                authentication.signOut();
+                await onLogOut();
+                Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+                Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
+              },
+            )
           ],
         ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.exit_to_app_sharp,
-              color: Colors.black,
-            ),
-            onPressed: () async {
-              authentication.signOut();
-
-              await onLogOut();
-
-              Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
-              );
-            },
-          )
-        ],
-      ),
-      body: _getPageData(),
-      bottomNavigationBar: BottomNavigationBar(
+        body: _getPageData(),
+        bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Colors.black,
         type: BottomNavigationBarType.fixed,
         unselectedItemColor: Colors.grey,
@@ -117,7 +116,14 @@ class _MainPage extends State<MainPage> {
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        ),
       ),
+      onWillPop: () {
+        authentication.signOut();
+        onLogOut();
+        Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+        throw {};
+      },
     );
   }
 }

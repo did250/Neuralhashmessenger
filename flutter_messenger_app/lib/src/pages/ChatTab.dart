@@ -103,7 +103,6 @@ class ChatTabState extends State<ChatTab> {
                   return Text("no data");
                 } else if ((snapshot.data as DatabaseEvent).snapshot.value ==
                     null) {
-                  print("here");
                   numbers = temp_numbers;
                   check = temp_check;
                   names = temp_names;

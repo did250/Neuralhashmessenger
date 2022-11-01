@@ -18,7 +18,8 @@ List<Map<String, dynamic>> rooms = [];
 String _fuid = "";
 List<Messages> _message = <Messages>[];
 int len = 0;
-
+String _friendimage = "";
+Uint8List _friendimageuint = Uint8List.fromList([0]);
 class ChatRoom extends StatefulWidget {
   final String name;
   final int number;
@@ -201,6 +202,9 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     });
   }
 
+  /// 친구 프로필 사진
+
+
   /// 채팅방 목록 불러오기
   Future<void> _roomcheck() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
@@ -277,6 +281,19 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     await ref.child('UserList').child(target).child('Num_Chatroom').set(map2);
   }
 
+  Future<void> _friendprofile() async {
+    final DatabaseReference ref = FirebaseDatabase.instance.ref();
+    final snapshot = await ref.child('UserList').child(_fuid).child(
+        'Profile_img').get();
+    if (snapshot.exists && snapshot.value != null) {
+      setState(() {
+        _friendimage = snapshot.value.toString();
+        _friendimageuint = base64Decode(_friendimage);
+
+      });
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -285,6 +302,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     _searchFriend();
     _roomcheck();
     getCurrentUser();
+    _friendprofile();
     super.initState();
   }
 
@@ -589,7 +607,7 @@ class Messages extends StatelessWidget {
                   )
                 : Container(
                     margin: const EdgeInsets.only(right: 10.0),
-                    child: CircleAvatar(child: Text(_other[0])),
+                    child: CircleAvatar(backgroundImage: MemoryImage(_friendimageuint))
                   ),
             Container(child: (() {
               // if (text.endsWith("123")) {

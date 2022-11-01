@@ -117,12 +117,7 @@ class _MainPage extends State<MainPage> {
         onTap: _onItemTapped,
         ),
       ),
-      onWillPop: () {
-        authentication.signOut();
-        onLogOut();
-        Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-        throw {};
-      },
+      onWillPop: () async => false,
     );
   }
 }

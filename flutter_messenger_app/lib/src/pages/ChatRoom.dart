@@ -311,7 +311,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.name,
-            style: TextStyle(fontSize: 16, color: Colors.black)),
+            style: TextStyle(fontSize: 16, color: Theme.of(context).primaryColor)),
         automaticallyImplyLeading: true,
         leading: IconButton(
             icon: Icon(Icons.arrow_back),
@@ -319,43 +319,44 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
               Navigator.pop(context);
             }),
         iconTheme: IconThemeData(
-          color: Colors.black,
+          color: Theme.of(context).primaryColor,
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).canvasColor,
         elevation: 0,
       ),
       endDrawer: Drawer(
           child: ListView(padding: EdgeInsets.zero, children: [
-        UserAccountsDrawerHeader(
-          accountName: Text(
-            _name,
-            style: TextStyle(
-              letterSpacing: 1.0,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+            UserAccountsDrawerHeader(
+            accountName: Text(_name,
+              style: TextStyle(
+                letterSpacing: 1.0,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            accountEmail: Text(loggedUser!.email.toString(),
+              style: TextStyle(
+                letterSpacing: 1.0,
+                fontSize: 14,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            decoration: BoxDecoration(
+              color: Colors.deepPurpleAccent.shade100,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(20.0),
+                bottomRight: Radius.circular(20.0),
+              ),
             ),
           ),
-          accountEmail: Text(
-            loggedUser!.email.toString(),
-            style: TextStyle(
-              letterSpacing: 1.0,
-              fontSize: 14,
-            ),
-          ),
-          decoration: BoxDecoration(
-            color: Colors.deepPurpleAccent.shade100,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20.0),
-              bottomRight: Radius.circular(20.0),
-            ),
-          ),
-        ),
-        ListTile(
+          ListTile(
             title: Text('Export data'),
             onTap: () {
               exportData(this.number, frienduid);
             }),
-      ])),
+          ])
+      ),
       body: Container(
         child: Column(
           children: <Widget>[
@@ -464,7 +465,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
             SizedBox(width: 10),
             IconButton(
               icon: Icon(Icons.add_a_photo),
-              color: Colors.black,
+              color: Theme.of(context).primaryColor,
               tooltip: 'pick Image',
               padding: EdgeInsets.all(5),
               constraints: BoxConstraints(),
@@ -474,7 +475,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
             ),
             IconButton(
               icon: Icon(Icons.wallpaper),
-              color: Colors.black,
+              color: Theme.of(context).primaryColor,
               tooltip: 'pick Image',
               padding: EdgeInsets.all(5),
               constraints: BoxConstraints(),
@@ -500,7 +501,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
               margin: const EdgeInsets.symmetric(horizontal: 4.0),
               child: IconButton(
                 icon: Icon(Icons.send),
-                color: Colors.black,
+                color: Theme.of(context).primaryColor,
                 onPressed: _exist
                     ? () => _handleSubmitted(_textController.text)
                     : null,
@@ -661,7 +662,7 @@ class Messages extends StatelessWidget {
                           ismine ? Alignment.centerRight : Alignment.centerLeft,
                       padding: const EdgeInsets.all(5.0),
                       child: Text(snapshot.data!,
-                          style: TextStyle(fontSize: 15.0)));
+                          style: TextStyle(color: Colors.black, fontSize: 15.0)));
                 },
                 // child: Container(
                 //

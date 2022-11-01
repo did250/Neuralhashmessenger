@@ -4,7 +4,6 @@ import 'package:flutter_messenger_app/src/pages/Login.dart';
 import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
 import 'package:flutter_messenger_app/src/pages/MyPage.dart';
-import 'package:flutter_messenger_app/src/pages/SettingsTab.dart';
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
@@ -82,7 +81,7 @@ class _MainPage extends State<MainPage> {
             IconButton(
               icon: Icon(
                 Icons.exit_to_app_sharp,
-                color: Colors.black,
+                color: Theme.of(context).primaryColor,
               ),
               onPressed: () async {
                 authentication.signOut();
@@ -97,7 +96,7 @@ class _MainPage extends State<MainPage> {
         ),
         body: _getPageData(),
         bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.black,
+        selectedItemColor: Theme.of(context).primaryColor,
         type: BottomNavigationBarType.fixed,
         unselectedItemColor: Colors.grey,
         items: const <BottomNavigationBarItem>[

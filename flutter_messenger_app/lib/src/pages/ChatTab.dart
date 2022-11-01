@@ -66,27 +66,6 @@ class ChatTabState extends State<ChatTab> {
               ),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.only(top: 16, left: 16, right: 16),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "Search...",
-                hintStyle: TextStyle(
-                    color: Colors.grey.shade600, fontWeight: FontWeight.bold),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.grey.shade600,
-                  size: 20,
-                ),
-                filled: true,
-                fillColor: Colors.grey.shade200,
-                contentPadding: EdgeInsets.all(8),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.grey.shade200)),
-              ),
-            ),
-          ),
           StreamBuilder(
               stream: FirebaseDatabase.instance
                   .ref()

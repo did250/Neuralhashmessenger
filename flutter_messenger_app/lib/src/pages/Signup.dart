@@ -48,7 +48,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       image: AssetImage('assets/images/profile_img.jpg'),
                       width: 170,
                       height: 190,
-                  )
+                    )
                 ),
                 SizedBox(
                   height: 20,
@@ -82,7 +82,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       hintText: 'User name',
                       hintStyle:
-                          TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
+                      TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
                       contentPadding: EdgeInsets.all(10)),
                 ),
                 SizedBox(
@@ -116,7 +116,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       hintText: 'email',
                       hintStyle:
-                          TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
+                      TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
                       contentPadding: EdgeInsets.all(10)),
                 ),
                 SizedBox(
@@ -150,7 +150,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                       hintText: 'password',
                       hintStyle:
-                          TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
+                      TextStyle(fontSize: 14, color: Color(0XFFA7BCC7)),
                       contentPadding: EdgeInsets.all(10)),
                 ),
                 SizedBox(
@@ -202,16 +202,16 @@ class _SignupScreenState extends State<SignupScreen> {
                             await storage.write(key: 'prefPassword', value: userPassword);
 
                             Navigator.push(context, MaterialPageRoute(builder: (context) {
-                                  return Home();
-                                },
-                              ),
+                              return Home();
+                            },
+                            ),
                             );
                           }
                         } catch (e) { //SIGNUP FAILED
                           print(e);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content:
-                                  Text('Please check your email and password'),
+                            Text('Please check your email and password'),
                               backgroundColor: Colors.blue,
                             ),
                           );

@@ -212,14 +212,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: Container(height: 1, color: Colors.grey),
+                                child: Container(height: 1, color: Theme.of(context).primaryColorLight),
                               ),
-                              Text(
-                                "  or  ",
-                                style: TextStyle(color: Colors.grey[700]),
+                              Text("  or  ",
+                                style: TextStyle(color: Theme.of(context).primaryColorLight),
                               ),
                               Expanded(
-                                child: Container(height: 1, color: Colors.grey),
+                                child: Container(height: 1, color: Theme.of(context).primaryColorLight),
                               ),
                             ],
                           ),
@@ -235,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 letterSpacing: 1.0,
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black45,
+                                color: Theme.of(context).primaryColorLight,
                                 decoration: TextDecoration.underline,
                               ),
                             ),

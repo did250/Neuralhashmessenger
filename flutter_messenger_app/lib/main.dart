@@ -20,15 +20,42 @@ class MyHttpOverrides extends HttpOverrides{
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
+  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Messenger',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: LoginScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (_, ThemeMode currentMode, __) {
+        return MaterialApp(
+          title: 'Messenger',
+          themeMode: currentMode,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            canvasColor: Colors.white,
+            primaryColor: Colors.black,
+            primaryColorLight: Colors.grey,
+            primaryColorDark: Colors.grey,
+            primaryColorBrightness: Brightness.light,
+            brightness: Brightness.light,
+            indicatorColor: Colors.black,
+            appBarTheme: AppBarTheme(brightness: Brightness.light),
+          ),
+          darkTheme: ThemeData(
+            canvasColor: Colors.black,
+            primaryColor: Colors.white,
+            primaryColorLight: Colors.white,
+            primaryColorDark: Colors.white,
+            primaryColorBrightness: Brightness.dark,
+            brightness: Brightness.dark,
+            indicatorColor: Colors.white,
+            appBarTheme: AppBarTheme(brightness: Brightness.dark),
+          ),
+          debugShowCheckedModeBanner: false,
+          home: LoginScreen(),
+        );
+      },
     );
   }
 }

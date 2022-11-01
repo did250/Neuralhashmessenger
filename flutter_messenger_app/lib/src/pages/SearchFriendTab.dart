@@ -23,9 +23,9 @@ class _SearchFriendTabState extends State<SearchFriendTab> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Search", style:TextStyle(fontSize: 16, color: Colors.black)),
-          iconTheme: IconThemeData(color: Colors.black,),
-          backgroundColor: Colors.white,
+          title: Text("Search", style:TextStyle(fontSize: 16, color: Theme.of(context).primaryColor)),
+          iconTheme: IconThemeData(color: Theme.of(context).primaryColor,),
+          backgroundColor: Theme.of(context).canvasColor,
           elevation: 0,
         ),
         body: Row(
@@ -61,7 +61,7 @@ class _SearchFriendTabState extends State<SearchFriendTab> {
                   iconSize: 30,
                   icon: Icon(
                     Icons.check,
-                    color: Colors.black,
+                    color: Theme.of(context).primaryColor,
                   ),
                   padding: EdgeInsets.all(5),
                   constraints: BoxConstraints(),

@@ -286,11 +286,10 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     final snapshot = await ref.child('UserList').child(_fuid).child(
         'Profile_img').get();
     if (snapshot.exists && snapshot.value != null) {
-      setState(() {
-        _friendimage = snapshot.value.toString();
-        _friendimageuint = base64Decode(_friendimage);
 
-      });
+      _friendimage = snapshot.value.toString();
+      _friendimageuint = base64Decode(_friendimage);
+
     }
   }
 
@@ -300,9 +299,9 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     Loaduser();
     _other = this.friendname;
     _searchFriend();
+    _friendprofile();
     _roomcheck();
     getCurrentUser();
-    _friendprofile();
     super.initState();
   }
 
@@ -595,8 +594,8 @@ class Messages extends StatelessWidget {
       axisAlignment: 0.0,
       child: Container(
         margin: ismine
-            ? const EdgeInsets.only(top: 10, bottom: 10, left: 150.0)
-            : const EdgeInsets.only(top: 10, bottom: 10, left: 0, right: 130.0),
+            ? const EdgeInsets.only(top: 10, bottom: 10, right:5.0)
+            : const EdgeInsets.only(top: 10, bottom: 10, left: 10.0),
         child: Row(
           mainAxisAlignment:
               ismine ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -648,21 +647,53 @@ class Messages extends StatelessWidget {
                     );
                     //--------------------------------------------------------------------------------------------------
                   }
-                  return Container(
-                      constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.2),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
+                  if (MediaQuery.of(context).size.width/13 < snapshot.data!.length) {
+                    return Container(
+
+                        width: MediaQuery.of(context).size.width * 0.7,
+
+                        decoration: BoxDecoration(
+                          color: ismine ? Colors.blueGrey.shade700 : Colors
+                              .blueGrey.shade500,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                        alignment:
+                        ismine ? Alignment.centerRight : Alignment.centerLeft,
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text(snapshot.data!,
+                          style: TextStyle(fontSize: 15.0),
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          maxLines: 100,
+                        ),
+                    );
+                  }
+                  else {
+                      return Container(
+                        decoration: BoxDecoration(
+                        color: ismine ? Colors.blueGrey.shade700 : Colors
+                            .blueGrey.shade500,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: Colors.grey.shade300,
+                        color: Colors.grey.shade400,
                         ),
-                      ),
-                      alignment:
-                          ismine ? Alignment.centerRight : Alignment.centerLeft,
-                      padding: const EdgeInsets.all(5.0),
-                      child: Text(snapshot.data!,
-                          style: TextStyle(color: Colors.black, fontSize: 15.0)));
+                        ),
+                        alignment:
+                        ismine ? Alignment.centerRight : Alignment.centerLeft,
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text(snapshot.data!,
+                        style: TextStyle(fontSize: 15.0),
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                        maxLines: 100,
+                        ),
+
+
+                      );
+                  }
                 },
                 // child: Container(
                 //
@@ -724,3 +755,5 @@ void exportData(int roomNumber, String uid) async {
     print('export error');
   }
 }
+
+

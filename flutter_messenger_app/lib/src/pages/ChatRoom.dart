@@ -286,11 +286,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     final snapshot = await ref.child('UserList').child(_fuid).child(
         'Profile_img').get();
     if (snapshot.exists && snapshot.value != null) {
-      setState(() {
+
         _friendimage = snapshot.value.toString();
         _friendimageuint = base64Decode(_friendimage);
+        print("infuction");
+        print(_friendimage);
 
-      });
     }
   }
 
@@ -300,9 +301,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     Loaduser();
     _other = this.friendname;
     _searchFriend();
+    _friendprofile();
     _roomcheck();
     getCurrentUser();
-    _friendprofile();
+
+    print("inmessage");
+    print(_friendimage);
     super.initState();
   }
 
@@ -588,14 +592,16 @@ class Messages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("inmessage2");
+    print(_friendimage);
     return SizeTransition(
       sizeFactor:
           CurvedAnimation(parent: animationController, curve: Curves.easeOut),
       axisAlignment: 0.0,
       child: Container(
         margin: ismine
-            ? const EdgeInsets.only(top: 10, bottom: 10, left: 150.0)
-            : const EdgeInsets.only(top: 10, bottom: 10, left: 0, right: 130.0),
+            ? const EdgeInsets.only(top: 10, bottom: 10, right: 5.0)
+            : const EdgeInsets.only(top: 10, bottom: 10, left: 5.0),
         child: Row(
           mainAxisAlignment:
               ismine ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -647,21 +653,68 @@ class Messages extends StatelessWidget {
                     );
                     //--------------------------------------------------------------------------------------------------
                   }
-                  return Container(
-                      constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.2),
+
+                  // return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                  //   print(constraints.maxWidth);
+                  //   return Text("d");
+                  // });
+                  print(MediaQuery.of(context).size.width/13);
+                  print(snapshot.data!.length);
+                  if (MediaQuery.of(context).size.width/13 < snapshot.data!.length) {
+                    return Container(
+
+                      width: MediaQuery.of(context).size.width * 0.7,
+
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
+                        color: ismine ? Colors.grey.shade300 : Colors.grey.shade600,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: Colors.grey.shade300,
+                          color: Colors.grey.shade400,
                         ),
                       ),
                       alignment:
-                          ismine ? Alignment.centerRight : Alignment.centerLeft,
-                      padding: const EdgeInsets.all(5.0),
+                      ismine ? Alignment.centerRight : Alignment.centerLeft,
+                      padding: const EdgeInsets.all(10.0),
                       child: Text(snapshot.data!,
-                          style: TextStyle(fontSize: 15.0)));
+                        style: TextStyle(fontSize: 15.0),
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                        maxLines: 100,
+                      ),
+
+
+                    );
+                  }
+                  else {
+                    return Container(
+
+                      // width: MediaQuery.of(context).size.width * 0.2,
+                      // constraints: BoxConstraints(
+                      //     maxWidth: MediaQuery.of(context).size.width * 0.4,
+                      //     minWidth: MediaQuery.of(context).size.width * 0.2,
+                      //
+                      // ),
+                      decoration: BoxDecoration(
+                        color: ismine ? Colors.grey.shade300 : Colors
+                            .grey.shade600,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.grey.shade400,
+                        ),
+                      ),
+                      alignment:
+                      ismine ? Alignment.centerRight : Alignment.centerLeft,
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(snapshot.data!,
+                        style: TextStyle(fontSize: 15.0),
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                        maxLines: 100,
+                      ),
+
+
+                    );
+                  }
                 },
                 // child: Container(
                 //

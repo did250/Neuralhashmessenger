@@ -20,6 +20,7 @@ List<Messages> _message = <Messages>[];
 int len = 0;
 String _friendimage = "";
 Uint8List _friendimageuint = Uint8List.fromList([0]);
+
 class ChatRoom extends StatefulWidget {
   final String name;
   final int number;
@@ -204,7 +205,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
   /// 친구 프로필 사진
 
-
   /// 채팅방 목록 불러오기
   Future<void> _roomcheck() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
@@ -283,13 +283,13 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
   Future<void> _friendprofile() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    final snapshot = await ref.child('UserList').child(_fuid).child(
-        'Profile_img').get();
+    final snapshot =
+        await ref.child('UserList').child(_fuid).child('Profile_img').get();
     if (snapshot.exists && snapshot.value != null) {
-
-      _friendimage = snapshot.value.toString();
-      _friendimageuint = base64Decode(_friendimage);
-
+      setState(() {
+        _friendimage = snapshot.value.toString();
+        _friendimageuint = base64Decode(_friendimage);
+      });
     }
   }
 
@@ -310,7 +310,8 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.name,
-            style: TextStyle(fontSize: 16, color: Theme.of(context).primaryColor)),
+            style:
+                TextStyle(fontSize: 16, color: Theme.of(context).primaryColor)),
         automaticallyImplyLeading: true,
         leading: IconButton(
             icon: Icon(Icons.arrow_back),
@@ -325,37 +326,38 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       ),
       endDrawer: Drawer(
           child: ListView(padding: EdgeInsets.zero, children: [
-            UserAccountsDrawerHeader(
-            accountName: Text(_name,
-              style: TextStyle(
-                letterSpacing: 1.0,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            accountEmail: Text(loggedUser!.email.toString(),
-              style: TextStyle(
-                letterSpacing: 1.0,
-                fontSize: 14,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            decoration: BoxDecoration(
-              color: Colors.deepPurpleAccent.shade100,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20.0),
-                bottomRight: Radius.circular(20.0),
-              ),
+        UserAccountsDrawerHeader(
+          accountName: Text(
+            _name,
+            style: TextStyle(
+              letterSpacing: 1.0,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
             ),
           ),
-          ListTile(
+          accountEmail: Text(
+            loggedUser!.email.toString(),
+            style: TextStyle(
+              letterSpacing: 1.0,
+              fontSize: 14,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          decoration: BoxDecoration(
+            color: Colors.deepPurpleAccent.shade100,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20.0),
+              bottomRight: Radius.circular(20.0),
+            ),
+          ),
+        ),
+        ListTile(
             title: Text('Export data'),
             onTap: () {
               exportData(this.number, frienduid);
             }),
-          ])
-      ),
+      ])),
       body: Container(
         child: Column(
           children: <Widget>[
@@ -594,7 +596,7 @@ class Messages extends StatelessWidget {
       axisAlignment: 0.0,
       child: Container(
         margin: ismine
-            ? const EdgeInsets.only(top: 10, bottom: 10, right:5.0)
+            ? const EdgeInsets.only(top: 10, bottom: 10, right: 5.0)
             : const EdgeInsets.only(top: 10, bottom: 10, left: 10.0),
         child: Row(
           mainAxisAlignment:
@@ -607,8 +609,8 @@ class Messages extends StatelessWidget {
                   )
                 : Container(
                     margin: const EdgeInsets.only(right: 10.0),
-                    child: CircleAvatar(backgroundImage: MemoryImage(_friendimageuint))
-                  ),
+                    child: CircleAvatar(
+                        backgroundImage: MemoryImage(_friendimageuint))),
             Container(child: (() {
               // if (text.endsWith("123")) {
               //   print("image입니다...");
@@ -647,52 +649,52 @@ class Messages extends StatelessWidget {
                     );
                     //--------------------------------------------------------------------------------------------------
                   }
-                  if (MediaQuery.of(context).size.width/13 < snapshot.data!.length) {
+                  if (MediaQuery.of(context).size.width / 13 <
+                      snapshot.data!.length) {
                     return Container(
-
-                        width: MediaQuery.of(context).size.width * 0.7,
-
-                        decoration: BoxDecoration(
-                          color: ismine ? Colors.blueGrey.shade700 : Colors
-                              .blueGrey.shade500,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: Colors.grey.shade400,
-                          ),
-                        ),
-                        alignment:
-                        ismine ? Alignment.centerRight : Alignment.centerLeft,
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(snapshot.data!,
-                          style: TextStyle(fontSize: 15.0),
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                          maxLines: 100,
-                        ),
-                    );
-                  }
-                  else {
-                      return Container(
-                        decoration: BoxDecoration(
-                        color: ismine ? Colors.blueGrey.shade700 : Colors
-                            .blueGrey.shade500,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      decoration: BoxDecoration(
+                        color: ismine
+                            ? Colors.blueGrey.shade700
+                            : Colors.blueGrey.shade500,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                        color: Colors.grey.shade400,
+                          color: Colors.grey.shade400,
                         ),
-                        ),
-                        alignment:
-                        ismine ? Alignment.centerRight : Alignment.centerLeft,
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(snapshot.data!,
+                      ),
+                      alignment:
+                          ismine ? Alignment.centerRight : Alignment.centerLeft,
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(
+                        snapshot.data!,
                         style: TextStyle(fontSize: 15.0),
                         overflow: TextOverflow.ellipsis,
                         softWrap: false,
                         maxLines: 100,
+                      ),
+                    );
+                  } else {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: ismine
+                            ? Colors.blueGrey.shade700
+                            : Colors.blueGrey.shade500,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.grey.shade400,
                         ),
-
-
-                      );
+                      ),
+                      alignment:
+                          ismine ? Alignment.centerRight : Alignment.centerLeft,
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(
+                        snapshot.data!,
+                        style: TextStyle(fontSize: 15.0),
+                        overflow: TextOverflow.ellipsis,
+                        softWrap: false,
+                        maxLines: 100,
+                      ),
+                    );
                   }
                 },
                 // child: Container(
@@ -721,14 +723,24 @@ class Messages extends StatelessWidget {
 
 void exportData(int roomNumber, String uid) async {
   //채팅방 메시지 복호화해서 텍스트파일로 저장
+
   final DatabaseReference ref = FirebaseDatabase.instance.ref();
   final snapshot = await ref.child('ChattingRoom/$roomNumber/Messages').get();
   final aeskeyforexport = encrypt.Key.fromBase64(await getAESKey(uid));
   List<List<dynamic>> temp = [];
+  Directory directory = await getApplicationDocumentsDirectory();
+  try {
+    if (Platform.isIOS) {
+      directory = await getApplicationDocumentsDirectory();
+    } else {
+      directory = Directory('/storage/emulated/0/Download');
+      if (!await directory.exists())
+        directory = (await getExternalStorageDirectory())!;
+    }
+  } catch (err, stack) {
+    print("Cannot get download folder path");
+  }
 
-  //이미지면 예외처리 필요
-  //첫번째 key does not match : none 임시메시지 때문ㅇ
-  //var
   if (snapshot.exists && snapshot.value != '') {
     for (Map<dynamic, dynamic> item
         in List<dynamic>.from(snapshot.value as List<Object?>)) {
@@ -741,12 +753,6 @@ void exportData(int roomNumber, String uid) async {
     }
 
     String csv = const ListToCsvConverter().convert(temp);
-    print(csv);
-
-    /// Write to a file
-    ///
-
-    final directory = await getApplicationDocumentsDirectory();
     final pathOfTheFileToWrite = directory.path + "/exportedMessage.csv";
     File file = File(pathOfTheFileToWrite);
     await file.writeAsString(csv);
@@ -755,5 +761,3 @@ void exportData(int roomNumber, String uid) async {
     print('export error');
   }
 }
-
-

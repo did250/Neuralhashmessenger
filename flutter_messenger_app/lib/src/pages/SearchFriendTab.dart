@@ -13,9 +13,9 @@ class _SearchFriendTabState extends State<SearchFriendTab> {
   @override
   void initState() {}
 
-  Future<Map> _searchFriend(String name) async {
+  Future<Map> _searchFriend(String email) async {
     DatabaseReference ref = FirebaseDatabase.instance.ref();
-    Query query = ref.child('UserList').orderByChild('Name').equalTo(name);
+    Query query = ref.child('UserList').orderByChild('Email').equalTo(email);
     DataSnapshot event = await query.get();
     Map result = {
       'Uid': event.children.elementAt(0).key ?? 'error',

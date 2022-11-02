@@ -81,7 +81,7 @@ class _MainPage extends State<MainPage> {
             IconButton(
               icon: Icon(
                 Icons.exit_to_app_sharp,
-                color: Theme.of(context).primaryColor,
+                color: Colors.black,
               ),
               onPressed: () async {
                 authentication.signOut();

@@ -62,35 +62,38 @@ class _MainPage extends State<MainPage> {
     return WillPopScope(
         child: Scaffold(
           appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 150,
-                height: 100,
-                alignment: Alignment.center,
-                child: Image(
-                  image: AssetImage('assets/images/logo.png'),
-                )
-              ),
-            ],
-          ),
-          backgroundColor: Theme.of(context).canvasColor,
-          elevation: 0,
-          actions: [
+            iconTheme: IconThemeData(
+              color: Theme.of(context).primaryColor,//색변경
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 150,
+                  height: 100,
+                  alignment: Alignment.center,
+                  child: Image(
+                    image: AssetImage('assets/images/logo.png'),
+                  )
+                ),
+              ],
+            ),
+            backgroundColor: Theme.of(context).canvasColor,
+            elevation: 0,
+            actions: [
             IconButton(
-              icon: Icon(
-                Icons.exit_to_app_sharp,
-                color: Theme.of(context).primaryColor,
-              ),
-              onPressed: () async {
-                authentication.signOut();
-                await onLogOut();
-                Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-                Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()),
-                );
-              },
+                icon: Icon(
+                  Icons.exit_to_app_sharp,
+                  color: Theme.of(context).primaryColor,
+                ),
+                onPressed: () async {
+                  authentication.signOut();
+                  await onLogOut();
+                  Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
+                  Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                },
             )
           ],
         ),

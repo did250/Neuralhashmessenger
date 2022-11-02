@@ -168,7 +168,7 @@ class FriendTile extends StatelessWidget {
             .equalTo(_friend.name);
         DataSnapshot event = await query.get();
 
-        if (event.exists) {
+        if (event.exists ) {
           int roomnum = int.parse(
               event.children.elementAt(0).child('number').value.toString());
           Navigator.of(context).push(MaterialPageRoute(

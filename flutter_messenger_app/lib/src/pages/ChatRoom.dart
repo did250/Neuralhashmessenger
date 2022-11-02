@@ -101,6 +101,35 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     uploadimage();
   }
 
+  void _outDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: new Text("정말 나가시겠습니까? 나가면 복구할 수 없습니다. 상대방도 채팅방에서 나가집니다."),
+          actions: <Widget>[
+            new TextButton(
+                onPressed: ()async {
+                  await roomOut(number);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: new Text("YES")),
+            new TextButton(
+              child: new Text("No"),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      }
+    );
+  }
+
+
+
   // 검열 통과 못한 경우 => "true 일 때"
   void _showDialogT(String reason) {
     showDialog(
@@ -296,6 +325,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   @override
   void initState() {
     // TODO: implement initState
+
     Loaduser();
     _other = this.friendname;
     _searchFriend();
@@ -357,6 +387,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
             onTap: () {
               exportData(this.number, frienduid);
             }),
+        ListTile(
+          title: Text('Out'),
+          onTap: ()async {
+            _outDialog();
+          },
+        )
       ])),
       body: Container(
         child: Column(
@@ -731,6 +767,50 @@ class Messages extends StatelessWidget {
     );
   }
 }
+
+Future<void> roomOut(int roomnumber) async {
+  int idx = 0;
+
+  for ( var item in rooms) {
+    if (item["number"] == roomnumber) {
+      rooms[idx]["number"] = -1;
+      rooms[idx]["with"] = "removed";
+      rooms[idx]["check"] = "removed";
+      break;
+    }
+    idx += 1;
+  }
+
+  final DatabaseReference ref = FirebaseDatabase.instance.ref();
+  await ref
+      .child('UserList')
+      .child(FirebaseAuth.instance.currentUser!.uid.toString())
+      .child('Num_Chatroom')
+      .set(rooms);
+
+  List<Map<String, dynamic>> map2 = [];
+
+  final snapshot = await ref.child('UserList').child(_fuid).child('Num_Chatroom').get();
+
+  if (snapshot.exists) {
+    int idx = 0;
+    for (var item in (snapshot.value as List<Object?>)) {
+      Map<String, dynamic> map =
+      Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+      if (map["number"] != roomnumber) {
+        map2.add(map);
+      } else {
+        map["number"] = -1;
+        map["with"] = "removed";
+        map["check"] = "removed";
+        map2.add(map);
+      }
+    }
+  }
+
+  await ref.child('UserList').child(_fuid).child('Num_Chatroom').set(map2);
+}
+
 
 void exportData(int roomNumber, String uid) async {
   //채팅방 메시지 복호화해서 텍스트파일로 저장

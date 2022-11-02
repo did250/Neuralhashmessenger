@@ -136,11 +136,12 @@ class ChatTabState extends State<ChatTab> {
                       .value as List<Object?>) {
                     Map<String, dynamic> map = Map<String, dynamic>.from(
                         item as Map<dynamic, dynamic>);
-
-                    numbers.add(map["number"]);
-                    names.add(map["with"]);
-                    check.add(map["check"]?.contains(_name));
-                    room.add(map);
+                    if (map["number"] != -1) {
+                      numbers.add(map["number"]);
+                      names.add(map["with"]);
+                      check.add(map["check"]?.contains(_name));
+                      room.add(map);
+                    }
                   }
                   temp_check = check;
                   temp_names = names;

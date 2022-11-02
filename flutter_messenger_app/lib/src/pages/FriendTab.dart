@@ -144,8 +144,8 @@ class FriendTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
     return ListTile(
-      leading: Image.memory(
-          Uint8List.fromList(base64Decode(_friend.profile_img.toString()))),
+      leading: CircleAvatar(radius: 25.0, backgroundImage: MemoryImage(
+          Uint8List.fromList(base64Decode(_friend.profile_img.toString())))),
       title: Container(
         height: 53,
         alignment: Alignment.centerLeft,

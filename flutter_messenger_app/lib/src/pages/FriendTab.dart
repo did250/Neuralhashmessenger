@@ -203,7 +203,7 @@ class FriendTile extends StatelessWidget {
         /* local userlist update */
         await rootRef.child('UserList/$myUid/Num_Chatroom').update({
           '$nextnumLocal': {
-            'check': [myname],
+            'check': "new",
             'number': nextnumChatroom,
             'with': _friend.name,
           }
@@ -216,7 +216,7 @@ class FriendTile extends StatelessWidget {
         /* remote userlist update*/
         await rootRef.child('UserList/${_friend.uid}/Num_Chatroom').update({
           '$nextnumRemote': {
-            'check': [myname],
+            'check': "new",
             'number': nextnumChatroom,
             'with': myname,
           }
@@ -233,9 +233,9 @@ class FriendTile extends StatelessWidget {
               '0': myname,
               '1': _friend.name,
             },
-            'Messages': {
-              '0': {'checked': 1, 'sender': myname, 'text': 'none'}
-            }
+            // 'Messages': {
+            //   '0': {'checked': 1, 'sender': 'none', 'text': 'none'}
+            // }
           }
         });
         nextnumChatroom++;

@@ -377,9 +377,20 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                     int k = 0;
                     _lastmessage = 0;
 
+                    if ( (snapshot.data as DatabaseEvent).snapshot.value == null) {
+                      return Expanded(
+                        child: Container(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "친구에게 메시지를 보내보세요.",
+                              style: TextStyle(fontSize: 20),
+                            )),
+                      );
+                    }
                     for (var item in (snapshot.data as DatabaseEvent)
                         .snapshot
                         .value as List<Object?>) {
+                      print("ccccccc");
                       if (item != null) {
                         bool mine = false;
                         Map<String, dynamic> map = Map<String, dynamic>.from(
@@ -408,7 +419,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                           }
                         }
                       } else {
-                        print("nullll");
+                        print("null");
                       }
                       _lastmessage += 1;
                     }

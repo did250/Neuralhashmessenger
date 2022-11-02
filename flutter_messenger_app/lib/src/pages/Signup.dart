@@ -176,36 +176,44 @@ class _SignupScreenState extends State<SignupScreen> {
                             password: userPassword,
                           );
 
+                          FirebaseAuth.instance.currentUser?.sendEmailVerification();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Please verify your email'),
+                              backgroundColor: Colors.blue,
+                            ),
+                          );
+
                           if (newUser.user != null) { //SIGNUP SUCCESS
                             try {
                               final user = authentication.currentUser;
                               if (user != null) {
                                 loggedUser = user;
+                                DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + loggedUser!.uid.toString());
+
+                                await ref.set({
+                                  "Email": userEmail,
+                                  "Name": userName,
+                                  "Friend": "",
+                                  "Profile_img": profile_img_base64,
+                                  "Next_Chatroom": 0
+                                });
+                                onSignUp(userPassword);
+
+                                final storage = FlutterSecureStorage();
+                                await storage.write(key: 'prefEmailId', value: userEmail);
+                                await storage.write(key: 'prefPassword', value: userPassword);
+
+                                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                                  return Home();
+                                },
+                                ),
+                                );
                               }
                             } catch (e) {
                               print(e);
                             }
-
-                            DatabaseReference ref = FirebaseDatabase.instance.ref("UserList/" + loggedUser!.uid.toString());
-
-                            await ref.set({
-                              "Email": userEmail,
-                              "Name": userName,
-                              "Friend": "",
-                              "Profile_img": profile_img_base64,
-                              "Next_Chatroom": 0
-                            });
-                            onSignUp(userPassword);
-
-                            final storage = FlutterSecureStorage();
-                            await storage.write(key: 'prefEmailId', value: userEmail);
-                            await storage.write(key: 'prefPassword', value: userPassword);
-
-                            Navigator.push(context, MaterialPageRoute(builder: (context) {
-                              return Home();
-                            },
-                            ),
-                            );
                           }
                         } catch (e) { //SIGNUP FAILED
                           print(e);

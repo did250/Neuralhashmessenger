@@ -1,18 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
-import 'package:flutter_messenger_app/src/pages/Login.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:typed_data';
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_messenger_app/src/pages/Login.dart';
+import 'package:flutter_messenger_app/src/pages/Home.dart';
+import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'dart:ui';
 import 'dart:io';
-
+import 'dart:convert';
+import 'dart:typed_data';
 import '../../main.dart';
-import 'FriendTab.dart';
-import 'Home.dart';
 
 class MyPage extends StatefulWidget {
   const MyPage({Key? key}) : super(key: key);
@@ -579,7 +577,7 @@ class _MyPageState extends State<MyPage> {
               ),
               Container(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(30, 0, 20, 0),
+                  padding: EdgeInsets.fromLTRB(30, 0, 90, 0),
                   child: Text("  "+loggedUser!.email.toString(),
                     style: TextStyle(
                       letterSpacing: 1.0,

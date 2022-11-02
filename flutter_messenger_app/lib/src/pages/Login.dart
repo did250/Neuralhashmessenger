@@ -50,7 +50,17 @@ class _LoginScreenState extends State<LoginScreen> {
           email: userEmail,
           password: userPassword,
         );
-
+        if (userEmail != '' && userPassword != '' && FirebaseAuth.instance.currentUser?.emailVerified == false) {
+          FirebaseAuth.instance.currentUser?.sendEmailVerification();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Please verify your email'),
+              backgroundColor: Colors.blue,
+            ),
+          );
+        }
+        else {
         if (newUser.user != null) {
           set_prefData(userEmail, userPassword);
 
@@ -60,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
         }
-      } catch (e) {
+      }} catch (e) {
         //LOGIN FAILED
         print(e);
       }
@@ -182,14 +192,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                 if (newUser.user != null) {
                                   set_prefData(userEmail, userPassword);
 
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) {
-                                        return Home();
-                                      },
-                                    ),
-                                  );
+                                  if (FirebaseAuth.instance.currentUser?.emailVerified == false) {
+                                    FirebaseAuth.instance.currentUser?.sendEmailVerification();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Please verify your email'),
+                                        backgroundColor: Colors.blue,
+                                      ),
+                                    );
+                                  }
+                                  else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) {
+                                          return Home();
+                                        },
+                                      ),
+                                    );
+                                  }
                                 }
                               } catch (e) {
                                 //LOGIN FAILED

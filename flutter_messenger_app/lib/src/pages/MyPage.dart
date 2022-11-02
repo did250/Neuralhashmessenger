@@ -191,6 +191,9 @@ class _MyPageState extends State<MyPage> {
 
   Widget showProfileImage() {
     final Uint8List Img8List = base64Decode(image64String);
+    if (Img8List.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    }
     return Container(
         width: MediaQuery.of(context).size.width * 0.3,
         height: MediaQuery.of(context).size.height * 0.15,

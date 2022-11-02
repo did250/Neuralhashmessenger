@@ -110,7 +110,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
           title: new Text(reason + " Image. 전송할 수 없습니다."),
           // content: new Text("Alert Dialog body"),
           actions: <Widget>[
-            new FlatButton(
+            new TextButton(
               child: new Text("OK"),
               onPressed: () {
                 imageString = "";
@@ -134,7 +134,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
           title: new Text("사진을 전송하시겠습니까?"),
           // content: new Text("Alert Dialog body"),
           actions: <Widget>[
-            new FlatButton(
+            new TextButton(
               child: new Text("Yes"),
               onPressed: () {
                 _handleSubmitted(imageString);
@@ -143,7 +143,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                 Navigator.pop(context);
               },
             ),
-            new FlatButton(
+            new TextButton(
               child: new Text("No"),
               onPressed: () {
                 _image = null;

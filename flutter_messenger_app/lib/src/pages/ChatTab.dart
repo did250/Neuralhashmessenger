@@ -82,6 +82,7 @@ class ChatTabState extends State<ChatTab> {
                   return Text("no data");
                 } else if ((snapshot.data as DatabaseEvent).snapshot.value ==
                     null) {
+                  print("null");
                   numbers = temp_numbers;
                   check = temp_check;
                   names = temp_names;
@@ -136,6 +137,7 @@ class ChatTabState extends State<ChatTab> {
                       .value as List<Object?>) {
                     Map<String, dynamic> map = Map<String, dynamic>.from(
                         item as Map<dynamic, dynamic>);
+                    print(map);
                     if (map["number"] != -1) {
                       numbers.add(map["number"]);
                       names.add(map["with"]);
@@ -143,6 +145,7 @@ class ChatTabState extends State<ChatTab> {
                       room.add(map);
                     }
                   }
+
                   temp_check = check;
                   temp_names = names;
                   temp_numbers = numbers;

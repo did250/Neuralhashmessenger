@@ -687,16 +687,16 @@ class Messages extends StatelessWidget {
                     final st =
                         snapshot.data!.substring(0, snapshot.data!.length - 3);
                     final Uint8List imageBytetest = base64Decode(st);
-                    return Container(
-                      height: MediaQuery.of(context).size.height * 0.2,
-                      width: MediaQuery.of(context).size.width * 0.2,
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.15,
+                      width: MediaQuery.of(context).size.width * 0.4,
                       child: Center(
                         child: Image.memory(Uint8List.fromList(imageBytetest)),
                       ),
                     );
                     //--------------------------------------------------------------------------------------------------
                   }
-                  if (MediaQuery.of(context).size.width / 13 <
+                  if (MediaQuery.of(context).size.width / 15 <
                       snapshot.data!.length) {
                     return Container(
                       width: MediaQuery.of(context).size.width * 0.7,

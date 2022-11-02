@@ -97,25 +97,46 @@ class _MyPageState extends State<MyPage> {
       });
     }
 
-    if (friendshot.exists && friendshot.value != '') {
-      for (String? item
-      in List<String?>.from(friendshot.value as List<Object?>)) {
-        if (item == null) {
-          continue;
-        }
-        friend_count++;
-      }
+    // if (friendshot.exists && friendshot.value != '') {
+    //   for (String? item
+    //   in List<String?>.from(friendshot.value as List<Object?>)) {
+    //     if (item == null) {
+    //       continue;
+    //     }
+    //     friend_count++;
+    //   }
+    // }
+    if ( friendshot.value == null) {
+      friend_count = 0;
+    }
+    else {
+      friend_count = friendshot.children.length;
     }
 
-    if (chatroomshot.value == '') {
+    // if (chatroomshot.value == '') {
+    //   chatroom_count = 0;
+    // } else if (chatroomshot.value != '') {
+    //   final chatnumshot = await ref
+    //       .child("UserList")
+    //       .child(loggedUser!.uid.toString())
+    //       .child("Next_Chatroom")
+    //       .get();
+    //   chatroom_count = int.parse(chatnumshot.value.toString());
+    // }
+
+    if (chatroomshot.value == null) {
       chatroom_count = 0;
-    } else if (chatroomshot.value != '') {
-      final chatnumshot = await ref
-          .child("UserList")
-          .child(loggedUser!.uid.toString())
-          .child("Next_Chatroom")
-          .get();
-      chatroom_count = int.parse(chatnumshot.value.toString());
+    }
+    else {
+      int cnt = 0;
+      for (var item in (chatroomshot.value as List<Object?>)) {
+        Map<String, dynamic> map =
+        Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+        if (map["number"] != -1) {
+          cnt += 1;
+        }
+      }
+      chatroom_count = cnt;
     }
   }
 
@@ -594,15 +615,20 @@ class _MyPageState extends State<MyPage> {
         Divider(),
 
         Container(
-          height: 70,
+          color: Colors.yellow,
+          height: 40,
           margin: EdgeInsets.fromLTRB(3, 0, 0, 0),
           child: SwitchListTile(
-            title: Text('Lights'),
-            subtitle: Text(_switchValue?'on':'off', style: TextStyle(
+            title: Text(_switchValue ?'Dark Mode : ON':'Dark Mode : OFF', style: TextStyle(
               letterSpacing: 1.0,
               fontSize: 16,
               color: Theme.of(context).primaryColor,
-            ),),
+            )),
+            // subtitle: Text(_switchValue?'on':'off', style: TextStyle(
+            //   letterSpacing: 1.0,
+            //   fontSize: 16,
+            //   color: Theme.of(context).primaryColor,
+            // ),),
             value: _switchValue,
             onChanged: (bool value) {
               setState(() {
@@ -623,6 +649,7 @@ class _MyPageState extends State<MyPage> {
         Divider(),
 
         Container(
+          color: Colors.yellow,
           height: 40,
           margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
           child: Row(

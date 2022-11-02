@@ -201,8 +201,8 @@ class _MyPageState extends State<MyPage> {
                   //child: Img8List.isEmpty
                   //? Image(image: AssetImage('assets/images/profile_img.jpg'),)
                     child: _image == null
-                        ? Image.memory(Uint8List.fromList(Img8List))
-                        : Image.file(File(_image!.path))))));
+                        ? CircleAvatar(radius: 100.0, backgroundImage: MemoryImage(Img8List))
+                        : CircleAvatar(radius: 100.0, backgroundImage: FileImage((File(_image!.path))))))));
   }
 
   Widget showUserInfo() {

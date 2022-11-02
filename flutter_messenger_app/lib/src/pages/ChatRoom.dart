@@ -20,6 +20,7 @@ List<Messages> _message = <Messages>[];
 int len = 0;
 String _friendimage = "";
 Uint8List _friendimageuint = Uint8List.fromList([0]);
+
 class ChatRoom extends StatefulWidget {
   final String name;
   final int number;
@@ -204,7 +205,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
   /// 친구 프로필 사진
 
-
   /// 채팅방 목록 불러오기
   Future<void> _roomcheck() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
@@ -283,13 +283,12 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
   Future<void> _friendprofile() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
-    final snapshot = await ref.child('UserList').child(_fuid).child(
-        'Profile_img').get();
+    final snapshot =
+        await ref.child('UserList').child(_fuid).child('Profile_img').get();
     if (snapshot.exists && snapshot.value != null) {
       setState(() {
         _friendimage = snapshot.value.toString();
         _friendimageuint = base64Decode(_friendimage);
-
       });
     }
   }
@@ -607,8 +606,8 @@ class Messages extends StatelessWidget {
                   )
                 : Container(
                     margin: const EdgeInsets.only(right: 10.0),
-                    child: CircleAvatar(backgroundImage: MemoryImage(_friendimageuint))
-                  ),
+                    child: CircleAvatar(
+                        backgroundImage: MemoryImage(_friendimageuint))),
             Container(child: (() {
               // if (text.endsWith("123")) {
               //   print("image입니다...");
@@ -689,14 +688,24 @@ class Messages extends StatelessWidget {
 
 void exportData(int roomNumber, String uid) async {
   //채팅방 메시지 복호화해서 텍스트파일로 저장
+
   final DatabaseReference ref = FirebaseDatabase.instance.ref();
   final snapshot = await ref.child('ChattingRoom/$roomNumber/Messages').get();
   final aeskeyforexport = encrypt.Key.fromBase64(await getAESKey(uid));
   List<List<dynamic>> temp = [];
+  Directory directory = await getApplicationDocumentsDirectory();
+  try {
+    if (Platform.isIOS) {
+      directory = await getApplicationDocumentsDirectory();
+    } else {
+      directory = Directory('/storage/emulated/0/Download');
+      if (!await directory.exists())
+        directory = (await getExternalStorageDirectory())!;
+    }
+  } catch (err, stack) {
+    print("Cannot get download folder path");
+  }
 
-  //이미지면 예외처리 필요
-  //첫번째 key does not match : none 임시메시지 때문ㅇ
-  //var
   if (snapshot.exists && snapshot.value != '') {
     for (Map<dynamic, dynamic> item
         in List<dynamic>.from(snapshot.value as List<Object?>)) {
@@ -709,12 +718,6 @@ void exportData(int roomNumber, String uid) async {
     }
 
     String csv = const ListToCsvConverter().convert(temp);
-    print(csv);
-
-    /// Write to a file
-    ///
-
-    final directory = await getApplicationDocumentsDirectory();
     final pathOfTheFileToWrite = directory.path + "/exportedMessage.csv";
     File file = File(pathOfTheFileToWrite);
     await file.writeAsString(csv);

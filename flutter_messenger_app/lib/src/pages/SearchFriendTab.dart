@@ -19,7 +19,9 @@ class _SearchFriendTabState extends State<SearchFriendTab> {
     DataSnapshot event = await query.get();
     Map result = {
       'Uid': event.children.elementAt(0).key ?? 'error',
-      'Name': event.children.elementAt(0).child('Name').value.toString()
+      'Name': event.children.elementAt(0).child('Name').value.toString(),
+      'Profile':
+          event.children.elementAt(0).child('Profile_img').value.toString(),
     };
     return result;
   }

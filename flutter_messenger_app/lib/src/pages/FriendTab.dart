@@ -19,24 +19,17 @@ final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
 const storage = FlutterSecureStorage();
 
 class _FriendTabState extends State<FriendTab> {
+  final myUid = FirebaseAuth.instance.currentUser!.uid;
   List<Friend> myFriendList = [];
-  Uint8List tempbytes = Uint8List(10);
-
-  void initState() {
-    _getFriend();
-  }
 
   void addtestfriend() async {
-    final myUid = FirebaseAuth.instance.currentUser?.uid;
-    final newPostKey = rootRef.child("UserList/$myUid/Test").push().key;
-
-    rootRef.child("UserList/$myUid/Test/$newPostKey").update(
+    final newPostKey = rootRef.child("UserList/$myUid/Friend").push().key;
+    rootRef.child("UserList/$myUid/Friend/$newPostKey").update(
         {'Uid': '$newPostKey data', 'Name': Random().nextInt(100).toString()});
   }
 
   void gettestfriend() async {
-    final myUid = FirebaseAuth.instance.currentUser?.uid;
-    final snapshot = await rootRef.child('UserList/$myUid/Test').get();
+    final snapshot = await rootRef.child('UserList/$myUid/Friend').get();
 
     for (var element in snapshot.children) {
       print(element.child('Uid').value);
@@ -44,29 +37,13 @@ class _FriendTabState extends State<FriendTab> {
     }
   }
 
-  Future<void> _getFriend() async {
-    final myUid = FirebaseAuth.instance.currentUser?.uid;
-
-    final snapshot = await rootRef.child("UserList/$myUid/Test").get();
-    myFriendList = [];
-
-    if (snapshot.exists && snapshot.value != '') {
-      for (var element in snapshot.children) {
-        String uid = element.child('Uid').value.toString();
-        String name = element.child('Name').value.toString();
-        myFriendList.add(Friend(uid, name, await _getProfileImgFromUid(uid)));
-      }
-    }
-
-    setState(() {});
-  }
-
   Future<void> _addFriend(Map friend) async {
-    final myUid = FirebaseAuth.instance.currentUser?.uid;
-    final newPostKey = rootRef.child("UserList/$myUid/Test").push().key;
-    rootRef
-        .child("UserList/$myUid/Test/$newPostKey")
-        .update({'Uid': friend['Uid'], 'Name': friend['Name']});
+    final newPostKey = rootRef.child("UserList/$myUid/Friend").push().key;
+    rootRef.child("UserList/$myUid/Friend/$newPostKey").update({
+      'Uid': friend['Uid'],
+      'Name': friend['Name'],
+      'Profile': friend['Profile']
+    });
   }
 
   Future<String> _getNameFromUid(String uid) async {
@@ -99,8 +76,29 @@ class _FriendTabState extends State<FriendTab> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
-                  height: 500, width: 420, child: _buildListView(myFriendList)),
+              StreamBuilder(
+                  stream: FirebaseDatabase.instance
+                      .ref()
+                      .child('UserList/$myUid/Friend')
+                      .onValue,
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.hasData) {
+                      myFriendList = [];
+                      for (var element in (snapshot.data as DatabaseEvent)
+                          .snapshot
+                          .children) {
+                        final uid = element.child('Uid').value.toString();
+                        final name = element.child('Name').value.toString();
+                        final profile =
+                            element.child('Profile').value.toString();
+                        myFriendList.add(Friend(uid, name, profile));
+                      }
+                    }
+                    return Container(
+                        height: 500,
+                        width: 420,
+                        child: _buildListView(myFriendList));
+                  }),
               TextButton(
                   onPressed: () {
                     addtestfriend();
@@ -108,7 +106,7 @@ class _FriendTabState extends State<FriendTab> {
                   child: Text('add friend test button')),
               TextButton(
                   onPressed: gettestfriend, child: Text('gettestfriend')),
-              //TextButton(onPressed: temp2, child: Text('getkey'))
+              //TextButton(onPressed: temp2, child: Text('getkey')),
             ],
           ),
         ),
@@ -123,8 +121,7 @@ class _FriendTabState extends State<FriendTab> {
             if (result['Uid'] == 'error') {
               print('error');
             } else {
-              await _addFriend(result);
-              _getFriend();
+              _addFriend(result);
             }
           },
         ));

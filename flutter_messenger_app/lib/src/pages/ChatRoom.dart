@@ -666,8 +666,8 @@ class Messages extends StatelessWidget {
                       width: MediaQuery.of(context).size.width * 0.7,
                       decoration: BoxDecoration(
                         color: ismine
-                            ? Colors.blueGrey.shade700
-                            : Colors.blueGrey.shade500,
+                            ? Colors.blueAccent
+                            : Colors.blue.shade300,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: Colors.grey.shade400,
@@ -688,8 +688,8 @@ class Messages extends StatelessWidget {
                     return Container(
                       decoration: BoxDecoration(
                         color: ismine
-                            ? Colors.blueGrey.shade700
-                            : Colors.blueGrey.shade500,
+                            ? Colors.blueAccent
+                            : Colors.blue.shade300,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: Colors.grey.shade400,

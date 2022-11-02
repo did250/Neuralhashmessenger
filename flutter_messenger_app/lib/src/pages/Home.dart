@@ -66,8 +66,8 @@ class _MainPage extends State<MainPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 100,
-                height: 80,
+                width: 150,
+                height: 100,
                 alignment: Alignment.center,
                 child: Image(
                   image: AssetImage('assets/images/logo.png'),
@@ -75,13 +75,13 @@ class _MainPage extends State<MainPage> {
               ),
             ],
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).canvasColor,
           elevation: 0,
           actions: [
             IconButton(
               icon: Icon(
                 Icons.exit_to_app_sharp,
-                color: Colors.black,
+                color: Theme.of(context).primaryColor,
               ),
               onPressed: () async {
                 authentication.signOut();

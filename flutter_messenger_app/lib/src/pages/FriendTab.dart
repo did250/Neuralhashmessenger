@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -25,59 +26,47 @@ class _FriendTabState extends State<FriendTab> {
     _getFriend();
   }
 
-  Future<void> keyReset() async {
-    String temp = (await storage.read(key: 'prefPassword'))!;
-    String temp2 = (await storage.read(key: 'prefEmailId'))!;
-    await onLogOut();
-    await storage.write(key: 'prefPassword', value: temp);
-    await storage.write(key: 'prefEmailId', value: temp2);
+  void addtestfriend() async {
+    final myUid = FirebaseAuth.instance.currentUser?.uid;
+    final newPostKey = rootRef.child("UserList/$myUid/Test").push().key;
 
-    onSignUp((await storage.read(key: 'prefPassword'))!);
+    rootRef.child("UserList/$myUid/Test/$newPostKey").update(
+        {'Uid': '$newPostKey data', 'Name': Random().nextInt(100).toString()});
   }
 
-  Future<void> checkKey() async {
-    storage.delete(key: '0G8WsuiGipVyTFHjs6Xhjs9apHq1');
+  void gettestfriend() async {
+    final myUid = FirebaseAuth.instance.currentUser?.uid;
+    final snapshot = await rootRef.child('UserList/$myUid/Test').get();
 
-    print(base64Decode(await getAESKey('HWR8mh2eZLP1JM3cHJDercnFv1A3')));
+    for (var element in snapshot.children) {
+      print(element.child('Uid').value);
+      print(element.child("Name").value);
+    }
   }
 
   Future<void> _getFriend() async {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
-    DatabaseReference myFriendRef = rootRef.child("UserList/$myUid/Friend");
-    final snapshot = await myFriendRef.get();
+
+    final snapshot = await rootRef.child("UserList/$myUid/Test").get();
     myFriendList = [];
+
     if (snapshot.exists && snapshot.value != '') {
-      for (String? item
-          in List<String?>.from(snapshot.value as List<Object?>)) {
-        if (item == null) {
-          continue;
-        }
-        myFriendList.add(Friend(item, await _getNameFromUid(item),
-            await _getProfileImgFromUid(item)));
+      for (var element in snapshot.children) {
+        String uid = element.child('Uid').value.toString();
+        String name = element.child('Name').value.toString();
+        myFriendList.add(Friend(uid, name, await _getProfileImgFromUid(uid)));
       }
     }
 
     setState(() {});
   }
 
-  Future<void> _addFriend(String friendUid) async {
+  Future<void> _addFriend(Map friend) async {
     final myUid = FirebaseAuth.instance.currentUser?.uid;
-    DatabaseReference myFriendRef = rootRef.child("UserList/$myUid/Friend");
-
-    final snapshot = await myFriendRef.get();
-
-    List<String> tempFriendList = [];
-    if (snapshot.exists && snapshot.value != '') {
-      for (String? item
-          in List<String?>.from(snapshot.value as List<Object?>)) {
-        if (item == null) {
-          continue;
-        }
-        tempFriendList.add(item);
-      }
-    }
-    tempFriendList.add(friendUid);
-    rootRef.child('UserList/$myUid').update({'Friend': tempFriendList});
+    final newPostKey = rootRef.child("UserList/$myUid/Test").push().key;
+    rootRef
+        .child("UserList/$myUid/Test/$newPostKey")
+        .update({'Uid': friend['Uid'], 'Name': friend['Name']});
   }
 
   Future<String> _getNameFromUid(String uid) async {
@@ -112,12 +101,13 @@ class _FriendTabState extends State<FriendTab> {
             children: [
               Container(
                   height: 500, width: 420, child: _buildListView(myFriendList)),
-              /*TextButton(
+              TextButton(
                   onPressed: () {
-                    checkKey();
+                    addtestfriend();
                   },
-                  child: Text('check aes Key')),*/
-              //TextButton(onPressed: temp1, child: Text('generateAESKey')),
+                  child: Text('add friend test button')),
+              TextButton(
+                  onPressed: gettestfriend, child: Text('gettestfriend')),
               //TextButton(onPressed: temp2, child: Text('getkey'))
             ],
           ),
@@ -128,12 +118,11 @@ class _FriendTabState extends State<FriendTab> {
           ),
           backgroundColor: Colors.deepPurpleAccent.shade200,
           onPressed: () async {
-            final result = await Navigator.push(context,
+            Map result = await Navigator.push(context,
                 MaterialPageRoute(builder: (context) => SearchFriendTab()));
-            if (result == 'error') {
+            if (result['Uid'] == 'error') {
               print('error');
             } else {
-              //print(result);
               await _addFriend(result);
               _getFriend();
             }
@@ -320,7 +309,7 @@ Future<encrypt.Key> generatePbkdf2(String password, Uint8List salt) async {
   final myUid = FirebaseAuth.instance.currentUser?.uid;
   final pbkdf2 = Pbkdf2(
     macAlgorithm: Hmac.sha256(),
-    iterations: 100000,
+    iterations: 1000,
     bits: 256,
   );
   /* generate secretKey from password */

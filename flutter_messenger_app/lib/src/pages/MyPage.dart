@@ -600,7 +600,7 @@ class _MyPageState extends State<MyPage> {
           height: 70,
           margin: EdgeInsets.fromLTRB(3, 0, 0, 0),
           child: SwitchListTile(
-            title: Text(_switchValue ?'Dark Mode : ON':'Dark Mode : OFF', style: TextStyle(
+            title: Text('Dark Mode', style: TextStyle(
               letterSpacing: 1.0,
               fontSize: 16,
               color: Theme.of(context).primaryColor,

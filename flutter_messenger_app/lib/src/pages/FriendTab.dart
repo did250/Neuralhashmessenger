@@ -4,11 +4,13 @@ import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:focused_menu/modals.dart';
 import 'SearchFriendTab.dart';
 import 'ChatRoom.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:focused_menu/focused_menu.dart';
 
 class FriendTab extends StatefulWidget {
   @override
@@ -18,27 +20,40 @@ class FriendTab extends StatefulWidget {
 final DatabaseReference rootRef = FirebaseDatabase.instance.ref();
 const storage = FlutterSecureStorage();
 
-class _FriendTabState extends State<FriendTab> {
+class _FriendTabState extends State<FriendTab>
+    with AutomaticKeepAliveClientMixin {
   final myUid = FirebaseAuth.instance.currentUser!.uid;
   List<Friend> myFriendList = [];
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 
-  void addtestfriend() async {
-    final newPostKey = rootRef.child("UserList/$myUid/Friend").push().key;
-    rootRef.child("UserList/$myUid/Friend/$newPostKey").update(
-        {'Uid': '$newPostKey data', 'Name': Random().nextInt(100).toString()});
+  @override
+  void initState() {
+    // TODO: implement initState
+    _refreshFriendList();
+    super.initState();
   }
 
-  void gettestfriend() async {
+  void _refreshFriendList() async {
+    myFriendList = [];
     final snapshot = await rootRef.child('UserList/$myUid/Friend').get();
 
     for (var element in snapshot.children) {
+      myFriendList.add(Friend(
+          element.child('Uid').value.toString(),
+          element.child('Name').value.toString(),
+          element.child('Profile').value.toString()));
       print(element.child('Uid').value);
       print(element.child("Name").value);
     }
+    setState(() {});
   }
 
-  Future<void> _addFriend(Map friend) async {
+  void _addFriend(Map friend) {
     final newPostKey = rootRef.child("UserList/$myUid/Friend").push().key;
+    myFriendList.add(Friend(friend['Uid'], friend['Name'], friend['Profile']));
+    setState(() {});
     rootRef.child("UserList/$myUid/Friend/$newPostKey").update({
       'Uid': friend['Uid'],
       'Name': friend['Name'],
@@ -46,17 +61,13 @@ class _FriendTabState extends State<FriendTab> {
     });
   }
 
-  Future<String> _getNameFromUid(String uid) async {
-    DatabaseReference ref = FirebaseDatabase.instance.ref('UserList/$uid/Name');
-    final snapshot = await ref.get();
-    if (snapshot.exists) {
-      return snapshot.value.toString();
-    } else {
-      return "null";
-    }
-  }
+  void _deleteFriend(int index) async {
+    myFriendList.removeAt(index);
+    final snapshot = await rootRef.child('UserList/$myUid/Friend').get();
+    var key = snapshot.children.elementAt(index).key;
 
-  _refreshState() {
+    await rootRef.child('UserList/$myUid/Friend/$key').remove();
+
     setState(() {});
   }
 
@@ -72,41 +83,72 @@ class _FriendTabState extends State<FriendTab> {
   }
 
   Widget build(BuildContext context) {
+    var _tapPosition;
     return Scaffold(
         body: SingleChildScrollView(
+          physics: BouncingScrollPhysics(),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              StreamBuilder(
-                  stream: FirebaseDatabase.instance
-                      .ref()
-                      .child('UserList/$myUid/Friend')
-                      .onValue,
-                  builder: (BuildContext context, snapshot) {
-                    if (snapshot.hasData) {
-                      myFriendList = [];
-                      for (var element in (snapshot.data as DatabaseEvent)
-                          .snapshot
-                          .children) {
-                        final uid = element.child('Uid').value.toString();
-                        final name = element.child('Name').value.toString();
-                        final profile =
-                            element.child('Profile').value.toString();
-                        myFriendList.add(Friend(uid, name, profile));
-                      }
-                    }
-                    return Container(
-                        height: 500,
-                        width: 420,
-                        child: _buildListView(myFriendList));
-                  }),
-              TextButton(
-                  onPressed: () {
-                    addtestfriend();
-                  },
-                  child: Text('add friend test button')),
-              TextButton(
-                  onPressed: gettestfriend, child: Text('gettestfriend')),
-              //TextButton(onPressed: temp2, child: Text('getkey')),
+              SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.only(left: 16, right: 16, top: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[],
+                  ),
+                ),
+              ),
+              ListView.separated(
+                padding: EdgeInsets.only(top: 15),
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: myFriendList.length,
+                separatorBuilder: (BuildContext context, int index) =>
+                    const Divider(),
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                      onLongPress: () {},
+                      /*onTap: () => newChatroom(context, myFriendList[index].name,
+                        myFriendList[index].uid),*/
+                      child: FocusedMenuHolder(
+                          menuWidth: MediaQuery.of(context).size.width * 0.5,
+                          blurSize: 5,
+                          blurBackgroundColor: Colors.black,
+                          openWithTap: true,
+                          child: ListTile(
+                            dense: true,
+                            leading: CircleAvatar(
+                                child: Image.memory(Uint8List.fromList(
+                                    base64Decode(myFriendList[index]
+                                        .profile_img
+                                        .toString())))),
+                            title: Text(
+                              myFriendList[index].name,
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          onPressed: () {},
+                          menuItems: <FocusedMenuItem>[
+                            FocusedMenuItem(
+                                title: Text('New Chat'),
+                                trailingIcon: Icon(Icons.chat_bubble),
+                                onPressed: () => newChatroom(
+                                    context,
+                                    myFriendList[index].name,
+                                    myFriendList[index].uid)),
+                            FocusedMenuItem(
+                                title: Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                trailingIcon:
+                                    Icon(Icons.delete, color: Colors.white),
+                                backgroundColor: Colors.redAccent,
+                                onPressed: () => _deleteFriend(index)),
+                          ]));
+                },
+              ),
             ],
           ),
         ),
@@ -128,124 +170,89 @@ class _FriendTabState extends State<FriendTab> {
   }
 }
 
-Widget _buildListView(List<Friend> friendlist) {
-  return ListView.builder(
-      itemCount: friendlist.length,
-      itemBuilder: (BuildContext context, int index) {
-        return FriendTile(friendlist[index]);
-      });
-}
+void newChatroom(
+  BuildContext context,
+  String friendName,
+  String friendUid,
+) async {
+  final myUid = FirebaseAuth.instance.currentUser!.uid;
+  DatabaseReference ref = FirebaseDatabase.instance.ref();
+  Query query = ref
+      .child('UserList/$myUid/Num_Chatroom')
+      .orderByChild('with')
+      .equalTo(friendName);
+  DataSnapshot event = await query.get();
 
-class FriendTile extends StatelessWidget {
-  final Friend _friend;
-  FriendTile(this._friend);
-
-  @override
-  Widget build(BuildContext context) {
-    final myUid = FirebaseAuth.instance.currentUser?.uid;
-    return ListTile(
-      leading: CircleAvatar(radius: 25.0, backgroundImage: MemoryImage(
-          Uint8List.fromList(base64Decode(_friend.profile_img.toString())))),
-      title: Container(
-        height: 53,
-        alignment: Alignment.centerLeft,
-        child: Text(
-          _friend.name,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      onTap: () async {
-        /*새 채팅방*/
-
-        /* check duplicates*/
-        DatabaseReference ref = FirebaseDatabase.instance.ref();
-        Query query = ref
-            .child('UserList/$myUid/Num_Chatroom')
-            .orderByChild('with')
-            .equalTo(_friend.name);
-        DataSnapshot event = await query.get();
-
-        if (event.exists ) {
-          int roomnum = int.parse(
-              event.children.elementAt(0).child('number').value.toString());
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => ChatRoom(_friend.name, roomnum)));
-          print("chatroom already exists");
-          return;
-        }
-
-        /* generate AES Key */
-        await getAESKey(_friend.uid);
-
-        /* generate new chatroom */
-        final snapshotChat = await rootRef.child('ChattingRoom/next').get();
-        int nextnumChatroom;
-        if (snapshotChat.exists) {
-          nextnumChatroom = int.parse(snapshotChat.value.toString());
-        } else {
-          nextnumChatroom = 0;
-        }
-
-        final snapshotLocal = await rootRef.child('UserList/$myUid').get();
-        final snapshotRemote =
-            await rootRef.child('UserList/${_friend.uid}').get();
-        String myname = snapshotLocal.child('Name').value.toString();
-
-        /* get next number of each user's chatroom*/
-        int nextnumLocal =
-            int.parse(snapshotLocal.child('Next_Chatroom').value.toString());
-        int nextnumRemote =
-            int.parse(snapshotRemote.child('Next_Chatroom').value.toString());
-
-        /* local userlist update */
-        await rootRef.child('UserList/$myUid/Num_Chatroom').update({
-          '$nextnumLocal': {
-            'check': myname,
-            'number': nextnumChatroom,
-            'with': _friend.name,
-          }
-        });
-        nextnumLocal++;
-        await rootRef
-            .child('UserList/$myUid')
-            .update({'Next_Chatroom': nextnumLocal});
-
-        /* remote userlist update*/
-        await rootRef.child('UserList/${_friend.uid}/Num_Chatroom').update({
-          '$nextnumRemote': {
-            'check': _friend.name,
-            'number': nextnumChatroom,
-            'with': myname,
-          }
-        });
-        nextnumRemote++;
-        await rootRef
-            .child('UserList/${_friend.uid}')
-            .update({'Next_Chatroom': nextnumRemote});
-
-        /* ChattingRoom update */
-        rootRef.child('ChattingRoom').update({
-          '$nextnumChatroom': {
-            'Members': {
-              '0': myname,
-              '1': _friend.name,
-            },
-            // 'Messages': {
-            //   '0': {'checked': 1, 'sender': 'none', 'text': 'none'}
-            // }
-          }
-        });
-        nextnumChatroom++;
-        await rootRef.child('ChattingRoom').update({'next': nextnumChatroom});
-
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => ChatRoom(_friend.name, nextnumChatroom - 1)));
-      },
-    );
+  if (event.exists) {
+    int roomnum =
+        int.parse(event.children.elementAt(0).child('number').value.toString());
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => ChatRoom(friendName, roomnum)));
+    print("chatroom already exists");
+    return;
   }
+
+  /* generate AES Key */
+  await getAESKey(friendUid);
+  /* generate new chatroom */
+  final snapshotChat = await rootRef.child('ChattingRoom/next').get();
+  int nextnumChatroom;
+  if (snapshotChat.exists) {
+    nextnumChatroom = int.parse(snapshotChat.value.toString());
+  } else {
+    nextnumChatroom = 0;
+  }
+
+  final snapshotLocal = await rootRef.child('UserList/$myUid').get();
+  final snapshotRemote = await rootRef.child('UserList/$friendUid').get();
+  String myname = snapshotLocal.child('Name').value.toString();
+
+  /* get next number of each user's chatroom*/
+  int nextnumLocal =
+      int.parse(snapshotLocal.child('Next_Chatroom').value.toString());
+  int nextnumRemote =
+      int.parse(snapshotRemote.child('Next_Chatroom').value.toString());
+
+  /* local userlist update */
+  await rootRef.child('UserList/$myUid/Num_Chatroom').update({
+    '$nextnumLocal': {
+      'check': myname,
+      'number': nextnumChatroom,
+      'with': friendName,
+    }
+  });
+  nextnumLocal++;
+  await rootRef
+      .child('UserList/$myUid')
+      .update({'Next_Chatroom': nextnumLocal});
+
+  /* remote userlist update*/
+  await rootRef.child('UserList/$friendUid/Num_Chatroom').update({
+    '$nextnumRemote': {
+      'check': friendName,
+      'number': nextnumChatroom,
+      'with': myname,
+    }
+  });
+  nextnumRemote++;
+  await rootRef
+      .child('UserList/$friendUid')
+      .update({'Next_Chatroom': nextnumRemote});
+
+  /* ChattingRoom update */
+  rootRef.child('ChattingRoom').update({
+    '$nextnumChatroom': {
+      'Members': {
+        '0': myname,
+        '1': friendName,
+      },
+    }
+  });
+  nextnumChatroom++;
+  await rootRef.child('ChattingRoom').update({'next': nextnumChatroom});
+
+  Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => ChatRoom(friendName, nextnumChatroom - 1)));
 }
 
 class Friend {
@@ -415,3 +422,26 @@ String decryptData(String data, encrypt.Key key) {
     return 'error key does not match';
   }
 }
+
+/*
+StreamBuilder(
+                  stream: FirebaseDatabase.instance
+                      .ref()
+                      .child('UserList/$myUid/Friend')
+                      .onValue,
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.hasData) {
+                      myFriendList = [];
+                      for (var element in (snapshot.data as DatabaseEvent)
+                          .snapshot
+                          .children) {
+                        final uid = element.child('Uid').value.toString();
+                        final name = element.child('Name').value.toString();
+                        final profile =
+                            element.child('Profile').value.toString();
+                        myFriendList.add(Friend(uid, name, profile));
+                      }
+                    }
+                    return
+
+                    */

@@ -99,7 +99,7 @@ class _MyPageState extends State<MyPage> {
       });
     }
 
-    if ( friendshot.value == null) {
+    if (friendshot.value == null) {
       friend_count = 0;
     }
     else {

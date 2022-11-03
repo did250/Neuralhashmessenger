@@ -4,11 +4,13 @@ import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:focused_menu/modals.dart';
 import 'SearchFriendTab.dart';
 import 'ChatRoom.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import 'package:focused_menu/focused_menu.dart';
 
 class FriendTab extends StatefulWidget {
   @override
@@ -26,28 +28,47 @@ class _FriendTabState extends State<FriendTab>
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 
-  void addtestfriend() async {
-    final newPostKey = rootRef.child("UserList/$myUid/Friend").push().key;
-    rootRef.child("UserList/$myUid/Friend/$newPostKey").update(
-        {'Uid': '$newPostKey data', 'Name': Random().nextInt(100).toString()});
+  @override
+  void initState() {
+    // TODO: implement initState
+    _refreshFriendList();
+    super.initState();
   }
 
-  void gettestfriend() async {
+  void _refreshFriendList() async {
+    myFriendList = [];
     final snapshot = await rootRef.child('UserList/$myUid/Friend').get();
 
     for (var element in snapshot.children) {
+      myFriendList.add(Friend(
+          element.child('Uid').value.toString(),
+          element.child('Name').value.toString(),
+          element.child('Profile').value.toString()));
       print(element.child('Uid').value);
       print(element.child("Name").value);
     }
+    setState(() {});
   }
 
-  Future<void> _addFriend(Map friend) async {
+  void _addFriend(Map friend) {
     final newPostKey = rootRef.child("UserList/$myUid/Friend").push().key;
+    myFriendList.add(Friend(friend['Uid'], friend['Name'], friend['Profile']));
+    setState(() {});
     rootRef.child("UserList/$myUid/Friend/$newPostKey").update({
       'Uid': friend['Uid'],
       'Name': friend['Name'],
       'Profile': friend['Profile']
     });
+  }
+
+  void _deleteFriend(int index) async {
+    myFriendList.removeAt(index);
+    final snapshot = await rootRef.child('UserList/$myUid/Friend').get();
+    var key = snapshot.children.elementAt(index).key;
+
+    await rootRef.child('UserList/$myUid/Friend/$key').remove();
+
+    setState(() {});
   }
 
   Future<String> _getProfileImgFromUid(String uid) async {
@@ -62,6 +83,7 @@ class _FriendTabState extends State<FriendTab>
   }
 
   Widget build(BuildContext context) {
+    var _tapPosition;
     return Scaffold(
         body: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
@@ -77,37 +99,23 @@ class _FriendTabState extends State<FriendTab>
                   ),
                 ),
               ),
-              StreamBuilder(
-                  stream: FirebaseDatabase.instance
-                      .ref()
-                      .child('UserList/$myUid/Friend')
-                      .onValue,
-                  builder: (BuildContext context, snapshot) {
-                    if (snapshot.hasData) {
-                      myFriendList = [];
-                      for (var element in (snapshot.data as DatabaseEvent)
-                          .snapshot
-                          .children) {
-                        final uid = element.child('Uid').value.toString();
-                        final name = element.child('Name').value.toString();
-                        final profile =
-                            element.child('Profile').value.toString();
-                        myFriendList.add(Friend(uid, name, profile));
-                      }
-                    }
-                    return ListView.separated(
-                      padding: EdgeInsets.only(top: 15),
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      itemCount: myFriendList.length,
-                      separatorBuilder: (BuildContext context, int index) =>
-                          const Divider(),
-                      itemBuilder: (BuildContext context, int index) {
-                        return GestureDetector(
-                          onTap: () => newChatroom(
-                              context,
-                              myFriendList[index].name,
-                              myFriendList[index].uid),
+              ListView.separated(
+                padding: EdgeInsets.only(top: 15),
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: myFriendList.length,
+                separatorBuilder: (BuildContext context, int index) =>
+                    const Divider(),
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                      onLongPress: () {},
+                      /*onTap: () => newChatroom(context, myFriendList[index].name,
+                        myFriendList[index].uid),*/
+                      child: FocusedMenuHolder(
+                          menuWidth: MediaQuery.of(context).size.width * 0.5,
+                          blurSize: 5,
+                          blurBackgroundColor: Colors.black,
+                          openWithTap: true,
                           child: ListTile(
                             dense: true,
                             leading: CircleAvatar(
@@ -120,10 +128,27 @@ class _FriendTabState extends State<FriendTab>
                               style: TextStyle(fontSize: 14),
                             ),
                           ),
-                        );
-                      },
-                    );
-                  }),
+                          onPressed: () {},
+                          menuItems: <FocusedMenuItem>[
+                            FocusedMenuItem(
+                                title: Text('New Chat'),
+                                trailingIcon: Icon(Icons.chat_bubble),
+                                onPressed: () => newChatroom(
+                                    context,
+                                    myFriendList[index].name,
+                                    myFriendList[index].uid)),
+                            FocusedMenuItem(
+                                title: Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                trailingIcon:
+                                    Icon(Icons.delete, color: Colors.white),
+                                backgroundColor: Colors.redAccent,
+                                onPressed: () => _deleteFriend(index)),
+                          ]));
+                },
+              ),
             ],
           ),
         ),
@@ -397,3 +422,26 @@ String decryptData(String data, encrypt.Key key) {
     return 'error key does not match';
   }
 }
+
+/*
+StreamBuilder(
+                  stream: FirebaseDatabase.instance
+                      .ref()
+                      .child('UserList/$myUid/Friend')
+                      .onValue,
+                  builder: (BuildContext context, snapshot) {
+                    if (snapshot.hasData) {
+                      myFriendList = [];
+                      for (var element in (snapshot.data as DatabaseEvent)
+                          .snapshot
+                          .children) {
+                        final uid = element.child('Uid').value.toString();
+                        final name = element.child('Name').value.toString();
+                        final profile =
+                            element.child('Profile').value.toString();
+                        myFriendList.add(Friend(uid, name, profile));
+                      }
+                    }
+                    return
+
+                    */

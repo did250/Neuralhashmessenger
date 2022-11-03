@@ -72,6 +72,7 @@ class _MyPageState extends State<MyPage> {
         .child(loggedUser!.uid.toString())
         .child("Profile_img")
         .get();
+
     final namesnapshot = await ref
         .child("UserList")
         .child(loggedUser!.uid.toString())
@@ -83,6 +84,7 @@ class _MyPageState extends State<MyPage> {
         .child(loggedUser!.uid.toString())
         .child("Friend")
         .get();
+
     final chatroomshot = await ref
         .child("UserList")
         .child(loggedUser!.uid.toString())
@@ -97,32 +99,12 @@ class _MyPageState extends State<MyPage> {
       });
     }
 
-    // if (friendshot.exists && friendshot.value != '') {
-    //   for (String? item
-    //   in List<String?>.from(friendshot.value as List<Object?>)) {
-    //     if (item == null) {
-    //       continue;
-    //     }
-    //     friend_count++;
-    //   }
-    // }
     if ( friendshot.value == null) {
       friend_count = 0;
     }
     else {
       friend_count = friendshot.children.length;
     }
-
-    // if (chatroomshot.value == '') {
-    //   chatroom_count = 0;
-    // } else if (chatroomshot.value != '') {
-    //   final chatnumshot = await ref
-    //       .child("UserList")
-    //       .child(loggedUser!.uid.toString())
-    //       .child("Next_Chatroom")
-    //       .get();
-    //   chatroom_count = int.parse(chatnumshot.value.toString());
-    // }
 
     if (chatroomshot.value == null) {
       chatroom_count = 0;
@@ -615,8 +597,7 @@ class _MyPageState extends State<MyPage> {
         Divider(),
 
         Container(
-          color: Colors.yellow,
-          height: 40,
+          height: 70,
           margin: EdgeInsets.fromLTRB(3, 0, 0, 0),
           child: SwitchListTile(
             title: Text(_switchValue ?'Dark Mode : ON':'Dark Mode : OFF', style: TextStyle(
@@ -624,11 +605,11 @@ class _MyPageState extends State<MyPage> {
               fontSize: 16,
               color: Theme.of(context).primaryColor,
             )),
-            // subtitle: Text(_switchValue?'on':'off', style: TextStyle(
-            //   letterSpacing: 1.0,
-            //   fontSize: 16,
-            //   color: Theme.of(context).primaryColor,
-            // ),),
+            subtitle: Text(_switchValue?'on':'off', style: TextStyle(
+            letterSpacing: 1.0,
+            fontSize: 16,
+            color: Theme.of(context).primaryColor,
+            ),),
             value: _switchValue,
             onChanged: (bool value) {
               setState(() {
@@ -649,7 +630,6 @@ class _MyPageState extends State<MyPage> {
         Divider(),
 
         Container(
-          color: Colors.yellow,
           height: 40,
           margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
           child: Row(

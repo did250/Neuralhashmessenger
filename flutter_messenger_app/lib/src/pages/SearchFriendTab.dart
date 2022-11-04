@@ -2,18 +2,20 @@ import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'FriendTab.dart';
 
 class SearchFriendTab extends StatefulWidget {
   @override
+  final List<Friend> myFriendList;
+
+  const SearchFriendTab(this.myFriendList);
   _SearchFriendTabState createState() => _SearchFriendTabState();
 }
 
 class _SearchFriendTabState extends State<SearchFriendTab> {
   final myController = TextEditingController();
   @override
-  void initState() {}
-
-  Future<Map> _searchFriend(String email) async {
+  Future<Map> _searchFriend(String email, List<Friend> myFriendList) async {
     DatabaseReference ref = FirebaseDatabase.instance.ref();
     Query query = ref.child('UserList').orderByChild('Email').equalTo(email);
     DataSnapshot event = await query.get();
@@ -23,6 +25,12 @@ class _SearchFriendTabState extends State<SearchFriendTab> {
       'Profile':
           event.children.elementAt(0).child('Profile_img').value.toString(),
     };
+    for (var element in myFriendList) {
+      if (element.uid == result['Uid']) {
+        result['Uid'] = 'error';
+        return result;
+      }
+    }
     return result;
   }
 
@@ -73,8 +81,10 @@ class _SearchFriendTabState extends State<SearchFriendTab> {
               ),
               padding: EdgeInsets.all(5),
               constraints: BoxConstraints(),
-              onPressed: () =>
-                  {Navigator.pop(context, _searchFriend(myController.text))},
+              onPressed: () => {
+                Navigator.pop(context,
+                    _searchFriend(myController.text, widget.myFriendList))
+              },
             ),
             flex: 1,
           ),

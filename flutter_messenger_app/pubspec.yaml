@@ -51,6 +51,7 @@ dependencies:
   csv: ^5.0.1
   path_provider: ^2.0.11
   focused_menu: ^1.0.5
+  firebase_messaging: ^13.1.0
 
 dev_dependencies:
   flutter_test:

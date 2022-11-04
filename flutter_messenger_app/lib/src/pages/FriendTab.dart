@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:focused_menu/modals.dart';
@@ -11,6 +13,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:focused_menu/focused_menu.dart';
+import 'package:http/http.dart' as http;
 
 class FriendTab extends StatefulWidget {
   @override
@@ -32,6 +35,7 @@ class _FriendTabState extends State<FriendTab>
   void initState() {
     // TODO: implement initState
     _refreshFriendList();
+
     super.initState();
   }
 
@@ -149,6 +153,26 @@ class _FriendTabState extends State<FriendTab>
                           ]));
                 },
               ),
+              TextButton(
+                  onPressed: () {
+                    FCMController fcm = FCMController();
+                    fcm.sendMessage(
+                      body: 'a',
+                      title: 'b',
+                      userToken: '',
+                    );
+                    print('sent message!');
+                  },
+                  child: Text('testbutton')),
+              TextButton(
+                  onPressed: () {
+                    final token = FirebaseMessaging.instance.getToken().then(
+                        (value) => rootRef
+                            .child('UserList/$myUid')
+                            .update({'Token': value}));
+                    print('generate token finished');
+                  },
+                  child: Text('generate token'))
             ],
           ),
         ),
@@ -158,8 +182,10 @@ class _FriendTabState extends State<FriendTab>
           ),
           backgroundColor: Colors.deepPurpleAccent.shade200,
           onPressed: () async {
-            Map result = await Navigator.push(context,
-                MaterialPageRoute(builder: (context) => SearchFriendTab()));
+            Map result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SearchFriendTab(myFriendList)));
             if (result['Uid'] == 'error') {
               print('error');
             } else {
@@ -423,25 +449,60 @@ String decryptData(String data, encrypt.Key key) {
   }
 }
 
-/*
-StreamBuilder(
-                  stream: FirebaseDatabase.instance
-                      .ref()
-                      .child('UserList/$myUid/Friend')
-                      .onValue,
-                  builder: (BuildContext context, snapshot) {
-                    if (snapshot.hasData) {
-                      myFriendList = [];
-                      for (var element in (snapshot.data as DatabaseEvent)
-                          .snapshot
-                          .children) {
-                        final uid = element.child('Uid').value.toString();
-                        final name = element.child('Name').value.toString();
-                        final profile =
-                            element.child('Profile').value.toString();
-                        myFriendList.add(Friend(uid, name, profile));
-                      }
-                    }
-                    return
+class FCMController {
+  final String _serverKey =
+      "AAAAjOe102k:APA91bEnTo4xCQYgiXvJJMYs85W7xrCEzwaM-aC-B8Dh9cAZ7_81Lxg5b-HaXtq4uCVNnAa2oCJlOrONFriqbsyvJ1fBPnPlJUfqKouNhP3b4DyIneYiz5QA2wg10vbqWbEiv4YQTmW9";
 
-                    */
+  Future<void> sendMessage({
+    required String userToken,
+    required String title,
+    required String body,
+  }) async {
+    http.Response response;
+
+    NotificationSettings settings =
+        await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: false,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print('User granted permission');
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
+      print('User granted provisional permission');
+    } else {
+      print('User declined or has not accepted permission');
+    }
+
+    try {
+      response = await http.post(
+          Uri.parse('https://fcm.googleapis.com/fcm/send'),
+          headers: <String, String>{
+            'Content-Type': 'application/json',
+            'Authorization': 'key=$_serverKey'
+          },
+          body: jsonEncode({
+            'notification': {'title': title, 'body': body, 'sound': 'false'},
+            'ttl': '60s',
+            "content_available": true,
+            'data': {
+              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              'id': '1',
+              'status': 'done',
+              "action": '테스트',
+            },
+            // 상대방 토큰 값, to -> 단일, registration_ids -> 여러명
+            'to': userToken
+            // 'registration_ids': tokenList
+          }));
+    } catch (e) {
+      print('error $e');
+    }
+  }
+}

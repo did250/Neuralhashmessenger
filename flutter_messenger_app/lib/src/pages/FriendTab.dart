@@ -187,7 +187,7 @@ class _FriendTabState extends State<FriendTab>
           child: Icon(
             Icons.add,
           ),
-          backgroundColor: Colors.deepPurpleAccent.shade200,
+          backgroundColor: const Color(0xff588970),
           onPressed: () async {
             Map result = await Navigator.push(
                 context,

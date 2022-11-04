@@ -768,7 +768,7 @@ class Messages extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: ismine
                             ? Colors.grey.shade500
-                            : Colors.green.shade500,
+                            : const Color(0xff588970),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: Colors.grey.shade400,
@@ -790,7 +790,7 @@ class Messages extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: ismine
                             ? Colors.grey.shade500
-                            : Colors.green.shade500,
+                            : const Color(0xff588970),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: Colors.grey.shade400,

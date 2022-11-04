@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.deepPurpleAccent.shade200,
+                            primary: const Color(0xff588970),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(3.0)),
                             minimumSize: const Size.fromHeight(50),

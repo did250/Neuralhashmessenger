@@ -7,6 +7,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
+import 'package:flutter_messenger_app/src/pages/ShowImage.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:encrypt/encrypt.dart' as encrypt;
@@ -103,28 +105,28 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
   void _outDialog() {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: new Text("정말 나가시겠습니까? 나가면 복구할 수 없습니다. 상대방도 채팅방에서 나가집니다."),
-          actions: <Widget>[
-            new TextButton(
-                onPressed: ()async {
-                  await roomOut(number);
-                  Navigator.pop(context);
-                  Navigator.pop(context);
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: new Text("Are you sure you want to go out? If you leave, you cannot recover. The other party also leaves the chat room."),
+            actions: <Widget>[
+              new TextButton(
+                  onPressed: ()async {
+                    await roomOut(number);
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  child: new Text("YES")),
+              new TextButton(
+                child: new Text("No"),
+                onPressed: () {
                   Navigator.pop(context);
                 },
-                child: new Text("YES")),
-            new TextButton(
-              child: new Text("No"),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      }
+              ),
+            ],
+          );
+        }
     );
   }
 
@@ -224,16 +226,23 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   Future<void> _searchFriend() async {
     DatabaseReference ref = FirebaseDatabase.instance.ref();
     Query query =
-        ref.child('UserList').orderByChild('Name').equalTo(this.friendname);
+    ref.child('UserList').orderByChild('Name').equalTo(this.friendname);
     DataSnapshot event = await query.get();
     setState(() {
       this.frienduid = event.children.elementAt(0).key ?? "error";
       _fuid = this.frienduid;
     });
+    final snapshot =
+    await ref.child('UserList').child(_fuid).child('Profile_img').get();
+    if (snapshot.exists && snapshot.value != null) {
+      setState(() {
+        _friendimage = snapshot.value.toString();
+        _friendimageuint = base64Decode(_friendimage);
+      });
+    }
   }
 
   /// 친구 프로필 사진
-
   /// 채팅방 목록 불러오기
   Future<void> _roomcheck() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
@@ -246,7 +255,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       rooms.clear();
       for (var item in (snapshot.value as List<Object?>)) {
         Map<String, dynamic> map =
-            Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+        Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
         rooms.add(map);
       }
     }
@@ -294,11 +303,11 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     List<Map<String, dynamic>> map2 = [];
     final snapshot =
-        await ref.child('UserList').child(target).child('Num_Chatroom').get();
+    await ref.child('UserList').child(target).child('Num_Chatroom').get();
     if (snapshot.exists) {
       for (var item in (snapshot.value as List<Object?>)) {
         Map<String, dynamic> map =
-            Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+        Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
         if (map["number"] != this.number) {
           map2.add(map);
         } else {
@@ -313,7 +322,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   Future<void> _friendprofile() async {
     final DatabaseReference ref = FirebaseDatabase.instance.ref();
     final snapshot =
-        await ref.child('UserList').child(_fuid).child('Profile_img').get();
+    await ref.child('UserList').child(_fuid).child('Profile_img').get();
     if (snapshot.exists && snapshot.value != null) {
       setState(() {
         _friendimage = snapshot.value.toString();
@@ -329,7 +338,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     Loaduser();
     _other = this.friendname;
     _searchFriend();
-    _friendprofile();
+    // _friendprofile();
     _roomcheck();
     getCurrentUser();
     super.initState();
@@ -341,7 +350,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       appBar: AppBar(
         title: Text(widget.name,
             style:
-                TextStyle(fontSize: 16, color: Theme.of(context).primaryColor)),
+            TextStyle(fontSize: 16, color: Theme.of(context).primaryColor)),
         automaticallyImplyLeading: true,
         leading: IconButton(
             icon: Icon(Icons.arrow_back),
@@ -356,49 +365,73 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       ),
       endDrawer: Drawer(
           child: ListView(padding: EdgeInsets.zero, children: [
-        UserAccountsDrawerHeader(
-          accountName: Text(
-            _name,
-            style: TextStyle(
-              letterSpacing: 1.0,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
+            UserAccountsDrawerHeader(
+              accountName: Text(
+                _name,
+                style: TextStyle(
+                  letterSpacing: 1.0,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              accountEmail: Text(
+                loggedUser!.email.toString(),
+                style: TextStyle(
+                  letterSpacing: 1.0,
+                  fontSize: 14,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              decoration: BoxDecoration(
+                color: Colors.deepPurpleAccent.shade100,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20.0),
+                  bottomRight: Radius.circular(20.0),
+                ),
+              ),
             ),
-          ),
-          accountEmail: Text(
-            loggedUser!.email.toString(),
-            style: TextStyle(
-              letterSpacing: 1.0,
-              fontSize: 14,
-              color: Theme.of(context).primaryColor,
+            ListTile(
+              title: Text("Member",style: TextStyle(fontSize: 20.0),),
             ),
-          ),
-          decoration: BoxDecoration(
-            color: Colors.deepPurpleAccent.shade100,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20.0),
-              bottomRight: Radius.circular(20.0),
+
+            ListTile(
+              title: Text(_name),
+              leading: CircleAvatar(
+                backgroundImage: MemoryImage(_friendimageuint),
+              ),
             ),
-          ),
-        ),
-        ListTile(
-            title: Text('Export data'),
-            onTap: () {
-              exportData(this.number, frienduid);
-            }),
-        ListTile(
-          title: Text('Out'),
-          onTap: ()async {
-            _outDialog();
-          },
-        )
-      ])),
+
+            ListTile(
+              title: Text(friendname),
+              leading : CircleAvatar(
+                  backgroundImage: MemoryImage(_friendimageuint)
+              ),
+            ),
+            Divider(),
+            Container(
+              height: 50,
+              child : ListTile(
+                  title: Text('Export data'),
+                  onTap: () {
+                    exportData(this.number, frienduid);
+                  }),
+            ),
+            Container(
+              height: 50,
+              child: ListTile(
+                title: Text('EXIT'),
+                onTap: ()async {
+                  _outDialog();
+                },
+              ),
+            ),
+          ])),
       body: Container(
         child: Column(
           children: <Widget>[
             StreamBuilder(
-                //수정할곳 end to end
+              //수정할곳 end to end
                 stream: FirebaseDatabase.instance
                     .ref()
                     .child("ChattingRoom")
@@ -418,7 +451,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                         child: Container(
                             alignment: Alignment.center,
                             child: Text(
-                              "친구에게 메시지를 보내보세요.",
+                              "Send a new message!",
                               style: TextStyle(fontSize: 20),
                             )),
                       );
@@ -542,7 +575,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                 },
                 onSubmitted: _exist ? _handleSubmitted : null,
                 decoration:
-                    InputDecoration.collapsed(hintText: "Send a message"),
+                InputDecoration.collapsed(hintText: "Send a message"),
               ),
             ),
             Container(
@@ -604,8 +637,8 @@ class Messages extends StatelessWidget {
 
   Messages(
       {required this.text,
-      required this.animationController,
-      required this.ismine});
+        required this.animationController,
+        required this.ismine});
 
   String _decryptData(String data, encrypt.Key key) {
     final iv = encrypt.IV.fromLength(16);
@@ -613,7 +646,7 @@ class Messages extends StatelessWidget {
     //print(key.bytes);
     try {
       final decrypted =
-          encrypter.decrypt(encrypt.Encrypted.fromBase64(data), iv: iv);
+      encrypter.decrypt(encrypt.Encrypted.fromBase64(data), iv: iv);
       return decrypted;
     } catch (exception) {
       return 'error key does not match';
@@ -639,7 +672,7 @@ class Messages extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizeTransition(
       sizeFactor:
-          CurvedAnimation(parent: animationController, curve: Curves.easeOut),
+      CurvedAnimation(parent: animationController, curve: Curves.easeOut),
       axisAlignment: 0.0,
       child: Container(
         margin: ismine
@@ -647,17 +680,28 @@ class Messages extends StatelessWidget {
             : const EdgeInsets.only(top: 10, bottom: 10, left: 10.0),
         child: Row(
           mainAxisAlignment:
-              ismine ? MainAxisAlignment.end : MainAxisAlignment.start,
+          ismine ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            ismine
-                ? Container(
-                    margin: const EdgeInsets.only(right: 10.0),
-                  )
+            ismine ? Container(
+              margin: const EdgeInsets.only(right: 10.0),
+            )
                 : Container(
-                    margin: const EdgeInsets.only(right: 10.0),
-                    child: CircleAvatar(
-                        backgroundImage: MemoryImage(_friendimageuint))),
+              margin: const EdgeInsets.only(right: 10.0),
+
+              child: IconButton(
+
+                padding: EdgeInsets.zero,
+                icon: CircleAvatar(
+                    backgroundImage: MemoryImage(_friendimageuint)
+                ),
+                onPressed: () {
+                  Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => ShowImageScreen(_friendimageuint)),);
+                },
+              ),
+
+            ),
             Container(child: (() {
               // if (text.endsWith("123")) {
               //   print("image입니다...");
@@ -685,13 +729,21 @@ class Messages extends StatelessWidget {
                   if (snapshot.data!.endsWith("123")) {
                     print("image입니다...");
                     final st =
-                        snapshot.data!.substring(0, snapshot.data!.length - 3);
+                    snapshot.data!.substring(0, snapshot.data!.length - 3);
                     final Uint8List imageBytetest = base64Decode(st);
                     return SizedBox(
                       height: MediaQuery.of(context).size.height * 0.15,
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: Center(
-                        child: Image.memory(Uint8List.fromList(imageBytetest)),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Image.memory(Uint8List.fromList(imageBytetest)),
+                          onPressed: () {
+                            Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => ShowImageScreen(imageBytetest)),
+                            );
+                          },
+                        ),
                       ),
                     );
                     //--------------------------------------------------------------------------------------------------
@@ -710,7 +762,7 @@ class Messages extends StatelessWidget {
                         ),
                       ),
                       alignment:
-                          ismine ? Alignment.centerRight : Alignment.centerLeft,
+                      ismine ? Alignment.centerRight : Alignment.centerLeft,
                       padding: const EdgeInsets.all(10.0),
                       child: Text(
                         snapshot.data!,
@@ -732,7 +784,7 @@ class Messages extends StatelessWidget {
                         ),
                       ),
                       alignment:
-                          ismine ? Alignment.centerRight : Alignment.centerLeft,
+                      ismine ? Alignment.centerRight : Alignment.centerLeft,
                       padding: const EdgeInsets.all(10.0),
                       child: Text(
                         snapshot.data!,
@@ -834,7 +886,7 @@ void exportData(int roomNumber, String uid) async {
 
   if (snapshot.exists && snapshot.value != '') {
     for (Map<dynamic, dynamic> item
-        in List<dynamic>.from(snapshot.value as List<Object?>)) {
+    in List<dynamic>.from(snapshot.value as List<Object?>)) {
       List<dynamic> tmp = [];
 
       var message = decryptData(item['text'], aeskeyforexport);

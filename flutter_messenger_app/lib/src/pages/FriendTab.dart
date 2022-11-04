@@ -27,6 +27,7 @@ class _FriendTabState extends State<FriendTab>
     with AutomaticKeepAliveClientMixin {
   final myUid = FirebaseAuth.instance.currentUser!.uid;
   List<Friend> myFriendList = [];
+
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
@@ -123,7 +124,7 @@ class _FriendTabState extends State<FriendTab>
                           child: ListTile(
                             dense: true,
                             leading: CircleAvatar(
-                                child: Image.memory(Uint8List.fromList(
+                                backgroundImage: MemoryImage(Uint8List.fromList(
                                     base64Decode(myFriendList[index]
                                         .profile_img
                                         .toString())))),

@@ -49,6 +49,15 @@ void main() async {
     badge: true,
     sound: true,
   );
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    announcement: true,
+    badge: true,
+    carPlay: true,
+    criticalAlert: true,
+    provisional: true,
+    sound: true,
+  );
   runApp(const Home());
 }
 

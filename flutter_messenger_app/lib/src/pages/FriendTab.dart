@@ -159,6 +159,18 @@ class _FriendTabState extends State<FriendTab>
                   onPressed: () {
                     FCMController fcm = FCMController();
                     fcm.sendMessage(
+                      body: 'message',
+                      title: 'Title',
+                      userToken:
+                          'fRb2HxbOR060nWcOvEhZU2:APA91bHwKO4X4-_iX2fNqzN5sfHnXalAqV-J9N9A2IcarfUXOqnmsXPabXUjODLYZ5dw5xB7bN2LXfQCa2nGXNH6-OPY1kTDV9UfpGlk0MOkSgq4qzUd_Hw3FSfz121VF2eiDvPzQqg5',
+                    );
+                    print('sent message!');
+                  },
+                  child: Text('testbutton')),
+              TextButton(
+                  onPressed: () {
+                    FCMController fcm = FCMController();
+                    fcm.sendMessage(
                       body: 'a',
                       title: 'b',
                       userToken:
@@ -167,15 +179,6 @@ class _FriendTabState extends State<FriendTab>
                     print('sent message!');
                   },
                   child: Text('testbutton')),
-              TextButton(
-                  onPressed: () {
-                    final token = FirebaseMessaging.instance.getToken().then(
-                        (value) => rootRef
-                            .child('UserList/$myUid')
-                            .update({'Token': value}));
-                    print('generate token finished');
-                  },
-                  child: Text('generate token'))
             ],
           ),
         ),
@@ -466,12 +469,12 @@ class FCMController {
     NotificationSettings settings =
         await FirebaseMessaging.instance.requestPermission(
       alert: true,
-      announcement: false,
+      announcement: true,
       badge: true,
       carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: false,
+      criticalAlert: true,
+      provisional: true,
+      sound: true,
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
@@ -491,7 +494,7 @@ class FCMController {
             'Authorization': 'key=$_serverKey'
           },
           body: jsonEncode({
-            'notification': {'title': title, 'body': body, 'sound': 'false'},
+            'notification': {'title': title, 'body': body, 'sound': 'true'},
             'ttl': '60s',
             "content_available": true,
             'data': {

@@ -24,6 +24,7 @@ class _FriendTabState extends State<FriendTab>
     with AutomaticKeepAliveClientMixin {
   final myUid = FirebaseAuth.instance.currentUser!.uid;
   List<Friend> myFriendList = [];
+
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;

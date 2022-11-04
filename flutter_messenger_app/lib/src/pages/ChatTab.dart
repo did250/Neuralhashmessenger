@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_messenger_app/src/pages/ChatRoom.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 
 String _name = "";
 List<Map<String, dynamic>> room = [];
@@ -177,7 +178,7 @@ class ChatTabState extends State<ChatTab> {
                             subtitle: check[index]
                                 ? Text("")
                                 : Text(
-                                    "새로운 메시지가 있습니다.",
+                                    "New Message",
                                     style: TextStyle(fontSize: 12),
                                   ),
                             trailing: check[index]

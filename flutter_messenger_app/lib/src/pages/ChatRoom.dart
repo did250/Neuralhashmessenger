@@ -392,16 +392,40 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
               ),
             ),
             ListTile(
-                title: Text('Export data'),
-                onTap: () {
-                  exportData(this.number, frienduid);
-                }),
+              title: Text("Member",style: TextStyle(fontSize: 20.0),),
+            ),
+
             ListTile(
-              title: Text('Exit this chatroom'),
-              onTap: ()async {
-                _outDialog();
-              },
-            )
+              title: Text(_name),
+              leading: CircleAvatar(
+                backgroundImage: MemoryImage(_friendimageuint),
+              ),
+            ),
+
+            ListTile(
+              title: Text(friendname),
+              leading : CircleAvatar(
+                 backgroundImage: MemoryImage(_friendimageuint)
+              ),
+            ),
+            Divider(),
+            Container(
+              height: 50,
+              child : ListTile(
+                  title: Text('Export data'),
+                  onTap: () {
+                    exportData(this.number, frienduid);
+                  }),
+            ),
+            Container(
+              height: 50,
+              child: ListTile(
+                title: Text('EXIT'),
+                onTap: ()async {
+                  _outDialog();
+                },
+              ),
+            ),
           ])),
       body: Container(
         child: Column(
@@ -427,7 +451,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                         child: Container(
                             alignment: Alignment.center,
                             child: Text(
-                              "친구에게 메시지를 보내보세요.",
+                              "Send a new message!",
                               style: TextStyle(fontSize: 20),
                             )),
                       );
@@ -666,6 +690,7 @@ class Messages extends StatelessWidget {
                 margin: const EdgeInsets.only(right: 10.0),
 
                   child: IconButton(
+
                     padding: EdgeInsets.zero,
                     icon: CircleAvatar(
                         backgroundImage: MemoryImage(_friendimageuint)

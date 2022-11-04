@@ -87,6 +87,7 @@ class _MainPage extends State<MainPage> {
   int _selectedIndex = 0;
 
   final authentication = FirebaseAuth.instance;
+  @override
   void initState() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       RemoteNotification? notification = message.notification;

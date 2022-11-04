@@ -161,7 +161,8 @@ class _FriendTabState extends State<FriendTab>
                     fcm.sendMessage(
                       body: 'a',
                       title: 'b',
-                      userToken: '',
+                      userToken:
+                          'fdo0VhST1qZTsXux67fDC9:APA91bHTBkZgKw9A6Rmx0gBEXR0Fb8fcCRpNWCi22JeTqfTgePoKIfWbGdo4JE6qNtOhTWtekrN0KcMXP-V00lC5ugyJqLzh5yHywe_9y77jTMz18uWYWkePHUYGfIqvNbSOO7I6oXDS',
                     );
                     print('sent message!');
                   },

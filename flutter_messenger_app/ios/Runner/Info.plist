@@ -62,5 +62,9 @@
 		<false/>
 		<key>UIStatusBarHidden</key>
 		<true/>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>use to send photo to chat</string>
+		<key>NSCameraUsageDescription</key>
+		<string>use to send photo</string>
 	</dict>
 </plist>

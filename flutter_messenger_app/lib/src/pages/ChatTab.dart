@@ -110,7 +110,7 @@ class ChatTabState extends State<ChatTab> {
                             subtitle: check[index]
                                 ? Text("")
                                 : Text(
-                                    "새로운 메시지가 있습니다.",
+                                    "New Message",
                                     style: TextStyle(fontSize: 12),
                                   ),
                             trailing: check[index]

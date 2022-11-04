@@ -7,6 +7,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
+import 'package:flutter_messenger_app/src/pages/ShowImage.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:encrypt/encrypt.dart' as encrypt;
@@ -106,7 +108,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: new Text("정말 나가시겠습니까? 나가면 복구할 수 없습니다. 상대방도 채팅방에서 나가집니다."),
+            title: new Text("Are you sure you want to go out? If you leave, you cannot recover. The other party also leaves the chat room."),
             actions: <Widget>[
               new TextButton(
                   onPressed: ()async {
@@ -395,7 +397,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                   exportData(this.number, frienduid);
                 }),
             ListTile(
-              title: Text('Out'),
+              title: Text('Exit this chatroom'),
               onTap: ()async {
                 _outDialog();
               },
@@ -657,14 +659,24 @@ class Messages extends StatelessWidget {
           ismine ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            ismine
-                ? Container(
+            ismine ? Container(
               margin: const EdgeInsets.only(right: 10.0),
             )
                 : Container(
                 margin: const EdgeInsets.only(right: 10.0),
-                child: CircleAvatar(
-                    backgroundImage: MemoryImage(_friendimageuint))),
+
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: CircleAvatar(
+                        backgroundImage: MemoryImage(_friendimageuint)
+                    ),
+                    onPressed: () {
+                      Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => ShowImageScreen(_friendimageuint)),);
+                    },
+                  ),
+
+            ),
             Container(child: (() {
               // if (text.endsWith("123")) {
               //   print("image입니다...");
@@ -698,7 +710,15 @@ class Messages extends StatelessWidget {
                       height: MediaQuery.of(context).size.height * 0.15,
                       width: MediaQuery.of(context).size.width * 0.4,
                       child: Center(
-                        child: Image.memory(Uint8List.fromList(imageBytetest)),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Image.memory(Uint8List.fromList(imageBytetest)),
+                          onPressed: () {
+                            Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => ShowImageScreen(imageBytetest)),
+                            );
+                          },
+                        ),
                       ),
                     );
                     //--------------------------------------------------------------------------------------------------

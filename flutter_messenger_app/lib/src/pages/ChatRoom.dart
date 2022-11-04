@@ -397,7 +397,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                 ),
               ),
               decoration: BoxDecoration(
-                color: Colors.deepPurpleAccent.shade100,
+                color: Colors.green.shade500,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(20.0),
                   bottomRight: Radius.circular(20.0),
@@ -767,8 +767,8 @@ class Messages extends StatelessWidget {
                       width: MediaQuery.of(context).size.width * 0.7,
                       decoration: BoxDecoration(
                         color: ismine
-                            ? Colors.blueAccent
-                            : Colors.blue.shade300,
+                            ? Colors.grey.shade500
+                            : Colors.green.shade500,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: Colors.grey.shade400,
@@ -789,8 +789,8 @@ class Messages extends StatelessWidget {
                     return Container(
                       decoration: BoxDecoration(
                         color: ismine
-                            ? Colors.blueAccent
-                            : Colors.blue.shade300,
+                            ? Colors.grey.shade500
+                            : Colors.green.shade500,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: Colors.grey.shade400,

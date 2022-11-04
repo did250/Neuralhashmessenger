@@ -16,6 +16,8 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:focused_menu/focused_menu.dart';
 import 'package:http/http.dart' as http;
 
+List<Friend> myFriendList = [];
+
 class FriendTab extends StatefulWidget {
   @override
   _FriendTabState createState() => _FriendTabState();
@@ -27,7 +29,6 @@ const storage = FlutterSecureStorage();
 class _FriendTabState extends State<FriendTab>
     with AutomaticKeepAliveClientMixin {
   final myUid = FirebaseAuth.instance.currentUser!.uid;
-  List<Friend> myFriendList = [];
 
   @override
   // TODO: implement wantKeepAlive

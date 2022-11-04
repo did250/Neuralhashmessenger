@@ -20,6 +20,8 @@ List<Map<String, dynamic>> rooms = [];
 String _fuid = "";
 List<Messages> _message = <Messages>[];
 int len = 0;
+String _myimage = "";
+Uint8List _myimageuint = Uint8List.fromList([0]);
 String _friendimage = "";
 Uint8List _friendimageuint = Uint8List.fromList([0]);
 
@@ -200,6 +202,17 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     if (snapshot.exists) {
       setState(() {
         _name = snapshot.value.toString();
+      });
+    }
+    final snapshot2 = await ref
+        .child('UserList')
+        .child(FirebaseAuth.instance.currentUser!.uid.toString())
+        .child('Profile_img')
+        .get();
+    if (snapshot2.exists) {
+      setState(() {
+        _myimage = snapshot2.value.toString();
+        _myimageuint = base64Decode(_myimage);
       });
     }
   }
@@ -398,7 +411,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
             ListTile(
               title: Text(_name),
               leading: CircleAvatar(
-                backgroundImage: MemoryImage(_friendimageuint),
+                backgroundImage: MemoryImage(_myimageuint),
               ),
             ),
 

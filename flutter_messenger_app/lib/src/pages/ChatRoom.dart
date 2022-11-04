@@ -405,7 +405,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
             ListTile(
               title: Text(friendname),
               leading : CircleAvatar(
-                 backgroundImage: MemoryImage(_friendimageuint)
+                  backgroundImage: MemoryImage(_friendimageuint)
               ),
             ),
             Divider(),
@@ -687,19 +687,19 @@ class Messages extends StatelessWidget {
               margin: const EdgeInsets.only(right: 10.0),
             )
                 : Container(
-                margin: const EdgeInsets.only(right: 10.0),
+              margin: const EdgeInsets.only(right: 10.0),
 
-                  child: IconButton(
+              child: IconButton(
 
-                    padding: EdgeInsets.zero,
-                    icon: CircleAvatar(
-                        backgroundImage: MemoryImage(_friendimageuint)
-                    ),
-                    onPressed: () {
-                      Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => ShowImageScreen(_friendimageuint)),);
-                    },
-                  ),
+                padding: EdgeInsets.zero,
+                icon: CircleAvatar(
+                    backgroundImage: MemoryImage(_friendimageuint)
+                ),
+                onPressed: () {
+                  Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => ShowImageScreen(_friendimageuint)),);
+                },
+              ),
 
             ),
             Container(child: (() {

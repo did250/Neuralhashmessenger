@@ -156,30 +156,6 @@ class _FriendTabState extends State<FriendTab>
                           ]));
                 },
               ),
-              TextButton(
-                  onPressed: () {
-                    FCMController fcm = FCMController();
-                    fcm.sendMessage(
-                      body: 'message',
-                      title: 'Title',
-                      userToken:
-                          'fRb2HxbOR060nWcOvEhZU2:APA91bHwKO4X4-_iX2fNqzN5sfHnXalAqV-J9N9A2IcarfUXOqnmsXPabXUjODLYZ5dw5xB7bN2LXfQCa2nGXNH6-OPY1kTDV9UfpGlk0MOkSgq4qzUd_Hw3FSfz121VF2eiDvPzQqg5',
-                    );
-                    print('sent message!');
-                  },
-                  child: Text('testbutton')),
-              TextButton(
-                  onPressed: () {
-                    FCMController fcm = FCMController();
-                    fcm.sendMessage(
-                      body: 'a',
-                      title: 'b',
-                      userToken:
-                          'fdo0VhST1qZTsXux67fDC9:APA91bHTBkZgKw9A6Rmx0gBEXR0Fb8fcCRpNWCi22JeTqfTgePoKIfWbGdo4JE6qNtOhTWtekrN0KcMXP-V00lC5ugyJqLzh5yHywe_9y77jTMz18uWYWkePHUYGfIqvNbSOO7I6oXDS',
-                    );
-                    print('sent message!');
-                  },
-                  child: Text('testbutton')),
             ],
           ),
         ),

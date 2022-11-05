@@ -8,50 +8,9 @@ import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
 import 'package:flutter_messenger_app/src/pages/MyPage.dart';
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print('Handling a background message ${message.messageId}');
-}
+import '../../main.dart';
 
-late AndroidNotificationChannel channel;
-late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  channel = const AndroidNotificationChannel(
-    'high_importance_channel', // id
-    'High Importance Notifications', // title
-    description:
-        'This channel is used for important notifications.', // description
-    importance: Importance.high,
-  );
-
-  var initialzationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-  flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
-
-  var initializationSettings =
-      InitializationSettings(android: initialzationSettingsAndroid);
-
-  await flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
-  );
-
-  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
-
-  runApp(const Home());
-}
+final notifications = FlutterLocalNotificationsPlugin();
 
 class Home extends StatelessWidget {
   const Home({Key? key}) : super(key: key);
@@ -77,6 +36,7 @@ class Home extends StatelessWidget {
   }
 }
 
+
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
 
@@ -88,9 +48,17 @@ class _MainPage extends State<MainPage> {
   int _selectedIndex = 0;
 
   final authentication = FirebaseAuth.instance;
+
+
   @override
   void initState() {
+    final myUid = FirebaseAuth.instance.currentUser!.uid;
+
+    final token = FirebaseMessaging.instance.getToken();
+    rootRef.child('UserList/$myUid').update({'Token' : token});
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      print('onmessage');
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
       var androidNotiDetails = AndroidNotificationDetails(
@@ -98,23 +66,21 @@ class _MainPage extends State<MainPage> {
         channel.name,
         channelDescription: channel.description,
       );
-      var details = NotificationDetails(android: androidNotiDetails);
+      var iOSNotiDetails = const DarwinNotificationDetails();
+      var details =
+      NotificationDetails(android: androidNotiDetails, iOS: iOSNotiDetails);
       if (notification != null) {
-        flutterLocalNotificationsPlugin.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          details,
-        );
+        notifications.show(1, notification.title, notification.body, details);
       }
     });
+
 
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       print(message);
     });
     super.initState();
-  }
 
+  }
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;

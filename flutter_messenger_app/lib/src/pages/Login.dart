@@ -7,6 +7,7 @@ import 'package:flutter_messenger_app/src/pages/Signup.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }

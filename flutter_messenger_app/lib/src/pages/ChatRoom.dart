@@ -58,6 +58,17 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       print(e);
     }
   }
+  void sendNotification() async {
+    final snapshot = await rootRef.child('UserList/${this.frienduid}/Token').get();
+    String token = snapshot.value.toString();
+    FCMController fcm = FCMController();
+    fcm.sendMessage(
+      body: 'From $_name',
+      title: 'New Message',
+      userToken: token,
+    );
+  }
+
 
   Future<String> encryptData(String data, encrypt.Key aesKey) async {
     final iv = encrypt.IV.fromLength(16);
@@ -233,6 +244,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       "sender": _name,
       "text": encryptedMessage,
     });
+    sendNotification();
   }
 
   /// 친구 uid 찾기

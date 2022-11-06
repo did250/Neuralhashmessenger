@@ -146,9 +146,11 @@ class ChatTabState extends State<ChatTab> {
                         }
                       }
                       List<String> images = [];
+                      images.clear();
                       for (int i = 0; i<names.length; i++) {
-                        int idx = 0;
+                        int idx = -1;
                         for (var items in myFriendList) {
+                          idx += 1;
                           if (items.name == names[i]) {
                             images.add(items.profile_img);
                             break;
@@ -157,8 +159,12 @@ class ChatTabState extends State<ChatTab> {
                             images.add("no");
                           }
                         }
-                        idx += 1;
+
                       }
+                      print(myFriendList.length);
+                      print(names.length);
+                      print(images.length);
+                      print("---");
                       temp_check = check;
                       temp_names = names;
                       temp_numbers = numbers;
@@ -168,6 +174,8 @@ class ChatTabState extends State<ChatTab> {
                         shrinkWrap: true,
                         itemCount: names.length,
                         itemBuilder: (BuildContext context, int index) {
+                          print(names);
+                          print(images.length);
                           return GestureDetector(
                             onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(

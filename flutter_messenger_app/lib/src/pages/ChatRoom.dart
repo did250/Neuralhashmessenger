@@ -86,7 +86,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   }
 
   Future uploadimage() async {
-    final uri = Uri.parse("https://10.0.2.2:5000/test");
+    final uri = Uri.parse("https://10.0.2.2:5001/test");
     var request = http.MultipartRequest('POST', uri);
     request.fields['name'] = "test";
     var pic = await http.MultipartFile.fromPath('images', _image!.path);
@@ -757,20 +757,27 @@ class Messages extends StatelessWidget {
                     snapshot.data!.substring(0, snapshot.data!.length - 3);
                     final Uint8List imageBytetest = base64Decode(st);
                     return SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.15,
-                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: MediaQuery.of(context).size.height * 0.2,
+                      width: MediaQuery.of(context).size.width * 0.5,
                       child: Center(
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: Image.memory(Uint8List.fromList(imageBytetest)),
-                          onPressed: () {
-                            Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => ShowImageScreen(imageBytetest)),
-                            );
-                          },
-                        ),
+                        child: Image.memory(Uint8List.fromList(imageBytetest)),
                       ),
                     );
+                    // return SizedBox(
+                    //   // height: MediaQuery.of(context).size.height * 0.4,
+                    //   // width: MediaQuery.of(context).size.width * 0.4,
+                    //   child: Center(
+                    //     child: IconButton(
+                    //       padding: EdgeInsets.zero,
+                    //       icon: Image.memory(Uint8List.fromList(imageBytetest)),
+                    //       onPressed: () {
+                    //         Navigator.push(context,
+                    //           MaterialPageRoute(builder: (context) => ShowImageScreen(imageBytetest)),
+                    //         );
+                    //       },
+                    //     ),
+                    //   ),
+                    // );
                     //--------------------------------------------------------------------------------------------------
                   }
                   if (MediaQuery.of(context).size.width / 15 <

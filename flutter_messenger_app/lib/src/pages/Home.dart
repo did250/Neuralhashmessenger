@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_messenger_app/src/pages/Login.dart';
 import 'package:flutter_messenger_app/src/pages/FriendTab.dart';
 import 'package:flutter_messenger_app/src/pages/ChatTab.dart';
 import 'package:flutter_messenger_app/src/pages/MyPage.dart';
+import 'package:flutter_messenger_app/src/pages/SettingsTab.dart';
 
 import '../../main.dart';
 
@@ -36,7 +38,6 @@ class Home extends StatelessWidget {
   }
 }
 
-
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
 
@@ -49,13 +50,12 @@ class _MainPage extends State<MainPage> {
 
   final authentication = FirebaseAuth.instance;
 
-
   @override
   void initState() {
     final myUid = FirebaseAuth.instance.currentUser!.uid;
 
     final token = FirebaseMessaging.instance.getToken();
-    rootRef.child('UserList/$myUid').update({'Token' : token});
+    rootRef.child('UserList/$myUid').update({'Token': token});
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       print('onmessage');
@@ -68,19 +68,18 @@ class _MainPage extends State<MainPage> {
       );
       var iOSNotiDetails = const DarwinNotificationDetails();
       var details =
-      NotificationDetails(android: androidNotiDetails, iOS: iOSNotiDetails);
+          NotificationDetails(android: androidNotiDetails, iOS: iOSNotiDetails);
       if (notification != null) {
         notifications.show(1, notification.title, notification.body, details);
       }
     });
 
-
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       print(message);
     });
     super.initState();
-
   }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -92,8 +91,10 @@ class _MainPage extends State<MainPage> {
       return FriendTab();
     } else if (_selectedIndex == 1) {
       return ChatTab();
-    } else {
+    } else if (_selectedIndex == 2) {
       return MyPage();
+    } else {
+      return SettingsTab();
     }
   }
 
@@ -155,6 +156,8 @@ class _MainPage extends State<MainPage> {
               icon: Icon(Icons.account_circle),
               label: 'Account',
             ),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.settings), label: 'Settings'),
           ],
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,

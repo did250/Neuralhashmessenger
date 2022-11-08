@@ -35,7 +35,8 @@ class _MyPageState extends State<MyPage> {
   final picker = ImagePicker();
   String image64String = "";
 
-  CollectionReference CollectRef = FirebaseFirestore.instance.collection('users');
+  CollectionReference CollectRef =
+      FirebaseFirestore.instance.collection('users');
 
   int friend_count = 0;
   int chatroom_count = 0;
@@ -101,19 +102,17 @@ class _MyPageState extends State<MyPage> {
 
     if (friendshot.value == null) {
       friend_count = 0;
-    }
-    else {
+    } else {
       friend_count = friendshot.children.length;
     }
 
     if (chatroomshot.value == null) {
       chatroom_count = 0;
-    }
-    else {
+    } else {
       int cnt = 0;
       for (var item in (chatroomshot.value as List<Object?>)) {
         Map<String, dynamic> map =
-        Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
+            Map<String, dynamic>.from(item as Map<dynamic?, dynamic?>);
         if (map["number"] != -1) {
           cnt += 1;
         }
@@ -159,12 +158,10 @@ class _MyPageState extends State<MyPage> {
                                   SizedBox(
                                     width: 7,
                                   ),
-                                  Column(
-                                      children: [
-                                        showProfileImage(),
-                                        Profile_img_opt(),
-                                      ]
-                                  ),
+                                  Column(children: [
+                                    showProfileImage(),
+                                    Profile_img_opt(),
+                                  ]),
                                   SizedBox(
                                     width: 30,
                                   ),
@@ -172,18 +169,13 @@ class _MyPageState extends State<MyPage> {
                                     ChangeLine(),
                                     showUserInfo(),
                                   ])
-                                ]
-                            ),
+                                ]),
                             Container(
                                 width: double.infinity,
                                 height: 500,
                                 child: Setting_list()),
-                          ]
-                      )
-                  )
-              );
-            }
-            else {
+                          ])));
+            } else {
               return Center(child: CircularProgressIndicator());
             }
           }),
@@ -201,58 +193,63 @@ class _MyPageState extends State<MyPage> {
         child: Container(
             child: Center(
                 child: Container(
-                  //child: Img8List.isEmpty
-                  //? Image(image: AssetImage('assets/images/profile_img.jpg'),)
+                    //child: Img8List.isEmpty
+                    //? Image(image: AssetImage('assets/images/profile_img.jpg'),)
                     child: _image == null
-                        ? CircleAvatar(radius: 100.0, backgroundImage: MemoryImage(Img8List))
-                        : CircleAvatar(radius: 100.0, backgroundImage: FileImage((File(_image!.path))))))));
+                        ? CircleAvatar(
+                            radius: 100.0,
+                            backgroundImage: MemoryImage(Img8List))
+                        : CircleAvatar(
+                            radius: 100.0,
+                            backgroundImage:
+                                FileImage((File(_image!.path))))))));
   }
 
   Widget showUserInfo() {
     return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
       Container(
           child:
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            Container(
-                child: Column(children: [
-                  Text(
-                    friend_count.toString(),
-                    style: TextStyle(
-                      letterSpacing: 1.0,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text("FRIEND",
-                      style: TextStyle(
-                        letterSpacing: 1.0,
-                        fontSize: 10,
-                        color: Theme.of(context).primaryColor,
-                      )),
-                ])),
-            SizedBox(width: 30),
-            Container(
-                child: Column(children: [
-                  Text(
-                    chatroom_count.toString(),
-                    style: TextStyle(
-                      letterSpacing: 1.0,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text("CHATROOM",
-                      style: TextStyle(
-                        letterSpacing: 1.0,
-                        fontSize: 10,
-                        color: Theme.of(context).primaryColor,
-                      )),
-                ])),
-          ])),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+        Container(
+            child: Column(children: [
+          Text(
+            friend_count.toString(),
+            style: TextStyle(
+              letterSpacing: 1.0,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          SizedBox(height: 10),
+          Text("FRIEND",
+              style: TextStyle(
+                letterSpacing: 1.0,
+                fontSize: 10,
+                color: Theme.of(context).primaryColor,
+              )),
+        ])),
+        SizedBox(width: 30),
+        Container(
+            child: Column(children: [
+          Text(
+            chatroom_count.toString(),
+            style: TextStyle(
+              letterSpacing: 1.0,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          SizedBox(height: 10),
+          Text("CHATROOM",
+              style: TextStyle(
+                letterSpacing: 1.0,
+                fontSize: 10,
+                color: Theme.of(context).primaryColor,
+              )),
+        ])),
+      ])),
     ]);
   }
 
@@ -299,7 +296,7 @@ class _MyPageState extends State<MyPage> {
           formKey.currentState!.save();
 
           final DatabaseReference ref =
-          FirebaseDatabase.instance.ref("UserList");
+              FirebaseDatabase.instance.ref("UserList");
           ref.child(loggedUser!.uid.toString()).update({
             "Name": userName,
           });
@@ -366,7 +363,7 @@ class _MyPageState extends State<MyPage> {
                             child: Text('Save'),
                             onPressed: () async {
                               DatabaseReference ref =
-                              FirebaseDatabase.instance.ref("UserList");
+                                  FirebaseDatabase.instance.ref("UserList");
                               ref.child(loggedUser!.uid.toString()).update({
                                 "Profile_img": profile_img_base64,
                               });
@@ -419,7 +416,7 @@ class _MyPageState extends State<MyPage> {
                             final imageBytes = await _image!.readAsBytesSync();
                             image64String = base64Encode(imageBytes);
                             DatabaseReference ref =
-                            FirebaseDatabase.instance.ref("UserList");
+                                FirebaseDatabase.instance.ref("UserList");
                             ref.child(loggedUser!.uid.toString()).update({
                               "Profile_img": image64String,
                             });
@@ -446,7 +443,8 @@ class _MyPageState extends State<MyPage> {
     return Padding(
       padding: EdgeInsets.fromLTRB(30, 0, 20, 0),
       child: InkWell(
-        child: Text('  Change password',
+        child: Text(
+          '  Change password',
           style: TextStyle(
             letterSpacing: 1.0,
             fontSize: 16,
@@ -455,37 +453,40 @@ class _MyPageState extends State<MyPage> {
         ),
         onTap: () async {
           return await showDialog(
-              context: context, builder: (BuildContext context) {
-            return AlertDialog(
-              backgroundColor: Color(0xff161619),
-              title: Text(
-                'Do you want to change your password? You can change your password via a message sent by email.',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
-              actions: [
-                TextButton(
-                    onPressed: () async {
-                      await authentication.sendPasswordResetEmail(
-                          email: loggedUser!.email.toString());
-                      authentication.signOut();
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  backgroundColor: Color(0xff161619),
+                  title: Text(
+                    'Do you want to change your password? You can change your password via a message sent by email.',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                  actions: [
+                    TextButton(
+                        onPressed: () async {
+                          await authentication.sendPasswordResetEmail(
+                              email: loggedUser!.email.toString());
+                          authentication.signOut();
 
-                      await onLogOut();
+                          await onLogOut();
 
-                      Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
-                      Navigator.push(context,
-                        MaterialPageRoute(
-                            builder: (context) => LoginScreen()),
-                      );
-                    },
-                    child: Text('Yes')),
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('No')),
-              ],
-            );
-          });
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/', (_) => false);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginScreen()),
+                          );
+                        },
+                        child: Text('Yes')),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text('No')),
+                  ],
+                );
+              });
         },
       ),
     );
@@ -500,7 +501,8 @@ class _MyPageState extends State<MyPage> {
             return Padding(
               padding: EdgeInsets.fromLTRB(30, 0, 20, 0),
               child: InkWell(
-                child: Text('  Withdrawal',
+                child: Text(
+                  '  Deactivate',
                   style: TextStyle(
                     letterSpacing: 1.0,
                     fontSize: 16,
@@ -514,7 +516,7 @@ class _MyPageState extends State<MyPage> {
                         return AlertDialog(
                           backgroundColor: Color(0xff161619),
                           title: Text(
-                            'Do you want to withdrawal your account?',
+                            'Do you want to deactivate your account?',
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                           actions: [
@@ -522,13 +524,15 @@ class _MyPageState extends State<MyPage> {
                                 onPressed: () async {
                                   await authentication.currentUser?.delete();
                                   final DatabaseReference ref =
-                                  FirebaseDatabase.instance.ref("UserList");
-                                  ref.child(loggedUser!.uid.toString()).remove();
+                                      FirebaseDatabase.instance.ref("UserList");
+                                  ref
+                                      .child(loggedUser!.uid.toString())
+                                      .remove();
 
                                   int count = streamSnapshot.data!.docs.length;
                                   for (int i = 0; i < count; i++) {
                                     final DocumentSnapshot documentSnapshot =
-                                    streamSnapshot.data!.docs[i];
+                                        streamSnapshot.data!.docs[i];
                                     if (documentSnapshot['uid'] ==
                                         loggedUser!.uid.toString()) {
                                       Delete_FireStore(documentSnapshot.id);
@@ -557,8 +561,7 @@ class _MyPageState extends State<MyPage> {
                 },
               ),
             );
-          }
-          else {
+          } else {
             return Center(child: CircularProgressIndicator());
           }
         });
@@ -567,7 +570,9 @@ class _MyPageState extends State<MyPage> {
   Widget Setting_list() {
     return ListView(
       children: [
-        SizedBox(height: 30,),
+        SizedBox(
+          height: 30,
+        ),
         Divider(),
         Container(
           height: 40,
@@ -576,12 +581,16 @@ class _MyPageState extends State<MyPage> {
             children: [
               Container(
                 width: 15,
-                child: Icon(Icons.email_outlined, color: Theme.of(context).primaryColor, ),
+                child: Icon(
+                  Icons.email_outlined,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
               Container(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(30, 0, 90, 0),
-                  child: Text("  "+loggedUser!.email.toString(),
+                  child: Text(
+                    "  " + loggedUser!.email.toString(),
                     style: TextStyle(
                       letterSpacing: 1.0,
                       fontSize: 16,
@@ -593,42 +602,7 @@ class _MyPageState extends State<MyPage> {
             ],
           ),
         ),
-
         Divider(),
-
-        Container(
-          height: 70,
-          margin: EdgeInsets.fromLTRB(3, 0, 0, 0),
-          child: SwitchListTile(
-            title: Text('Dark Mode', style: TextStyle(
-              letterSpacing: 1.0,
-              fontSize: 16,
-              color: Theme.of(context).primaryColor,
-            )),
-            subtitle: Text(_switchValue?'on':'off', style: TextStyle(
-            letterSpacing: 1.0,
-            fontSize: 16,
-            color: Theme.of(context).primaryColor,
-            ),),
-            value: _switchValue,
-            onChanged: (bool value) {
-              setState(() {
-                _switchValue = value;
-                MyApp.themeNotifier.value =
-                MyApp.themeNotifier.value == ThemeMode.light
-                    ? ThemeMode.dark
-                    : ThemeMode.light;
-              });
-            },
-            secondary: Container(
-              width: 15,
-              child: Icon(Icons.lightbulb_outline, color: Theme.of(context).primaryColor, ),
-            ),
-          ),
-        ),
-
-        Divider(),
-
         Container(
           height: 40,
           margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
@@ -636,15 +610,16 @@ class _MyPageState extends State<MyPage> {
             children: [
               Container(
                 width: 15,
-                child: Icon(Icons.lock, color: Theme.of(context).primaryColor, ),
+                child: Icon(
+                  Icons.lock,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
               ChangePasswordBtn(),
             ],
           ),
         ),
-
         Divider(),
-
         Container(
           height: 40,
           margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
@@ -652,40 +627,15 @@ class _MyPageState extends State<MyPage> {
             children: [
               Container(
                 width: 15,
-                child: Icon(Icons.close, color: Theme.of(context).primaryColor, ),
+                child: Icon(
+                  Icons.close,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
               WithdrawalAccountBtn(),
             ],
           ),
         ),
-
-        Divider(),
-
-        Container(
-          height: 40,
-          margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
-          child: Row(
-            children: [
-              Container(
-                width: 15,
-                child: Icon(Icons.settings, color: Theme.of(context).primaryColor, ),
-              ),
-              Container(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(30, 0, 20, 0),
-                  child: Text("  Version 1.1",
-                    style: TextStyle(
-                      letterSpacing: 1.0,
-                      fontSize: 16,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
         Divider(),
       ],
     );

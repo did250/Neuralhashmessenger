@@ -6,30 +6,31 @@ import nnhash
 
 app = Flask(__name__)
 
-dangerous = ["b4c339deb101343e885efb15", "25f3a8593eb58f22ddf4f4e1","25f3a8593ef58f22ddf4f4e1"]
+
+copyright = ['e53929a448ae45ecc9f465a5','03c440f364b23fdc381d97d1','a8fab3b0769175fd48424aeb']
+dangerous = ['8dc077b5a7f1c65b8cb8886a', '36dd53046cc4b1d83363760c']
+
+
 # GET
 @app.route('/')
 def hello_world():
     return 'hello'
 
+
+#POST
 @app.route('/test', methods=['POST'])
 def hash():
     imagefiles = request.files['images']
     target = nnhash.gethash(imagefiles)
 
-    for items in dangerous :
-
+    for items in copyright :
         if items == target :
-            return "true"
+            return "copyright"
+    for items in dangerous :
+        if items == target :
+            return "dangerous"
     return "false"
-    # data = request.form.get('name')
-    # print(data)
-    # data2 = request.form.get('images')
-    # print(data2)
-    # # return nnhash.gethash("시간표.png")
-    # return "your name is %s" %data
+
 
 if __name__ == '__main__':
-    app.run(ssl_context='adhoc')
-
-
+    app.run(ssl_context='adhoc', port=5001)

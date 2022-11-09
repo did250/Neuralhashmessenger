@@ -484,7 +484,6 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                     for (var item in (snapshot.data as DatabaseEvent)
                         .snapshot
                         .value as List<Object?>) {
-                      print("ccccccc");
                       if (item != null) {
                         bool mine = false;
                         Map<String, dynamic> map = Map<String, dynamic>.from(
@@ -728,22 +727,6 @@ class Messages extends StatelessWidget {
 
             ),
             Container(child: (() {
-              // if (text.endsWith("123")) {
-              //   print("image입니다...");
-              //   final st = text.substring(0, text.length - 3);
-              //   final Uint8List imageBytetest = base64Decode(st);
-              //
-              //   return Container(
-              //     height: MediaQuery.of(context).size.height * 0.2,
-              //     width: MediaQuery.of(context).size.width * 0.2,
-              //     child: Center(
-              //       child: Image.memory(Uint8List.fromList(imageBytetest)),
-              //     ),
-              //   );
-              //
-              //   //--------------------------------------------------------------------------------------------------
-              //
-              // } else {
               return FutureBuilder<String>(
                 future: _getAes(text),
                 builder:
@@ -752,7 +735,6 @@ class Messages extends StatelessWidget {
                     return Center(child: CircularProgressIndicator());
                   }
                   if (snapshot.data!.endsWith("123")) {
-                    print("image입니다...");
                     final st =
                     snapshot.data!.substring(0, snapshot.data!.length - 3);
                     final Uint8List imageBytetest = base64Decode(st);

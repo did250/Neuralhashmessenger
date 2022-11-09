@@ -7,8 +7,9 @@ import nnhash
 app = Flask(__name__)
 
 
-copyright = ['e53929a448ae45ecc9f465a5','03c440f364b23fdc381d97d1','a8fab3b0769175fd48424aeb']
-dangerous = ['8dc077b5a7f1c65b8cb8886a', '36dd53046cc4b1d83363760c']
+copyright = ['4e2b45523134070af324ffab','670c2d263a29e708a22a771e','9abe8999114260544cc18fc8', '67040be6ae2cc4d7d15e1d9a', '04487cf025f782877ba7aa3f']
+dangerous = ['27f279d3ffa58764db5275b6', 'd25d12a25385fd949c380894', 'db965ae6f03b2dadf2a60198', '6b239ebb424f7a6bfb4c1c5d', 'a4f70ca60e64b14915d78196']
+
 
 
 # GET

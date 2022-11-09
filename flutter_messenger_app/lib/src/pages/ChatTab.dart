@@ -86,7 +86,6 @@ class ChatTabState extends State<ChatTab> {
                       return Text("no data");
                     } else if ((snapshot.data as DatabaseEvent).snapshot.value ==
                         null) {
-                      print("null");
                       numbers = temp_numbers;
                       check = temp_check;
                       names = temp_names;
@@ -161,10 +160,6 @@ class ChatTabState extends State<ChatTab> {
                         }
 
                       }
-                      print(myFriendList.length);
-                      print(names.length);
-                      print(images.length);
-                      print("---");
                       temp_check = check;
                       temp_names = names;
                       temp_numbers = numbers;
@@ -174,8 +169,6 @@ class ChatTabState extends State<ChatTab> {
                         shrinkWrap: true,
                         itemCount: names.length,
                         itemBuilder: (BuildContext context, int index) {
-                          print(names);
-                          print(images.length);
                           return GestureDetector(
                             onTap: () => Navigator.of(context).push(
                                 MaterialPageRoute(

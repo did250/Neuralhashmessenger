@@ -756,28 +756,30 @@ class Messages extends StatelessWidget {
                     final st =
                     snapshot.data!.substring(0, snapshot.data!.length - 3);
                     final Uint8List imageBytetest = base64Decode(st);
-                    return SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.2,
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Center(
-                        child: Image.memory(Uint8List.fromList(imageBytetest)),
-                      ),
-                    );
                     // return SizedBox(
-                    //   // height: MediaQuery.of(context).size.height * 0.4,
-                    //   // width: MediaQuery.of(context).size.width * 0.4,
+                    //   height: MediaQuery.of(context).size.height * 0.2,
+                    //   width: MediaQuery.of(context).size.width * 0.5,
                     //   child: Center(
-                    //     child: IconButton(
-                    //       padding: EdgeInsets.zero,
-                    //       icon: Image.memory(Uint8List.fromList(imageBytetest)),
-                    //       onPressed: () {
-                    //         Navigator.push(context,
-                    //           MaterialPageRoute(builder: (context) => ShowImageScreen(imageBytetest)),
-                    //         );
-                    //       },
-                    //     ),
+                    //     child: Image.memory(Uint8List.fromList(imageBytetest)),
                     //   ),
                     // );
+                    return SizedBox(
+                      // height: MediaQuery.of(context).size.height ,
+                      // width: MediaQuery.of(context).size.width ,
+                      child: Center(
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+
+                          icon: Image.memory(Uint8List.fromList(imageBytetest)),
+                          iconSize: MediaQuery.of(context).size.width * 0.4,
+                          onPressed: () {
+                            Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => ShowImageScreen(imageBytetest)),
+                            );
+                          },
+                        ),
+                      ),
+                    );
                     //--------------------------------------------------------------------------------------------------
                   }
                   if (MediaQuery.of(context).size.width / 15 <
